@@ -1,4 +1,5 @@
 const { usuarios } = require('../__mocks__/usuario_mock')
+const { emails } = require('../__mocks__/email_mock')
 const dao = require('../dao')
 const util = require('util')
 const mysql = require('mysql')
@@ -20,5 +21,11 @@ describe('DAO', () => {
             forma_de_pagamento: 'cartao_de_credito',
             status_assinatura: 'aguardando_pagamento'
         })
+    })
+
+    it('deve adicionar um email à tabela de emails bloqueados', async () => {
+        await dao.adicionarEmEmailsBloqueados(emails[0], conexao)
+        const rows = await query("select * from EmailBloqueado where email='laskdmlaks@asda.com'")
+        expect(rows[0]).toEqual({email: 'laskdmlaks@asda.com'})
     })
 })

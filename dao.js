@@ -11,4 +11,9 @@ const removerTodosUsuarios = async (conexao) => {
     await query(`truncate table usuario`)
 }
 
-module.exports = {adicionarUsuarioAoBancoDeDados, removerTodosUsuarios}
+const adicionarEmEmailsBloqueados = async (email, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    await query(`insert into EmailBloqueado values ('${email}')`)
+}
+
+module.exports = {adicionarUsuarioAoBancoDeDados, removerTodosUsuarios, adicionarEmEmailsBloqueados}
