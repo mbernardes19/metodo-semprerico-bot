@@ -2,10 +2,10 @@
   "name": "metodo-semprerico-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "dist/app.js",
   "scripts": {
     "test": "jest",
-    "start": "node app.js",
+    "start": "node src/app.js",
     "build": "babel ./src -d ./dist",
     "dev": "nodemon --exec babel-node src/app.js"
   },
