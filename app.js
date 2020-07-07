@@ -8,14 +8,11 @@ const Extra = require('telegraf/extra')
 const db = require('./db');
 const mensagem = require('./mensagem')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
-const { pegarTransacaoNaMonetizze } = require('./request')
-const regex = require('./regex')
-
+const {verificarCompraDeUsuarioNaMonetizze, verificarUsuarioNaMonetizze} = require('./monetizze')
 
 const conexao = db.conexao
 conexao.connect((err) => {
     if (err) return console.log(err)
-    console.log('conectou!')
 })
 // const query = util.promisify(conexao.query).bind(conexao)
 
@@ -88,43 +85,6 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
     return ctx.wizard.back()
 }
 
-const verificarUsuarioNaMonetizze = async (ctx) => {
-    if (await usuarioExisteNaMonetizze(ctx)) {
-        await ctx.reply('Usuário confirmado!')
-        return true
-    } else {
-        await ctx.reply(`O email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhum pelo usuário na Monetizze com este email.`)
-        await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
-        return false
-    }
-}
-
-const usuarioExisteNaMonetizze = async (ctx) => {
-    const { email } = await ctx.wizard.state.novoUsuario
-    const response = await pegarTransacaoNaMonetizze({email})
-    return response.dados.length === 0 ? false : true
-}
-
-const compraDeUsuarioConfirmadaNaMonetizze = async (ctx) => {
-    const { email, formaDePagamento } = await ctx.wizard.state.novoUsuario
-    const pagamento = regex.CARTAO.test(formaDePagamento) ? 1 : 3
-    const response = await pegarTransacaoNaMonetizze({email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6})
-    return response.dados.length === 0 ? false : true
-}
-
-const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
-    if (await compraDeUsuarioConfirmadaNaMonetizze(ctx)) {
-        await ctx.reply('Usuário confirmado!')
-        return true
-    } else {
-        await ctx.reply(`O usuário do email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhuma compra finalizada do curso pelo usuário na Monetizze.`)
-        await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
-        return false
-    }
-}
-
-
-
 
 const stage = new Stage([wizardTeste]);
 
@@ -139,3 +99,5 @@ const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP 
 app.listen(PORT, function(){
   console.log(`Servidor rodando na porta ${PORT}`)
 });
+
+module.exports = { confirmarEmail, wizardTeste }
