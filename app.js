@@ -12,6 +12,8 @@ const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
 const {verificarCompraDeUsuarioNaMonetizze, verificarUsuarioNaMonetizze} = require('./monetizze')
+const async = require('asyncawait/async')
+const await = require('asyncawait/await')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -22,14 +24,14 @@ const bot = new Telegraf(process.env.BOT_TOKEN)
 
 const wizardTeste = new WizardScene(
     'teste',
-    async ctx => darBoasVindas(ctx),
-    async ctx => pegarFormaDePagamento(ctx),
-    async ctx => pegar('nomeCompleto', mensagem.nome_completo , ctx),
-    async ctx => confirmar(mensagem.confirmacao_nome_completo, mensagem.pedir_telefone, ctx),
-    async ctx => pegar('telefone', mensagem.telefone , ctx),
-    async ctx => confirmar(mensagem.confirmacao_telefone, mensagem.pedir_email, ctx),
-    async ctx => pegar('email', mensagem.email , ctx),
-    async ctx => confirmarEmail(mensagem.confirmacao_email, mensagem.verificar_monetizze, ctx),
+    async (ctx => darBoasVindas(ctx)),
+    async (ctx => pegarFormaDePagamento(ctx)),
+    async (ctx => pegar('nomeCompleto', mensagem.nome_completo , ctx)),
+    async (ctx => confirmar(mensagem.confirmacao_nome_completo, mensagem.pedir_telefone, ctx)),
+    async (ctx => pegar('telefone', mensagem.telefone , ctx)),
+    async (ctx => confirmar(mensagem.confirmacao_telefone, mensagem.pedir_email, ctx)),
+    async (ctx => pegar('email', mensagem.email , ctx)),
+    async (ctx => confirmarEmail(mensagem.confirmacao_email, mensagem.verificar_monetizze, ctx)),
 )
 
 const darBoasVindas = async (ctx) => {
