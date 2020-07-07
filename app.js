@@ -75,8 +75,8 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
         await ctx.reply(`${mensagemProximaInformacao}`)
         return await verificarUsuarioNaMonetizze(ctx) ? 
             (await verificarCompraDeUsuarioNaMonetizze(ctx) ? 
-                await adicionarUsuarioAoBancoDeDados(ctx) : ctx.scene.leave())
-                     : ctx.scene.leave()
+                await adicionarUsuarioAoBancoDeDados(ctx) : await adicionarEmailAosEmailsBloqueados(ctx))
+                     : await adicionarEmailAosEmailsBloqueados(ctx)
     }
     if (negado(ctx)) {
         await ctx.reply(`${mensagemConfirmacao.negativo}`)
@@ -91,6 +91,12 @@ const adicionarUsuarioAoBancoDeDados = async (ctx) => {
     const {nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new Usuario(nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
     await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+}
+
+const adicionarEmailAosEmailsBloqueados = async (ctx) => {
+    const { email } = ctx.wizard.state.novoUsuario
+    await dao.adicionarEmEmailsBloqueados(email, conexao)
+    return ctx.scene.leave()
 }
 
 
