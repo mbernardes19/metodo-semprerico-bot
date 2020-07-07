@@ -21,6 +21,11 @@ const getTransactions = async (auth, options={product, transaction, email, date_
     return response.data
 }
 
+const pegarTransacaoNaMonetizze = async (options={product, transaction, email, date_min, date_max, end_date_min, end_date_max, 'status[]': any, 'forma_pagamento[]': any, page}) => {
+    const token  = await auth()
+    return await getTransactions(token, options)
+}
+
 module.exports = {
-    createRequest, createAuthorizedRequest, auth, getTransactions
+    createRequest, createAuthorizedRequest, auth, getTransactions, pegarTransacaoNaMonetizze
 }
