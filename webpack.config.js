@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   target: 'node',
   externals: [nodeExternals({
-    whitelist:['telegraf', 'babel-loader']
+    whitelist:['telegraf']
   })],
   entry: './src/app.js',
   output: {
