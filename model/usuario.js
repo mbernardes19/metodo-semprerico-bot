@@ -1,12 +1,10 @@
-const StatusAssinatura = require('./status_assinatura')
-
 class Usuario {
-    constructor(nomeCompleto, formaDePagamento, email, telefone) {
+    constructor(nomeCompleto, formaDePagamento, email, telefone, statusAssinatura) {
         this.nomeCompleto = nomeCompleto
         this.formaDePagamento = formaDePagamento
         this.email = email
         this.telefone = telefone
-        this.statusAssinatura = StatusAssinatura.AGUARDANDO_PAGAMENTO
+        this.statusAssinatura = statusAssinatura
     }
 
     alterarStatusAssinatura(statusAssinatura) {

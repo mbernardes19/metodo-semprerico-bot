@@ -12,21 +12,23 @@ jest.mock('../monetizze', () => ({
     compraDeUsuarioConfirmadaNaMonetizze: jest.fn(),
     verificarUsuarioNaMonetizze: jest.fn()
 }))
+jest.mock('../dao', () => ({
+    adicionarUsuarioAoBancoDeDados: jest.fn()
+}))
 
-let {verificarUsuarioNaMonetizze, verificarCompraDeUsuarioNaMonetizze, compraDeUsuarioConfirmadaNaMonetizze, usuarioExisteNaMonetizze} = require('../monetizze')
+let {adicionarUsuarioAoBancoDeDados} = require('../dao')
+let {verificarUsuarioNaMonetizze, verificarCompraDeUsuarioNaMonetizze} = require('../monetizze')
 let {confirmado} = require('../validacao')
 
 
 describe('App', () => {
-    beforeEach(() => jest.resetModules());
-
-    it('usuário existe no Monetizze e tem compra em status finalizado deve ser bem sucedido', async () => {
+    it('se usuário existe no Monetizze e tem compra em status finalizado, deve salvá-lo no banco de dados', async () => {
         const ctx = makeMockContext({ message: {text: 'hehe', chat: { id: 1234 } } });
         confirmado.mockReturnValue(true)
         verificarUsuarioNaMonetizze.mockImplementation(() => Promise.resolve(true));
         verificarCompraDeUsuarioNaMonetizze.mockImplementation(() => Promise.resolve(true));
         const result = await app.confirmarEmail({positivo: "oi", negativo: "tchau", erro: "ai"}, "tchau", ctx)
-        expect(result).toBe(true)
+        expect(adicionarUsuarioAoBancoDeDados).toHaveBeenCalled()
     })
 
     it('usuário existe no Monetizze e não tem compra em status finalizado deve ser malsucedido', async () => {

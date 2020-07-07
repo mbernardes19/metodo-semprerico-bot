@@ -47,7 +47,10 @@ function makeMockContext(update = {}, contextExtra = {}) {
   ctx.wizard = {
       back: jest.fn(),
       next: () => true,
-      leave: () => false
+      leave: () => false,
+      state: {
+        novoUsuario: {nomeCompleto: 'asdasd', formaDePagamento: 'afads', email: 'asdasda', telefone: 'asdads'}
+      }
   }
 
   return ctx;
