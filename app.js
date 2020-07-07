@@ -7,6 +7,9 @@ const WizardScene = require('telegraf/scenes/wizard')
 const Extra = require('telegraf/extra')
 const db = require('./db');
 const mensagem = require('./mensagem')
+const dao = require('./dao')
+const StatusAssinatura = require('./model/status_assinatura')
+const Usuario = require('./model/usuario')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
 const {verificarCompraDeUsuarioNaMonetizze, verificarUsuarioNaMonetizze} = require('./monetizze')
 
@@ -72,7 +75,7 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
         await ctx.reply(`${mensagemProximaInformacao}`)
         return await verificarUsuarioNaMonetizze(ctx) ? 
             (await verificarCompraDeUsuarioNaMonetizze(ctx) ? 
-                ctx.wizard.next() : ctx.scene.leave())
+                await adicionarUsuarioAoBancoDeDados(ctx) : ctx.scene.leave())
                      : ctx.scene.leave()
     }
     if (negado(ctx)) {
@@ -82,6 +85,12 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
     await ctx.reply(`${mensagemConfirmacao.erro}`)
     await ctx.reply(`${mensagemConfirmacao.negativo}`)
     return ctx.wizard.back()
+}
+
+const adicionarUsuarioAoBancoDeDados = async (ctx) => {
+    const {nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
+    const novoUsuario = new Usuario(nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
+    await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
 }
 
 
@@ -99,4 +108,4 @@ app.listen(PORT, function(){
   console.log(`Servidor rodando na porta ${PORT}`)
 });
 
-module.exports = { confirmarEmail, wizardTeste }
+module.exports = { confirmarEmail, adicionarUsuarioAoBancoDeDados }
