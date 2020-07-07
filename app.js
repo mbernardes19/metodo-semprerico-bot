@@ -14,7 +14,6 @@ const conexao = db.conexao
 conexao.connect((err) => {
     if (err) return console.log(err)
 })
-// const query = util.promisify(conexao.query).bind(conexao)
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
