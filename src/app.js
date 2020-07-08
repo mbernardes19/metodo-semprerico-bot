@@ -1,17 +1,21 @@
+require('sexy-require');
+const regeneratorRuntime = require("regenerator-runtime");
+
 const app = require('express')()
-const { Telegraf } = require('telegraf')
+const { Telegraf } = require('/src/telegraf')
 require('dotenv').config()
-const session = require('telegraf/session')
-const Stage = require('telegraf/stage')
-const WizardScene = require('telegraf/scenes/wizard')
-const Extra = require('telegraf/extra')
-const db = require('./db');
+const session = require('/src/telegraf/session')
+const Stage = require('/src/telegraf/stage')
+const WizardScene = require('/src/telegraf/scenes/wizard')
+const Extra = require('/src/telegraf/extra')
+const db = require('/src/db');
 const mensagem = require('./mensagem')
 const dao = require('./dao')
 const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
 const {verificarCompraDeUsuarioNaMonetizze, verificarUsuarioNaMonetizze} = require('./monetizze')
+
 
 const conexao = db.conexao
 conexao.connect((err) => {

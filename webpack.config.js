@@ -6,7 +6,7 @@ module.exports = {
   externals: [nodeExternals({
     whitelist:['telegraf']
   })],
-  entry: './src/app.js',
+  entry: './dist/',
   output: {
     path: path.join(__dirname, 'dist'),
     filename: "app.js",
@@ -22,7 +22,7 @@ module.exports = {
             "targets": {
               "node": "current"
             }
-          }]
+          }], "es2015"
         ]
       }
     }]
