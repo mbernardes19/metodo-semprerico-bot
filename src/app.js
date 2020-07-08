@@ -1,9 +1,10 @@
 require('sexy-require');
 const regeneratorRuntime = require("regenerator-runtime");
 
+const path = require('path')
 const app = require('express')()
 const { Telegraf } = require('/src/telegraf')
-require('dotenv').config()
+require('dotenv').config({path: path.join(__dirname, "../", '.env')})
 const session = require('/src/telegraf/session')
 const Stage = require('/src/telegraf/stage')
 const WizardScene = require('/src/telegraf/scenes/wizard')
