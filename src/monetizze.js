@@ -1,4 +1,5 @@
 const {pegarTransacaoNaMonetizze} = require('./request')
+const regex = require('./regex')
 
 const verificarUsuarioNaMonetizze = async (ctx) => {
     if (await usuarioExisteNaMonetizze(ctx)) {
@@ -29,7 +30,7 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
         await ctx.reply('Usuário confirmado!')
         return true
     } else {
-        await ctx.reply(`O usuário do email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhuma compra finalizada do curso pelo usuário na Monetizze.`)
+        await ctx.reply(`O usuário do email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
         await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
         return false
     }
