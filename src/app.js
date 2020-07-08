@@ -78,10 +78,7 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
     if (confirmado(ctx)) {
         await ctx.reply(`${mensagemConfirmacao.positivo}`, Extra.inReplyTo(ctx.message.message_id))
         await ctx.reply(`${mensagemProximaInformacao}`)
-        return await verificarUsuarioNaMonetizze(ctx) ? 
-            (await verificarCompraDeUsuarioNaMonetizze(ctx) ? 
-                await adicionarUsuarioAoBancoDeDados(ctx) : await adicionarEmailAosEmailsBloqueados(ctx))
-                     : await adicionarEmailAosEmailsBloqueados(ctx)
+        return await verificarCompraDeUsuarioNaMonetizze(ctx) ? await adicionarUsuarioAoBancoDeDados(ctx) : await adicionarEmailAosEmailsBloqueados(ctx)
     }
     if (negado(ctx)) {
         await ctx.reply(`${mensagemConfirmacao.negativo}`)
