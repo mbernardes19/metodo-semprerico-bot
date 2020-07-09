@@ -3,19 +3,20 @@ const regeneratorRuntime = require("regenerator-runtime");
 
 const path = require('path')
 const app = require('express')()
-const { Telegraf } = require('/src/telegraf')
+const { Telegraf } = require('telegraf')
 require('dotenv').config({path: path.join(__dirname, "../", '.env')})
-const session = require('/src/telegraf/session')
-const Stage = require('/src/telegraf/stage')
-const WizardScene = require('/src/telegraf/scenes/wizard')
-const Extra = require('/src/telegraf/extra')
+const session = require('telegraf/session')
+const Stage = require('telegraf/stage')
+const BaseScene = require('telegraf/scenes/base')
+const WizardScene = require('telegraf/scenes/wizard')
+const Extra = require('telegraf/extra')
 const db = require('/src/db');
 const mensagem = require('./mensagem')
 const dao = require('./dao')
 const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
-const {verificarCompraDeUsuarioNaMonetizze, verificarUsuarioNaMonetizze} = require('./monetizze')
+const {verificarCompraDeUsuarioNaMonetizze} = require('./monetizze')
 // const cron = require('node-cron')
 // const fs = require('fs')
 
@@ -26,8 +27,11 @@ conexao.connect((err) => {
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
-const wizardTeste = new WizardScene(
-    'teste',
+const teste = new BaseScene('teste')
+teste.enter(ctx => console.log(ctx.chat))
+
+const wizard = new WizardScene(
+    'start',
     async ctx => darBoasVindas(ctx),
     async ctx => pegarFormaDePagamento(ctx),
     async ctx => pegar('nomeCompleto', mensagem.nome_completo , ctx),
@@ -35,7 +39,7 @@ const wizardTeste = new WizardScene(
     async ctx => pegar('telefone', mensagem.telefone , ctx),
     async ctx => confirmar(mensagem.confirmacao_telefone, mensagem.pedir_email, ctx),
     async ctx => pegar('email', mensagem.email , ctx),
-    async ctx => confirmarEmail(mensagem.confirmacao_email, mensagem.verificar_monetizze, ctx),
+    async ctx => confirmarEmail(mensagem.confirmacao_email, mensagem.verificar_monetizze, ctx)
 )
 
 const darBoasVindas = async (ctx) => {
@@ -94,20 +98,39 @@ const adicionarUsuarioAoBancoDeDados = async (ctx) => {
     const {nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new Usuario(nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
     await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+    await ctx.reply('Usuário registrado com sucesso! Seja bem-vindo!')
+    await enviarCanalTelegram(ctx)
+    const chat = await ctx.chat
+    console.log(chat)
+    await ctx.telegram.exportChatInviteLink('-400713265')
+    return ctx.wizard.next()
 }
 
 const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     const { email } = ctx.wizard.state.novoUsuario
     await dao.adicionarEmEmailsBloqueados(email, conexao)
+    await ctx.reply(`O usuário do email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
+    await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
     return ctx.scene.leave()
 }
 
+const enviarCanalTelegram = async (ctx) => {
+    await ctx.reply('https://t.me/joinchat/AAAAAFlgKPbG2N2Glr-Xeg')
+    await ctx.reply('https://t.me/joinchat/AAAAAFcQJkoI236IbrM_ew')
+}
 
-const stage = new Stage([wizardTeste]);
+
+const stage = new Stage([wizard, teste]);
 
 bot.use(session())
 bot.use(stage.middleware())
-bot.command('start', (ctx) => ctx.scene.enter('teste'))
+bot.on('message', ctx => console.log('Mensagem update', ctx.chat))
+bot.on('channel_post', ctx => console.log('Channel post update', ctx.chat, 'post do channel', ctx.channelPost))
+bot.on('migrate_from_chat_id', ctx => console.log('Migrate from chat id update', ctx.chat))
+bot.on('migrate_to_chat_id', ctx => console.log('Migrate to chat id update', ctx.chat))
+bot.on('new_chat_members', (ctx) => console.log(ctx.message.new_chat_members))
+bot.command('test', (ctx) => ctx.scene.enter('teste'))
+bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.launch()
 
 // cron.schedule("* 22 * * *", () => {
@@ -118,7 +141,6 @@ bot.launch()
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 app.listen(PORT, function(){
   console.log(`Servidor rodando na porta ${PORT}`)
-    console.log('Vendo se teste de automação deu certo')
 });
 
 module.exports = { confirmarEmail, adicionarUsuarioAoBancoDeDados }

@@ -22,7 +22,9 @@
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0",
     "sandwich-stream": "^2.0.2",
-    "sexy-require": "^1.1.2"
+    "sexy-require": "^1.1.2",
+    "telegraf": "^3.38.0",
+    "telegraf-getchatmembers": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
