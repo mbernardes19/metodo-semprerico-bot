@@ -114,6 +114,7 @@ bot.launch()
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 app.listen(PORT, function(){
   console.log(`Servidor rodando na porta ${PORT}`)
+    console.log('Vendo se teste de automação deu certo')
 });
 
 module.exports = { confirmarEmail, adicionarUsuarioAoBancoDeDados }
