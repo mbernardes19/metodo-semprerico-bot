@@ -16,7 +16,8 @@ const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
 const {verificarCompraDeUsuarioNaMonetizze, verificarUsuarioNaMonetizze} = require('./monetizze')
-
+// const cron = require('node-cron')
+// const fs = require('fs')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -109,10 +110,10 @@ bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('teste'))
 bot.launch()
 
-cron.schedule("55-59 21 * * *", () => {
-    const data = new Date();
-    fs.appendFileSync('log.txt', `${data.getDate()}:${data.getHours()}:${data.getMinutes()}:${data.getSeconds()} - Executando a todos os minutos depois das 21:50`)
-});
+// cron.schedule("* 22 * * *", () => {
+//     const data = new Date();
+//     fs.appendFileSync('log.txt', `${data.getDate()}:${data.getHours()}:${data.getMinutes()}:${data.getSeconds()} - Executando a todos os minutos depois das 21:50`)
+// });
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 app.listen(PORT, function(){
