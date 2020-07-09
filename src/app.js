@@ -109,7 +109,10 @@ bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('teste'))
 bot.launch()
 
-// cron.schedule("* * * * *", () => fs.appendFileSync('log.txt', 'Executando a tarefa a cada 1 minuto'));
+cron.schedule("55-59 21 * * *", () => {
+    const data = new Date();
+    fs.appendFileSync('log.txt', `${data.getDate()}:${data.getHours()}:${data.getMinutes()}:${data.getSeconds()} - Executando a todos os minutos depois das 21:50`)
+});
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 app.listen(PORT, function(){
