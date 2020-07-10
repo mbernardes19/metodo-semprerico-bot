@@ -1,11 +1,23 @@
 const mysql = require('mysql');
 
-const dbConnection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD
-})
+let dbConnection = ''
+if (process.env.NODE_ENV === 'production') {
+    dbConnection = mysql.createConnection({
+        host: process.env.DB_HOST,
+        port: process.env.DB_HOST_PORT,
+        database: process.env.DB_DATABASE,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD
+    })
+} else {
+    dbConnection = mysql.createConnection({
+        host: process.env.DB_HOST_TEST,
+        port: process.env.DB_HOST_PORT_TEST,
+        database: process.env.DB_DATABASE_TEST,
+        user: process.env.DB_USER_TEST,
+        password: process.env.DB_PASSWORD_TEST
+    })
+}
 
 module.exports = {
     conexao: dbConnection
