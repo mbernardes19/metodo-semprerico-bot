@@ -1,6 +1,6 @@
 const { usuarios } = require('../__mocks__/usuario_mock')
 const { emails } = require('../__mocks__/email_mock')
-const dao = require('../dao')
+const dao = require('../src/dao')
 const util = require('util')
 const mysql = require('mysql')
 const conexao = mysql.createConnection({host:'localhost', port:3306, user:'root', password:'Matheus20031997*', database:'metodo_sempre_rico_bot'})
@@ -14,7 +14,7 @@ describe('DAO', () => {
         const rows = await query("select * from Usuario where nome_completo='Matheus'")
         expect(rows[0]).toEqual
         ({
-            id: 1,
+            id: 123,
             nome_completo: 'Matheus',
             telefone: '21997532998',
             email: 'bernardes.matheus@outlook.com',
