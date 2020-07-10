@@ -124,7 +124,7 @@ const stage = new Stage([wizard]);
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
-bot.on('channel_post', ctx => console.log(ctx.message))
+bot.on('channel_post', (ctx) => console.log('channel post', ctx.channelPost))
 
 bot.launch()
 
