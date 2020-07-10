@@ -11,7 +11,7 @@ describe('DAO', () => {
 
     it('deve salvar um usuário', async () => {
         await dao.adicionarUsuarioAoBancoDeDados(usuarios[0], conexao)
-        const rows = await query("select * from usuario where nome_completo='Matheus'")
+        const rows = await query("select * from Usuario where nome_completo='Matheus'")
         expect(rows[0]).toEqual
         ({
             id: 1,
