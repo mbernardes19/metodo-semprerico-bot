@@ -1,5 +1,6 @@
 class Usuario {
-    constructor(nomeCompleto, formaDePagamento, email, telefone, statusAssinatura) {
+    constructor(idTelegram, nomeCompleto, formaDePagamento, email, telefone, statusAssinatura) {
+        this.idTelegram = idTelegram
         this.nomeCompleto = nomeCompleto
         this.formaDePagamento = formaDePagamento
         this.email = email
