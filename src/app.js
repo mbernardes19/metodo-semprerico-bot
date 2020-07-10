@@ -1,5 +1,4 @@
 require('sexy-require');
-const regeneratorRuntime = require("regenerator-runtime");
 
 const path = require('path')
 const app = require('express')()
