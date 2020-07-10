@@ -7,7 +7,6 @@ const { Telegraf } = require('telegraf')
 require('dotenv').config({path: path.join(__dirname, "../", '.env')})
 const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
-const BaseScene = require('telegraf/scenes/base')
 const WizardScene = require('telegraf/scenes/wizard')
 const Extra = require('telegraf/extra')
 const db = require('/src/db');
@@ -16,9 +15,12 @@ const dao = require('./dao')
 const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
 const {confirmado, negado, formaDePagamentoValida} = require('./validacao');
-const {verificarCompraDeUsuarioNaMonetizze} = require('./monetizze')
-// const cron = require('node-cron')
-// const fs = require('fs')
+const {
+    verificarCompraDeUsuarioNaMonetizze,
+    atualizarStatusDeAssinaturaDeUsuarios,
+    banirUsuariosSeStatusNaoForAtivo
+} = require('./monetizze')
+const cron = require('node-cron')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -26,9 +28,6 @@ conexao.connect((err) => {
 })
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-
-const teste = new BaseScene('teste')
-teste.enter(ctx => console.log(ctx.chat))
 
 const wizard = new WizardScene(
     'start',
@@ -83,7 +82,7 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
     if (confirmado(ctx)) {
         await ctx.reply(`${mensagemConfirmacao.positivo}`, Extra.inReplyTo(ctx.message.message_id))
         await ctx.reply(`${mensagemProximaInformacao}`)
-        return await verificarCompraDeUsuarioNaMonetizze(ctx) ? await adicionarUsuarioAoBancoDeDados(ctx) : await adicionarEmailAosEmailsBloqueados(ctx)
+        return await verificarCompraDeUsuarioNaMonetizze(ctx) ? await enviarCanaisTelegram(ctx) : await adicionarEmailAosEmailsBloqueados(ctx)
     }
     if (negado(ctx)) {
         await ctx.reply(`${mensagemConfirmacao.negativo}`)
@@ -94,16 +93,23 @@ const confirmarEmail = async (mensagemConfirmacao, mensagemProximaInformacao, ct
     return ctx.wizard.back()
 }
 
-const adicionarUsuarioAoBancoDeDados = async (ctx) => {
-    const {nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
-    const novoUsuario = new Usuario(nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
-    await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+const enviarCanaisTelegram = async (ctx) => {
     await ctx.reply('Usuário registrado com sucesso! Seja bem-vindo!')
-    await enviarCanalTelegram(ctx)
-    const chat = await ctx.chat
-    console.log(chat)
-    await ctx.telegram.exportChatInviteLink('-400713265')
-    return ctx.wizard.next()
+    await ctx.reply('https://t.me/joinchat/AAAAAFlgKPbG2N2Glr-Xeg')
+    await ctx.reply('https://t.me/joinchat/AAAAAFcQJkoI236IbrM_ew')
+    atribuirIdTelegramAoNovoUsuario(ctx)
+    adicionarUsuarioAoBancoDeDados(ctx);
+    return ctx.scene.leave()
+}
+
+const atribuirIdTelegramAoNovoUsuario = (ctx) => {
+    ctx.wizard.state.novoUsuario.idTelegram = ctx.chat.id;
+}
+
+const adicionarUsuarioAoBancoDeDados = async (ctx) => {
+    const {idTelegram, nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
+    const novoUsuario = new Usuario(idTelegram, nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
+    await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
 }
 
 const adicionarEmailAosEmailsBloqueados = async (ctx) => {
@@ -114,33 +120,22 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     return ctx.scene.leave()
 }
 
-const enviarCanalTelegram = async (ctx) => {
-    await ctx.reply('https://t.me/joinchat/AAAAAFlgKPbG2N2Glr-Xeg')
-    await ctx.reply('https://t.me/joinchat/AAAAAFcQJkoI236IbrM_ew')
-}
-
-
-const stage = new Stage([wizard, teste]);
+const stage = new Stage([wizard]);
 
 bot.use(session())
 bot.use(stage.middleware())
-bot.on('message', ctx => console.log('Mensagem update', ctx.chat))
-bot.on('channel_post', ctx => console.log('Channel post update', ctx.chat, 'post do channel', ctx.channelPost))
-bot.on('migrate_from_chat_id', ctx => console.log('Migrate from chat id update', ctx.chat))
-bot.on('migrate_to_chat_id', ctx => console.log('Migrate to chat id update', ctx.chat))
-bot.on('new_chat_members', (ctx) => console.log(ctx.message.new_chat_members))
-bot.command('test', (ctx) => ctx.scene.enter('teste'))
 bot.command('start', (ctx) => ctx.scene.enter('start'))
+bot.on('channel_post', async ctx => console.log(ctx.message))
+
 bot.launch()
 
-// cron.schedule("* 22 * * *", () => {
-//     const data = new Date();
-//     fs.appendFileSync('log.txt', `${data.getDate()}:${data.getHours()}:${data.getMinutes()}:${data.getSeconds()} - Executando a todos os minutos depois das 21:50`)
-// });
+cron.schedule("0 2 * * *", async () => {
+    const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexao)
+    await atualizarStatusDeAssinaturaDeUsuarios(usuarios)
+    await banirUsuariosSeStatusNaoForAtivo(usuarios)
+});
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
-app.listen(PORT, function(){
-  console.log(`Servidor rodando na porta ${PORT}`)
-});
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
 module.exports = { confirmarEmail, adicionarUsuarioAoBancoDeDados }

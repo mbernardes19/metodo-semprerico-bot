@@ -1,41 +1,46 @@
 const {pegarTransacaoNaMonetizze} = require('./request')
 const regex = require('./regex')
-
-const verificarUsuarioNaMonetizze = async (ctx) => {
-    if (await usuarioExisteNaMonetizze(ctx)) {
-        await ctx.reply('Usuário confirmado!')
-        return true
-    } else {
-        await ctx.reply(`O email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhum pelo usuário na Monetizze com este email.`)
-        await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
-        return false
-    }
-}
-
-const usuarioExisteNaMonetizze = async (ctx) => {
-    const { email } = await ctx.wizard.state.novoUsuario
-    const response = await pegarTransacaoNaMonetizze({email})
-    return response.dados.length === 0 ? false : true
-}
-
-const compraDeUsuarioConfirmadaNaMonetizze = async (ctx) => {
-    const { email, formaDePagamento } = await ctx.wizard.state.novoUsuario
-    const pagamento = regex.CARTAO.test(formaDePagamento) ? 1 : 3
-    const response = await pegarTransacaoNaMonetizze({email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6})
-    return response.dados.length === 0 ? false : true
-}
+const { atualizarStatusDeAssinaturaDeUsuario } = require('./dao')
+const { conexao } = require('./db')
+const Telegram = require('telegraf/telegram')
 
 const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
-    if (await compraDeUsuarioConfirmadaNaMonetizze(ctx)) {
-        await ctx.reply('Usuário confirmado!')
-        return true
-    } else {
-        await ctx.reply(`O usuário do email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
-        await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
-        return false
-    }
+    const { email, formaDePagamento } = await ctx.wizard.state.novoUsuario
+    const pagamento = regex.CARTAO.test(formaDePagamento) ? 1 : 3
+    const response = await pegarTransacaoNaMonetizze({
+        product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
+    })
+    return response.recordCount === 0 ? false : true
 }
 
-module.exports = {
-    verificarUsuarioNaMonetizze, verificarCompraDeUsuarioNaMonetizze, usuarioExisteNaMonetizze, compraDeUsuarioConfirmadaNaMonetizze
+const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
+    usuarios.forEach(async usuario => {
+        const novoStatus = await pegarNovoStatusDeAssinaturaDeUsuario(usuario)
+        await atualizarStatusDeAssinaturaDeUsuario(usuario, novoStatus, conexao)
+    })
+} 
+
+const pegarNovoStatusDeAssinaturaDeUsuario = async (usuario) => {
+    const { email, forma_de_pagamento } = usuario
+    const pagamento = regex.CARTAO.test(forma_de_pagamento) ? 1 : 3
+    const response = await pegarTransacaoNaMonetizze({
+        product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento
+    })
+    return response.dados[0].venda.status.toLowerCase().replace(/ /g, "_")
+}
+
+const banirUsuariosSeStatusNaoForAtivo = async (usuario) => {
+    usuario.forEach(async usuario => {
+        if (usuario.status_assinatura !== 'ativa') {
+            const telegram = new Telegram(process.env.BOT_TOKEN)
+            await telegram.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id)
+            await telegram.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id)
+        }
+    })
+} 
+
+module.exports = { 
+    verificarCompraDeUsuarioNaMonetizze,
+    atualizarStatusDeAssinaturaDeUsuarios,
+    banirUsuariosSeStatusNaoForAtivo 
 }
