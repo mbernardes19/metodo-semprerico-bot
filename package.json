@@ -2,13 +2,12 @@
   "name": "metodo-semprerico-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
-  "module": "dist/app.js",
+  "main": "src/app.js",
+  "module": "src/app.js",
   "scripts": {
     "test": "jest",
-    "start": "node dist/app.js",
-    "build": "babel ./src -d ./dist",
-    "dev": "node src/app.js"
+    "start": "NODE_ENV=production node src/app.js",
+    "dev": "NODE_ENV=development node src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -23,22 +22,10 @@
     "node-fetch": "^2.6.0",
     "sandwich-stream": "^2.0.2",
     "sexy-require": "^1.1.2",
-    "telegraf": "^3.38.0",
-    "telegraf-getchatmembers": "^1.0.0"
+    "telegraf": "^3.38.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.4",
-    "@babel/core": "^7.10.4",
-    "@babel/node": "^7.10.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
-    "babel-loader": "^7.1.4",
     "jest": "^26.1.0",
-    "nodemon": "^2.0.4",
-    "polyfill-library-node": "^1.0.0",
-    "webpack": "^4.29.0",
-    "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14",
-    "webpack-node-externals": "^1.7.2"
+    "nodemon": "^2.0.4"
   }
 }
