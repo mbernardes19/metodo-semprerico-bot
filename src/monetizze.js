@@ -1,6 +1,6 @@
 const {pegarTransacaoNaMonetizze} = require('./request')
 const regex = require('./regex')
-const { atualizarStatusDeAssinaturaDeUsuario } = require('./dao')
+const dao = require('./dao')
 const { conexao } = require('./db')
 const Telegram = require('telegraf/telegram')
 
@@ -10,14 +10,18 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
     const response = await pegarTransacaoNaMonetizze({
         product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
     })
-    return response.recordCount === 0 ? false : true
+    console.log(response)
+    return response.recordCount == 0 ? false : true
 }
 
+//
+// RESOLVER PROBLEMA DE CHAMA ASSÍNCRONA DENTRO DE LOOP
+//
 const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
-    usuarios.forEach(async usuario => {
-        const novoStatus = await pegarNovoStatusDeAssinaturaDeUsuario(usuario)
-        await atualizarStatusDeAssinaturaDeUsuario(usuario, novoStatus, conexao)
-    })
+    const novosStatusAsync = []
+    usuarios.forEach(usuario => novosStatusAsync.push(pegarNovoStatusDeAssinaturaDeUsuario(usuario)))
+    const novosStatus = await Promise.all(novosStatusAsync)
+    await dao.atualizarStatusDeAssinaturaDeUsuarios(usuarios, novosStatus, conexao)
 } 
 
 const pegarNovoStatusDeAssinaturaDeUsuario = async (usuario) => {
@@ -42,5 +46,6 @@ const banirUsuariosSeStatusNaoForAtivo = async (usuario) => {
 module.exports = { 
     verificarCompraDeUsuarioNaMonetizze,
     atualizarStatusDeAssinaturaDeUsuarios,
-    banirUsuariosSeStatusNaoForAtivo 
+    banirUsuariosSeStatusNaoForAtivo,
+    pegarNovoStatusDeAssinaturaDeUsuario
 }

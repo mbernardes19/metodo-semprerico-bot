@@ -22,9 +22,13 @@ const pegarTodosUsuariosDoBancoDeDados = async (conexao) => {
     return await query(`select * from Usuario`)
 }
 
-const atualizarStatusDeAssinaturaDeUsuario = async (usuario, novoStatus, conexao) => {
+const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios, novosStatus, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
-    await query(`update Usuario set status_assinatura='${novoStatus}' where id=${usuario.id}`)
+    const queries = []
+    usuarios.forEach((usuario, index) => {
+        queries.push(query(`update Usuario set status_assinatura='${novosStatus[index]}' where id=${usuario.id}`))
+    })
+    await Promise.all(usuarios)
 }
 
 module.exports = {
@@ -32,5 +36,5 @@ module.exports = {
     limparBancoDeDados,
     adicionarEmEmailsBloqueados,
     pegarTodosUsuariosDoBancoDeDados,
-    atualizarStatusDeAssinaturaDeUsuario
+    atualizarStatusDeAssinaturaDeUsuarios
 }
