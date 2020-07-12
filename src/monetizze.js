@@ -11,12 +11,10 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
         product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
     })
     console.log(response)
-    return response.recordCount == 0 ? false : true
+    // return response.recordCount == 0 ? false : true
+    return true
 }
 
-//
-// RESOLVER PROBLEMA DE CHAMA ASSÍNCRONA DENTRO DE LOOP
-//
 const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
     const novosStatusAsync = []
     usuarios.forEach(usuario => novosStatusAsync.push(pegarNovoStatusDeAssinaturaDeUsuario(usuario)))
@@ -33,19 +31,19 @@ const pegarNovoStatusDeAssinaturaDeUsuario = async (usuario) => {
     return response.dados[0].venda.status.toLowerCase().replace(/ /g, "_")
 }
 
-const banirUsuariosSeStatusNaoForAtivo = async (usuario) => {
-    usuario.forEach(async usuario => {
+const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
+    const acoes = [];
+    usuarios.forEach(usuario => {
         if (usuario.status_assinatura !== 'ativa') {
-            const telegram = new Telegram(process.env.BOT_TOKEN)
-            await telegram.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id)
-            await telegram.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id)
+            acoes.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+            acoes.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
         }
     })
+    await Promise.all(acoes)
 } 
 
 module.exports = { 
     verificarCompraDeUsuarioNaMonetizze,
     atualizarStatusDeAssinaturaDeUsuarios,
-    banirUsuariosSeStatusNaoForAtivo,
-    pegarNovoStatusDeAssinaturaDeUsuario
+    banirUsuariosSeStatusNaoForAtivo
 }
