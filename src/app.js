@@ -28,21 +28,21 @@ conexao.connect((err) => {
 const pedirFormaDePagamento = new Composer()
 pedirFormaDePagamento.action('cartao_de_credito', async (ctx) => {
     await ctx.answerCbQuery()
-    ctx.reply('Cartao!')
+    await ctx.reply('Cartao!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
-    ctx.reply(mensagem.pedir_nome_completo)
+    await ctx.reply(mensagem.pedir_nome_completo)
     return ctx.wizard.next()
   })
 pedirFormaDePagamento.action('boleto', async (ctx) => {
     await ctx.answerCbQuery()
-  ctx.reply('Boleto!')
+  await ctx.reply('Boleto!')
   ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
-  ctx.reply(mensagem.pedir_nome_completo)
+  await ctx.reply(mensagem.pedir_nome_completo)
   return ctx.wizard.next()
 })
 pedirFormaDePagamento.use(async (ctx) => {
     if (cartao(ctx)) {
-        if (!ctx.message.text) {
+        if (!ctx.message) {
             await ctx.answerCbQuery()
         }
         ctx.reply('Cartao!')
@@ -51,7 +51,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         return ctx.wizard.next()
     }
     if (boleto(ctx)) {
-        if (!ctx.message.text) {
+        if (!ctx.message) {
             await ctx.answerCbQuery()
         }
         ctx.reply('Boleto!')
@@ -103,20 +103,20 @@ const darBoasVindas = async (ctx) => {
     return ctx.wizard.next()
 }
 
-const pegar = (informacao, messagem, mensagemConfirmacao, mensagemProximaInformacao, ctx) => {
+const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaInformacao, ctx) => {
     ctx.wizard.state.novoUsuario[informacao] = ctx.message.text
     ctx.wizard.state.informacao = informacao
     ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
     ctx.wizard.state.mensagemProximaInformacao = mensagemProximaInformacao
     ctx.wizard.state.mensagem = ctx.message
 
-    const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('Sim', 'sim'), Markup.callbackButton('Não', 'nao')])
-    ctx.reply(`${messagem} ${ctx.message.text}?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+    const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
+    await ctx.reply(`${messagem} ${ctx.message.text}?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
     return ctx.wizard.next()
 }
 
 const confirmacaoPositiva = async (ctx) => {
-    if (!ctx.message.text) {
+    if (!ctx.message) {
         await ctx.answerCbQuery()
     }
     const { informacao, mensagemConfirmacao, mensagemProximaInformacao, mensagem } = ctx.wizard.state
@@ -135,7 +135,7 @@ const confirmacaoPositiva = async (ctx) => {
 }
 
 const confirmacaoNegativa = async (ctx) => {
-    if (!ctx.message.text) {
+    if (!ctx.message) {
         await ctx.answerCbQuery()
     }
     const { mensagemConfirmacao } = ctx.wizard.state
@@ -169,7 +169,7 @@ const enviarCanaisTelegram = async (ctx) => {
         Markup.urlButton('Canal Sinais Ricos', linkCanal1),
         Markup.urlButton('Canal Rico Vidente', linkCanal2)
     ])
-    await ctx.reply('ola', Extra.markup(teclado))
+    await ctx.reply('Acesse nossos canais:', Extra.markup(teclado))
     atribuirIdTelegramAoNovoUsuario(ctx)
     await adicionarUsuarioAoBancoDeDados(ctx);
     return ctx.scene.leave()
@@ -183,11 +183,6 @@ const adicionarUsuarioAoBancoDeDados = async (ctx) => {
     const {idTelegram, nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new Usuario(idTelegram, nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
     await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
-    const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexao)
-    await csv.criarArquivoCSV(
-        ['Id', 'Nome Completo', 'Telefone', 'Email', 'Forma De Pagamento', 'Status Assinatura'],
-        usuarios, 'usuarios.csv'
-    )
 }
 
 const adicionarEmailAosEmailsBloqueados = async (ctx) => {

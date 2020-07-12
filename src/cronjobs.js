@@ -21,7 +21,14 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
 }
 
 const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
-    cron.schedule("0 9 * * *", async () => await enviarCSVParaEmail());
+    cron.schedule("0 9 * * *", async () => {
+        const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexao)
+        await csv.criarArquivoCSV(
+            ['Id', 'Nome Completo', 'Telefone', 'Email', 'Forma De Pagamento', 'Status Assinatura'],
+            usuarios, 'usuarios.csv'
+        )
+        await enviarCSVParaEmail()
+    });
 }
 
 module.exports = { start }
