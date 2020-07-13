@@ -8,7 +8,6 @@ const Telegram = require('telegraf/telegram')
 const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia()
     enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha()
-    console.log(process.env.BOT_TOKEN)
 }
 
 const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
