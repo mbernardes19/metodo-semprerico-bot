@@ -33,4 +33,13 @@ const enviarCSVParaEmail = async () => {
     })
 }
 
-module.exports = { enviarCSVParaEmail }
+const enviarEmailDeRelatorioDeErro = async (erro) => {
+    enviarEmail({
+        de: process.env.USUARIO_EMAIL,
+        para: 'bernardes.matheus@outlook.com',
+        assunto: 'Ocorreu um erro no MSR Bot!',
+        texto: `Segue o erro:\n${JSON.stringify(erro)}`,
+    })
+}
+
+module.exports = { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro }
