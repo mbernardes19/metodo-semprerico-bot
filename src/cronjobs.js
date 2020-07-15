@@ -5,6 +5,7 @@ const { atualizarStatusDeAssinaturaDeUsuarios, banirUsuariosSeStatusNaoForAtivo 
 const { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro } = require('./email')
 const Telegram = require('telegraf/telegram')
 const { log } = require('./logger')
+const { cache } = require('./cache')
 
 const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia()
@@ -12,15 +13,16 @@ const start = () => {
 }
 
 const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
-    cron.schedule("30 0 * * *", async () => {
-        const telegramClient = new Telegram(process.env.BOT_TOKEN)
+    cron.schedule("30 9 * * *", async () => {
+        const telegramClient = cache.get('bot')
         try {
             const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexao)
             await atualizarStatusDeAssinaturaDeUsuarios(usuarios)
             await banirUsuariosSeStatusNaoForAtivo(usuarios, telegramClient)
             log(`Status de assinatura de usuários atualizado com sucesso!`)
         } catch (err) {
-            log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${err}`)
+            log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS:`)
+            log(err)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });
@@ -38,7 +40,8 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
             await enviarCSVParaEmail()
             log(`Email com relatório de usuários enviado com sucesso!`)
         } catch (err) {
-            log(`ERRO AO CRIAR E/OU ENVIAR ARQUIVO CSV POR EMAIL: ${err}`)
+            log(`ERRO AO CRIAR E/OU ENVIAR ARQUIVO CSV POR EMAIL:`)
+            log(err)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });

@@ -19,6 +19,7 @@ const {confirmado, negado, cartao, boleto, validar} = require('./validacao');
 const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
+const { cache } = require('./cache')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -78,6 +79,7 @@ confirmar.use(async (ctx) => {
 })
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
+cache.set('bot', bot.telegram)
 
 const wizard = new WizardScene(
     'start',

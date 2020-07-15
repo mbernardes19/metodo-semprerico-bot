@@ -39,7 +39,17 @@ const pegarTodosUsuariosDoBancoDeDados = async (conexao) => {
     try {
         return await query(`select * from Usuario`)
     } catch (err) {
-        throw err;
+        throw err
+    }
+}
+
+const pegarUsuarioPeloId = async (id, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const usuario = await query(`select * from Usuario where id=${id}`)
+        return usuario[0]
+    } catch (err) {
+        throw err
     }
 }
 
@@ -52,7 +62,24 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios, novosStatus, cone
     try {
         await Promise.all(usuarios)
     } catch (err) {
-        throw err;
+        throw err
+    }
+}
+
+const aumentarAvisoDeBanimento = async (usuario, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        if (usuario.aviso_banimento === 0) {
+            await query(`update Usuario set aviso_banimento=1 where id=${usuario.id}`)
+        }
+        if (usuario.aviso_banimento === 1) {
+            await query(`update Usuario set aviso_banimento=2 where id=${usuario.id}`)
+        }
+        if (usuario.aviso_banimento === 2) {
+            await query(`update Usuario set aviso_banimento=3 where id=${usuario.id}`)
+        }
+    } catch (err) {
+        throw err
     }
 }
 
@@ -61,5 +88,7 @@ module.exports = {
     limparBancoDeDados,
     adicionarEmEmailsBloqueados,
     pegarTodosUsuariosDoBancoDeDados,
-    atualizarStatusDeAssinaturaDeUsuarios
+    atualizarStatusDeAssinaturaDeUsuarios,
+    aumentarAvisoDeBanimento,
+    pegarUsuarioPeloId
 }
