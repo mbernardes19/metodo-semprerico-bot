@@ -6,8 +6,11 @@ const criarArquivoCSV = async (cabecalho, dados, nomeDoArquivo) => {
         path: path.join(__dirname, '..', 'csv', nomeDoArquivo),
         header: criarCabecalho(cabecalho)
     })
-
-    await csvWriter.writeRecords(dados)
+    try {
+        await csvWriter.writeRecords(dados)
+    } catch (err) {
+        throw err
+    }
 }
 
 const criarCabecalho = (titulos) => {

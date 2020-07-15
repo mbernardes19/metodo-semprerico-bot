@@ -20,7 +20,6 @@ const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
 const { cache } = require('./cache')
-const { enviarEmailDeRelatorioDeErro, enviarCSVParaEmail } = require('./email')
 
 const conexao = db.conexao
 conexao.connect((err) => {
