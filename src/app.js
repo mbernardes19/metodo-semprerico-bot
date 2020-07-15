@@ -125,7 +125,13 @@ const confirmacaoPositiva = async (ctx) => {
         await ctx.reply(`${mensagemConfirmacao.positivo}`, Extra.inReplyTo(mensagem.id))
         await ctx.reply(`${mensagemProximaInformacao}`)
         if (informacao === 'email') {
-            return await verificarCompraDeUsuarioNaMonetizze(ctx) ? await enviarCanaisTelegram(ctx) : await adicionarEmailAosEmailsBloqueados(ctx)
+            try {
+                return await verificarCompraDeUsuarioNaMonetizze(ctx) ?
+                    await enviarCanaisTelegram(ctx) : await adicionarEmailAosEmailsBloqueados(ctx)
+            } catch (err) {
+                await ctx.reply('Erro ao acessar Monetizze parar verificação de dados. Tente iniciar uma conversa comigo novamente mais tarde usando o comando /start.')
+                return ctx.scene.leave()
+            }
         }
         return ctx.wizard.next()
     }
@@ -162,6 +168,19 @@ const confirmarEmail = async (informacao, mensagemConfirmacao, mensagemProximaIn
 }
 
 const enviarCanaisTelegram = async (ctx) => {
+    const {email} = ctx.wizard.state.novoUsuario
+    try {
+        atribuirIdTelegramAoNovoUsuario(ctx)
+        await adicionarUsuarioAoBancoDeDados(ctx);
+    } catch (err) {
+        if (err.errno === 1062) {
+            await ctx.reply(`Você já criou um usuário com este Telegram. Seu email registrado é: ${email}. Caso esteja com dificuldade de acessar os canais, envie um e-mail para ${process.env.EMAIL_PARA}.`)
+            return ctx.scene.leave()
+        } else {
+            await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao registrar seu usuário. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
+            return ctx.scene.leave()
+        }
+    }
     await ctx.reply('Usuário registrado com sucesso! Seja bem-vindo!')
     const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
     const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
@@ -170,8 +189,6 @@ const enviarCanaisTelegram = async (ctx) => {
         Markup.urlButton('Canal Rico Vidente', linkCanal2)
     ])
     await ctx.reply('Acesse nossos canais:', Extra.markup(teclado))
-    atribuirIdTelegramAoNovoUsuario(ctx)
-    await adicionarUsuarioAoBancoDeDados(ctx);
     return ctx.scene.leave()
 }
 
@@ -182,15 +199,24 @@ const atribuirIdTelegramAoNovoUsuario = (ctx) => {
 const adicionarUsuarioAoBancoDeDados = async (ctx) => {
     const {idTelegram, nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new Usuario(idTelegram, nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
-    await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+    try {
+        await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+    } catch (err) {
+        throw err
+    }
 }
 
 const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     const { email } = ctx.wizard.state.novoUsuario
-    await dao.adicionarEmEmailsBloqueados(email, conexao)
-    await ctx.reply(`O usuário do email ${ctx.wizard.state.novoUsuario.email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
-    await ctx.reply('Caso houve algum engano, inicie novamente seu registro comigo usando o comando /start ou entre em contato com Alberto Soares (email) para pedir a liberação do seu acesso.')
-    return ctx.scene.leave()
+    try {
+        await dao.adicionarEmEmailsBloqueados(email, conexao)
+    } catch (err) {
+        console.log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado`, err)
+    } finally {
+        await ctx.reply(`O usuário do email ${email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
+        await ctx.reply(`Caso houve algum engano, verifique se o status da sua compra na Monetizze está como finalizada e inicie novamente sua conversa comigo usando o comando /start, ou envie um email para ${process.env.EMAIL_PARA} para pedir a liberação do seu acesso.`)
+        return ctx.scene.leave()
+    }
 }
 
 const stage = new Stage([wizard]);

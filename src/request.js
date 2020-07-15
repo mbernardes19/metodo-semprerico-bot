@@ -12,18 +12,30 @@ const createAuthorizedRequest = (token) => {
 } 
 
 const auth = async () => {
-    const response = await createRequest().get('/token')
-    return response.data.token
+    try {
+        const response = await createRequest().get('/token')
+        return response.data.token
+    } catch (err) {
+        throw err
+    }
 }
 
 const getTransactions = async (auth, options={product, transaction, email, date_min, date_max, end_date_min, end_date_max, 'status[]': any, 'forma_pagamento[]': any, page}) => {
-    const response = await createAuthorizedRequest(auth).get('/transactions', {params: options})
-    return response.data
+    try {
+        const response = await createAuthorizedRequest(auth).get('/transactions', {params: options})
+        return response.data
+    } catch (err) {
+        throw err
+    }
 }
 
 const pegarTransacaoNaMonetizze = async (options={product, transaction, email, date_min, date_max, end_date_min, end_date_max, 'status[]': any, 'forma_pagamento[]': any, page}) => {
-    const token  = await auth()
-    return await getTransactions(token, options)
+    try {
+        const token  = await auth()
+        return await getTransactions(token, options)
+    } catch(err) {
+        throw err
+    }
 }
 
 module.exports = {
