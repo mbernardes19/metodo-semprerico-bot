@@ -30,15 +30,15 @@ conexao.connect((err) => {
 const pedirFormaDePagamento = new Composer()
 pedirFormaDePagamento.action('cartao_de_credito', async (ctx) => {
     await ctx.answerCbQuery()
-    await ctx.reply('Cartao!')
+    await ctx.reply('Certo!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
     await ctx.reply(mensagem.pedir_nome_completo)
     return ctx.wizard.next()
   })
 pedirFormaDePagamento.action('boleto', async (ctx) => {
     await ctx.answerCbQuery()
-  await ctx.reply('Boleto!')
-  ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
+    await ctx.reply('Certo!')
+    ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
   await ctx.reply(mensagem.pedir_nome_completo)
   return ctx.wizard.next()
 })
@@ -47,7 +47,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         if (!ctx.message) {
             await ctx.answerCbQuery()
         }
-        await ctx.reply('Cartao!')
+        await ctx.reply('Certo!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
         await ctx.reply(mensagem.pedir_nome_completo)
         log('Forma de pagamento definida')
@@ -57,7 +57,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         if (!ctx.message) {
             await ctx.answerCbQuery()
         }
-        await ctx.reply('Boleto!')
+        await ctx.reply('Certo!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
         await ctx.reply(mensagem.pedir_nome_completo)
         log('Forma de pagamento definida')
@@ -96,6 +96,7 @@ const wizard = new WizardScene(
 
 const darBoasVindas = async (ctx) => {
     await ctx.reply(mensagem.boas_vindas)
+    await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado!\n\nVou precisar da sua ajuda aqui com algumas informações...')
     ctx.wizard.state.novoUsuario = {}
     const pagamento = Markup.inlineKeyboard([
         [Markup.callbackButton('💳 Cartão de Crédito', 'cartao_de_credito')],
@@ -113,7 +114,7 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
     ctx.wizard.state.mensagem = ctx.message
 
     const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
-    await ctx.reply(`${messagem} ${ctx.message.text}?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+    await ctx.reply(`${messagem} ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
     log(`${informacao} definido`)
     return ctx.wizard.next()
 }
@@ -128,11 +129,13 @@ const confirmacaoPositiva = async (ctx) => {
         await ctx.reply(`${mensagemConfirmacao.positivo}`, Extra.inReplyTo(mensagem.id))
         await ctx.reply(`${mensagemProximaInformacao}`)
         if (informacao === 'email') {
+            await ctx.reply(`Estou verificando no servidor da Monetizze a sua compra, só um momento...`)
             try {
                 return await verificarCompraDeUsuarioNaMonetizze(ctx) ?
                     await enviarCanaisTelegram(ctx) : await adicionarEmailAosEmailsBloqueados(ctx)
             } catch (err) {
-                await ctx.reply('Erro ao acessar Monetizze parar verificação de dados. Tente iniciar uma conversa comigo novamente mais tarde usando o comando /start.')
+                await ctx.reply(`Erro ao acessar Monetizze para verificação de dados. Tente iniciar uma conversa comigo novamente mais tarde usando o comando /start. Caso este erro persista, envie um email para ${process.env.EMAIL_PARA} com o print desta conversa`)
+                log(`ERRO AO VERIFICAR COMPRA DE USUÁRIO NA MONETIZZE, ${err}`)
                 return ctx.scene.leave()
             }
         }
@@ -171,7 +174,7 @@ const confirmarEmail = async (informacao, mensagemConfirmacao, mensagemProximaIn
 }
 
 const enviarCanaisTelegram = async (ctx) => {
-    log(`Compra de usuário na Monetizze confirmada`)
+    log(`Sua assinatura Monetizze foi ativada! 🎉`)
     const {email} = ctx.wizard.state.novoUsuario
     try {
         atribuirIdTelegramAoNovoUsuario(ctx)
@@ -179,23 +182,32 @@ const enviarCanaisTelegram = async (ctx) => {
     } catch (err) {
         if (err.errno === 1062) {
             log(`ERRO: Usuário já existe no banco de dados`)
-            await ctx.reply(`Você já criou um usuário com este Telegram. Seu email registrado é: ${email}. Caso esteja com dificuldade de acessar os canais, envie um e-mail para ${process.env.EMAIL_PARA}.`)
+            await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`)
+            await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
+            const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
+            const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+            const teclado = Markup.inlineKeyboard([
+                Markup.urlButton('Canal Sinais Ricos', linkCanal1),
+                Markup.urlButton('Canal Rico Vidente', linkCanal2)
+            ])
+            await ctx.reply('Aqui:', Extra.markup(teclado))
             return ctx.scene.leave()
         } else {
             log(`ERRO: Genérico`)
-            await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao registrar seu usuário. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
+            await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
             return ctx.scene.leave()
         }
     }
     log(`Usuário adicionado ao BD`)
-    await ctx.reply('Usuário registrado com sucesso! Seja bem-vindo!')
+    await ctx.reply('Sua assinatura Monetizze foi ativada! 🎉')
+    await ctx.reply('Seja bem-vindo!')
     const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
     const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
     const teclado = Markup.inlineKeyboard([
         Markup.urlButton('Canal Sinais Ricos', linkCanal1),
         Markup.urlButton('Canal Rico Vidente', linkCanal2)
     ])
-    await ctx.reply('Acesse nossos canais:', Extra.markup(teclado))
+    await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
     log(`Canais de Telegram enviados`)
     return ctx.scene.leave()
 }

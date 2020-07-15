@@ -22,11 +22,7 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             log(`Status de assinatura de usuários atualizado com sucesso!`)
         } catch (err) {
             log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${JSON.stringify(err)}`)
-            try {
-                await enviarEmailDeRelatorioDeErro(err)    
-            } catch (err) {
-            }
-            
+            await enviarEmailDeRelatorioDeErro(err)
         }
     });
 }
