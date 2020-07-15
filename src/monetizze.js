@@ -57,31 +57,41 @@ const mandarAvisoDeBanimento = async (usuario, telegramClient) => {
 }
 
 const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
-    const acoes = [];
-    let usuariosASeremAvisados = [];
-    let usuariosASeremBanidos = [];
+    const acoes = []
+    const usuariosASeremAvisados = []
+    const dadosUsuariosAvisados = []
+    const usuariosASeremBanidos = []
+    const usuariosATeremAvisosZerados = []
+    const dadosUsuariosComAvisosZerados = []
 
     usuarios.forEach(usuario => {
         if (usuario.status_assinatura !== 'ativa') {
             if (usuario.aviso_banimento > 2) {
                 acoes.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
                 acoes.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
-                usuariosASeremBanidos.push(usuario.nome_completo)
+                usuariosASeremBanidos.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
                 return
             }
             usuariosASeremAvisados.push(mandarAvisoDeBanimento(usuario, telegramClient))
+            dadosUsuariosAvisados.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
             return
         } else {
             if (usuario.aviso_banimento > 0) {
-                await dao.zerarAvisoDeBanimento(usuario, conexao)
+                usuariosATeremAvisosZerados.push(usuario)
+                dadosUsuariosComAvisosZerados.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
             }
         }
     })
+
+    
+
     try {
         await Promise.all(acoes)
         log(`Usuários ${usuariosASeremBanidos} foram banidos`)
-        const aprovados = await Promise.all(usuariosASeremAvisados)
-        log(`Usuários avisados sobre banimento`)
+        await Promise.all(usuariosASeremAvisados)
+        log(`Usuários ${dadosUsuariosAvisados} avisados sobre banimento`)
+        await Promise.all(usuariosATeremAvisosZerados)
+        log(`Usuários ${dadosUsuariosComAvisosZerados} tiveram aviso de banimento zerado`)
     } catch (err) {
         throw err
     }
