@@ -45,37 +45,34 @@ pedirFormaDePagamento.use(async (ctx) => {
         if (!ctx.message) {
             await ctx.answerCbQuery()
         }
-        ctx.reply('Cartao!')
+        await ctx.reply('Cartao!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
-        ctx.reply(mensagem.pedir_nome_completo)
+        await ctx.reply(mensagem.pedir_nome_completo)
         return ctx.wizard.next()
     }
     if (boleto(ctx)) {
         if (!ctx.message) {
             await ctx.answerCbQuery()
         }
-        ctx.reply('Boleto!')
+        await ctx.reply('Boleto!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
-        ctx.reply(mensagem.pedir_nome_completo)
+        await ctx.reply(mensagem.pedir_nome_completo)
         return ctx.wizard.next()
     }
-    ctx.reply('Por favor, escolha uma das opções.')
+    await ctx.reply('Por favor, escolha uma das opções.')
 })
 
 const confirmar = new Composer()
-confirmar.action('sim', async (ctx) => {
-    confirmacaoPositiva(ctx)
-  })
-  confirmar.action('nao', async (ctx) => {
-    confirmacaoNegativa(ctx)
-})
+confirmar.action('sim', async (ctx) => confirmacaoPositiva(ctx))
+  confirmar.action('nao', async (ctx) => confirmacaoNegativa(ctx))
 confirmar.use(async (ctx) => {
     if (confirmado(ctx)) {
-        confirmacaoPositiva(ctx)
+        return confirmacaoPositiva(ctx)
     }
     if (negado(ctx)) {
-        confirmacaoNegativa(ctx)
+        return confirmacaoNegativa(ctx)
     }
+    await ctx.reply('Por favor, escolha uma das opções.')
 })
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
