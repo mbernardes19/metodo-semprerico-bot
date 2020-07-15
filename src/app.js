@@ -66,8 +66,12 @@ pedirFormaDePagamento.use(async (ctx) => {
 })
 
 const confirmar = new Composer()
-confirmar.action('sim', async (ctx) => confirmacaoPositiva(ctx))
-confirmar.action('nao', async (ctx) => confirmacaoNegativa(ctx))
+confirmar.action('sim', async (ctx) => {
+    confirmacaoPositiva(ctx)
+})
+confirmar.action('nao', async (ctx) => {
+    confirmacaoNegativa(ctx)
+})
 confirmar.use(async (ctx) => {
     if (confirmado(ctx)) {
         return confirmacaoPositiva(ctx)
@@ -93,9 +97,11 @@ const wizard = new WizardScene(
     confirmar
 )
 
+wizard.command('stop', async ctx => ctx.scene.leave())
+
 const darBoasVindas = async (ctx) => {
     await ctx.reply(mensagem.boas_vindas)
-    await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado!\n\nVou precisar da sua ajuda aqui com algumas informações...')
+    await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...')
     ctx.wizard.state.novoUsuario = {}
     const pagamento = Markup.inlineKeyboard([
         [Markup.callbackButton('💳 Cartão de Crédito', 'cartao_de_credito')],
@@ -106,6 +112,7 @@ const darBoasVindas = async (ctx) => {
 }
 
 const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaInformacao, ctx) => {
+
     ctx.wizard.state.novoUsuario[informacao] = ctx.message.text
     ctx.wizard.state.informacao = informacao
     ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
@@ -240,16 +247,15 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     }
 }
 
-const stage = new Stage([wizard]);
+const stage = new Stage([wizard], { ttl: 1500});
 
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', (ctx) => log(`channel post: ${JSON.stringify(ctx.channelPost)}`))
-
+bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
 cronjobs.start()
-
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));
