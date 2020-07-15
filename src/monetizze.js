@@ -11,7 +11,7 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
         const response = await pegarTransacaoNaMonetizze({
             product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
         })
-        log(`Verificando compra de usuário na Monetizze - ${response}`)
+        log(`Verificando compra de usuário na Monetizze ${JSON.stringify(response)}`)
         return response.recordCount == 0 ? false : true
     } catch (err) {
         throw err
