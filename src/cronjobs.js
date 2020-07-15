@@ -4,6 +4,7 @@ const { conexao } = require('./db')
 const { atualizarStatusDeAssinaturaDeUsuarios, banirUsuariosSeStatusNaoForAtivo } = require('./monetizze')
 const { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro } = require('./email')
 const Telegram = require('telegraf/telegram')
+const { log } = require('./logger')
 
 const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia()
@@ -18,7 +19,7 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             await atualizarStatusDeAssinaturaDeUsuarios(usuarios)
             await banirUsuariosSeStatusNaoForAtivo(usuarios, telegramClient)
         } catch (err) {
-            console.log('ERRO AO ATUALIZAR STATUS DE USUÁRIOS ', err)
+            log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${err}`)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });
@@ -34,7 +35,7 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
             )
             await enviarCSVParaEmail()
         } catch (err) {
-            console.log('ERRO AO CRIAR E/OU ENVIAR ARQUIVO CSV POR EMAIL ', err)
+            log(`ERRO AO CRIAR E/OU ENVIAR ARQUIVO CSV POR EMAIL: ${err}`)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });

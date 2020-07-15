@@ -2,6 +2,7 @@ const {pegarTransacaoNaMonetizze} = require('./request')
 const regex = require('./regex')
 const dao = require('./dao')
 const { conexao } = require('./db')
+const { log } = require('./logger')
 
 const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
     const { email, formaDePagamento } = await ctx.wizard.state.novoUsuario
@@ -10,7 +11,7 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
         const response = await pegarTransacaoNaMonetizze({
             product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
         })
-        console.log(response)
+        log(response)
         return response.recordCount == 0 ? false : true
     } catch (err) {
         throw err

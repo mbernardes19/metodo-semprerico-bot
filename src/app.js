@@ -18,11 +18,11 @@ const Usuario = require('./model/usuario')
 const {confirmado, negado, cartao, boleto, validar} = require('./validacao');
 const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
-const csv = require('./csv')
+const { log } = require('./logger')
 
 const conexao = db.conexao
 conexao.connect((err) => {
-    if (err) return console.log(err)
+    if (err) return log(err)
 })
 
 const pedirFormaDePagamento = new Composer()
@@ -208,7 +208,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     try {
         await dao.adicionarEmEmailsBloqueados(email, conexao)
     } catch (err) {
-        console.log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado`, err)
+        log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado: ${err}`)
     } finally {
         await ctx.reply(`O usuário do email ${email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
         await ctx.reply(`Caso houve algum engano, verifique se o status da sua compra na Monetizze está como finalizada e inicie novamente sua conversa comigo usando o comando /start, ou envie um email para ${process.env.EMAIL_PARA} para pedir a liberação do seu acesso.`)
@@ -221,13 +221,13 @@ const stage = new Stage([wizard]);
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
-bot.on('channel_post', (ctx) => console.log('channel post', ctx.channelPost))
+bot.on('channel_post', (ctx) => log(`channel post: ${ctx.channelPost}`))
 
 bot.launch()
 cronjobs.start()
 
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));
 
 module.exports = { confirmarEmail, adicionarUsuarioAoBancoDeDados }

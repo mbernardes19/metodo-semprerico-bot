@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer')
 const path = require('path')
+const { log } = require('./logger')
 
 const transportador = nodemailer.createTransport({
     host: process.env.SERVIDOR_SMTP,
@@ -20,7 +21,7 @@ const enviarEmail = async (options={de, para, assunto, texto, anexos}) => {
         text: texto,
         attachments: anexos
     })
-    console.log(info)
+    log(info)
 }
 
 const enviarCSVParaEmail = async () => {
