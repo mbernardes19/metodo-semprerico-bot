@@ -71,6 +71,10 @@ const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
             }
             usuariosASeremAvisados.push(mandarAvisoDeBanimento(usuario, telegramClient))
             return
+        } else {
+            if (usuario.aviso_banimento > 0) {
+                await dao.zerarAvisoDeBanimento(usuario, conexao)
+            }
         }
     })
     try {

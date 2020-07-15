@@ -83,6 +83,15 @@ const aumentarAvisoDeBanimento = async (usuario, conexao) => {
     }
 }
 
+const zerarAvisoDeBanimento = async (usuario, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        await query(`update Usuario set aviso_banimento=0 where id=${usuario.id}`)
+    } catch (err) {
+        throw err
+    }
+}
+
 module.exports = {
     adicionarUsuarioAoBancoDeDados,
     limparBancoDeDados,
@@ -90,5 +99,6 @@ module.exports = {
     pegarTodosUsuariosDoBancoDeDados,
     atualizarStatusDeAssinaturaDeUsuarios,
     aumentarAvisoDeBanimento,
+    zerarAvisoDeBanimento,
     pegarUsuarioPeloId
 }
