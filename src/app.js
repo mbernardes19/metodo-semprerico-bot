@@ -20,6 +20,7 @@ const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
 const { cache } = require('./cache')
+const { enviarEmailDeRelatorioDeErro, enviarCSVParaEmail } = require('./email')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -94,6 +95,8 @@ const wizard = new WizardScene(
 )
 
 const darBoasVindas = async (ctx) => {
+    await enviarEmailDeRelatorioDeErro({erro: true})
+    await enviarCSVParaEmail()
     await ctx.reply(mensagem.boas_vindas)
     ctx.wizard.state.novoUsuario = {}
     const pagamento = Markup.inlineKeyboard([
@@ -220,7 +223,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     try {
         await dao.adicionarEmEmailsBloqueados(email, conexao)
     } catch (err) {
-        log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado: ${err}`)
+        log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado: ${JSON.stringify(err)}`)
     } finally {
         await ctx.reply(`O usuário do email ${email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
         await ctx.reply(`Caso houve algum engano, verifique se o status da sua compra na Monetizze está como finalizada e inicie novamente sua conversa comigo usando o comando /start, ou envie um email para ${process.env.EMAIL_PARA} para pedir a liberação do seu acesso.`)
@@ -233,7 +236,7 @@ const stage = new Stage([wizard]);
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
-bot.on('channel_post', (ctx) => log(`channel post: ${ctx.channelPost}`))
+bot.on('channel_post', (ctx) => log(`channel post: ${JSON.stringify(ctx.channelPost)}`))
 
 bot.launch()
 cronjobs.start()

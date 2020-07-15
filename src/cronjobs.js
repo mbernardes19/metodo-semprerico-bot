@@ -21,9 +21,12 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             await banirUsuariosSeStatusNaoForAtivo(usuarios, telegramClient)
             log(`Status de assinatura de usuários atualizado com sucesso!`)
         } catch (err) {
-            log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS:`)
-            log(err)
-            await enviarEmailDeRelatorioDeErro(err)
+            log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${JSON.stringify(err)}`)
+            try {
+                await enviarEmailDeRelatorioDeErro(err)    
+            } catch (err) {
+            }
+            
         }
     });
 }
@@ -40,8 +43,7 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
             await enviarCSVParaEmail()
             log(`Email com relatório de usuários enviado com sucesso!`)
         } catch (err) {
-            log(`ERRO AO CRIAR E/OU ENVIAR ARQUIVO CSV POR EMAIL:`)
-            log(err)
+            log(`ERRO AO CRIAR CSV: ${JSON.stringify(err)}`)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });
