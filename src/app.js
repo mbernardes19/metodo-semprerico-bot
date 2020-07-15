@@ -48,6 +48,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         await ctx.reply('Cartao!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
         await ctx.reply(mensagem.pedir_nome_completo)
+        log('Forma de pagamento definida')
         return ctx.wizard.next()
     }
     if (boleto(ctx)) {
@@ -57,6 +58,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         await ctx.reply('Boleto!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
         await ctx.reply(mensagem.pedir_nome_completo)
+        log('Forma de pagamento definida')
         return ctx.wizard.next()
     }
     await ctx.reply('Por favor, escolha uma das opções.')
@@ -64,7 +66,7 @@ pedirFormaDePagamento.use(async (ctx) => {
 
 const confirmar = new Composer()
 confirmar.action('sim', async (ctx) => confirmacaoPositiva(ctx))
-  confirmar.action('nao', async (ctx) => confirmacaoNegativa(ctx))
+confirmar.action('nao', async (ctx) => confirmacaoNegativa(ctx))
 confirmar.use(async (ctx) => {
     if (confirmado(ctx)) {
         return confirmacaoPositiva(ctx)
@@ -109,6 +111,7 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
 
     const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
     await ctx.reply(`${messagem} ${ctx.message.text}?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+    log(`${informacao} definido`)
     return ctx.wizard.next()
 }
 
@@ -165,19 +168,23 @@ const confirmarEmail = async (informacao, mensagemConfirmacao, mensagemProximaIn
 }
 
 const enviarCanaisTelegram = async (ctx) => {
+    log(`Compra de usuário na Monetizze confirmada`)
     const {email} = ctx.wizard.state.novoUsuario
     try {
         atribuirIdTelegramAoNovoUsuario(ctx)
         await adicionarUsuarioAoBancoDeDados(ctx);
     } catch (err) {
         if (err.errno === 1062) {
+            log(`ERRO: Usuário já existe no banco de dados`)
             await ctx.reply(`Você já criou um usuário com este Telegram. Seu email registrado é: ${email}. Caso esteja com dificuldade de acessar os canais, envie um e-mail para ${process.env.EMAIL_PARA}.`)
             return ctx.scene.leave()
         } else {
+            log(`ERRO: Genérico`)
             await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao registrar seu usuário. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
             return ctx.scene.leave()
         }
     }
+    log(`Usuário adicionado ao BD`)
     await ctx.reply('Usuário registrado com sucesso! Seja bem-vindo!')
     const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
     const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
@@ -186,10 +193,12 @@ const enviarCanaisTelegram = async (ctx) => {
         Markup.urlButton('Canal Rico Vidente', linkCanal2)
     ])
     await ctx.reply('Acesse nossos canais:', Extra.markup(teclado))
+    log(`Canais de Telegram enviados`)
     return ctx.scene.leave()
 }
 
 const atribuirIdTelegramAoNovoUsuario = (ctx) => {
+    log(`ID Telegram atribuido`)
     ctx.wizard.state.novoUsuario.idTelegram = ctx.chat.id;
 }
 
@@ -205,6 +214,7 @@ const adicionarUsuarioAoBancoDeDados = async (ctx) => {
 
 const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     const { email } = ctx.wizard.state.novoUsuario
+    log(`Email ${email} adicionado como bloqueado`)
     try {
         await dao.adicionarEmEmailsBloqueados(email, conexao)
     } catch (err) {

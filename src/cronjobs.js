@@ -18,6 +18,7 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexao)
             await atualizarStatusDeAssinaturaDeUsuarios(usuarios)
             await banirUsuariosSeStatusNaoForAtivo(usuarios, telegramClient)
+            log(`Status de assinatura de usuários atualizado com sucesso!`)
         } catch (err) {
             log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${err}`)
             await enviarEmailDeRelatorioDeErro(err)
@@ -33,7 +34,9 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
                 ['Id', 'Nome Completo', 'Telefone', 'Email', 'Forma De Pagamento', 'Status Assinatura'],
                 usuarios, 'usuarios.csv'
             )
+            log(`CSV com usuários atuais criado com sucesso!`)
             await enviarCSVParaEmail()
+            log(`Email com relatório de usuários enviado com sucesso!`)
         } catch (err) {
             log(`ERRO AO CRIAR E/OU ENVIAR ARQUIVO CSV POR EMAIL: ${err}`)
             await enviarEmailDeRelatorioDeErro(err)

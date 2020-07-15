@@ -11,7 +11,7 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
         const response = await pegarTransacaoNaMonetizze({
             product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
         })
-        log(response)
+        log(`Verificando compra de usuário na Monetizze - ${response}`)
         return response.recordCount == 0 ? false : true
     } catch (err) {
         throw err
@@ -24,6 +24,7 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
     try {
         const novosStatus = await Promise.all(novosStatusAsync)
         await dao.atualizarStatusDeAssinaturaDeUsuarios(usuarios, novosStatus, conexao)
+        log(`Status de assinatura de todos os usuários atualizado`)
     } catch (err) {
         throw err
     }
@@ -44,14 +45,17 @@ const pegarNovoStatusDeAssinaturaDeUsuario = async (usuario) => {
 
 const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
     const acoes = [];
+    let usuarioASerBanido;
     usuarios.forEach(usuario => {
         if (usuario.status_assinatura !== 'ativa') {
             acoes.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
             acoes.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+            usuarioASerBanido = usuario.nome_completo
         }
     })
     try {
         await Promise.all(acoes)
+        log(`Usuário ${usuarioASerBanido} foi banido`)
     } catch (err) {
         throw err
     }
