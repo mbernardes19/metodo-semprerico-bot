@@ -95,8 +95,6 @@ const wizard = new WizardScene(
 )
 
 const darBoasVindas = async (ctx) => {
-    await enviarEmailDeRelatorioDeErro({erro: true})
-    await enviarCSVParaEmail()
     await ctx.reply(mensagem.boas_vindas)
     ctx.wizard.state.novoUsuario = {}
     const pagamento = Markup.inlineKeyboard([
