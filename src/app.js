@@ -20,6 +20,7 @@ const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
 const { cache } = require('./cache')
+const { enviarEmailDeRelatorioDeErro } = require('./email')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -252,7 +253,12 @@ const stage = new Stage([wizard], { ttl: 1500});
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
-bot.on('channel_post', (ctx) => log(`channel post: ${JSON.stringify(ctx.channelPost)}`))
+bot.on('channel_post', async (ctx) => {
+    log(`channel post: ${JSON.stringify(ctx.channelPost)}`)
+    if (postDoCanal.includes('Par ')){
+        await enviarEmailDeRelatorioDeErro(ctx.channelPost)
+    }
+})
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
 cronjobs.start()
