@@ -255,7 +255,7 @@ bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', async (ctx) => {
     log(`channel post: ${JSON.stringify(ctx.channelPost)}`)
-    if (postDoCanal.includes('Par ')){
+    if (JSON.stringify(ctx.channelPost).includes('Par ')){
         await enviarEmailDeRelatorioDeErro(ctx.channelPost)
     }
 })
