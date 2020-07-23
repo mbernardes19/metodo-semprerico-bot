@@ -254,16 +254,9 @@ bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', async (ctx) => {
-<<<<<<< HEAD
     log(`channel post: ${JSON.stringify(ctx.channelPost)}`)
     if (postDoCanal.includes('Par ')){
         await enviarEmailDeRelatorioDeErro(ctx.channelPost)
-=======
-    const postDoCanal = JSON.stringify(ctx.channelPost)
-    log(`channel post: ${postDoCanal}`)
-    if (postDoCanal.includes('Par ')){
-        await enviarEmailDeRelatorioDeErro(postDoCanal)
->>>>>>> edd3dcb26dc0f550716432b1c1e940ee1636a008
     }
 })
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
