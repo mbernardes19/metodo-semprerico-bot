@@ -21,6 +21,9 @@ const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
 const { cache } = require('./cache')
 const { enviarEmailDeRelatorioDeErro } = require('./email')
+const { SINAL } = require('./regex')
+const axios = require('axios').default;
+
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -248,17 +251,54 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     }
 }
 
+const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
+    const mensagem = mensagemDeCanal.text.match(SINAL)
+    console.log(mensagemDeCanal)
+    console.log('MENSAGEM TRATADA', mensagem)
+    const par = mensagem[0]
+    const ordem = mensagem[1]
+    const horario = mensagem[2]
+    const expiracao = 5
+    // console.log('MENSAGEM', mensagem)
+    return {par, ordem, horario, expiracao}
+}
+
+const enviarSinalParaCompra = async (sinal) => {
+    return await axios.post('http://localhost:5000/buy', sinal)
+}
+
+const checarResultadoCompra = async (idCompra) => {
+    console.log('ID COMPRA', idCompra)
+    return await axios.post('http://localhost:5000/check_win', { idCompra: idCompra })
+}
+
 const stage = new Stage([wizard], { ttl: 1500});
 
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
-bot.on('channel_post', async (ctx) => {
-    log(`channel post: ${JSON.stringify(ctx.channelPost)}`)
-    if (JSON.stringify(ctx.channelPost).includes('Par ')){
-        await enviarEmailDeRelatorioDeErro(ctx.channelPost)
+bot.on('message', async (ctx) => {
+    console.log('CTX MESSAGE', ctx.message)
+    try {
+        const response = await enviarSinalParaCompra(extrairSinalDeMensagemDeCanal(ctx.message))
+        console.log('RESPONSE DA COMPRA', response)
+        let resultado;
+        setTimeout(async () => {
+            resultado = await checarResultadoCompra(response.data)
+            console.log('WIN OU LOSS?', resultado.data)
+        }, 288000)
+    } catch (err) {
+        console.log(err)
     }
 })
+bot.on('channel_post', async (ctx) => {
+    // log(`channel post: ${JSON.stringify(ctx.channelPost)}`)
+    // if (JSON.stringify(ctx.channelPost).includes('Par ')){
+        // const resultado = await enviarSinalParaCompra(extrairSinalDeMensagemDeCanal(ctx.channelPost))
+        // await enviarEmailDeRelatorioDeErro(ctx.channelPost)
+        // console.log(resultado)
+    }
+)
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
 cronjobs.start()
