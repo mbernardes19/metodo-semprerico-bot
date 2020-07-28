@@ -263,6 +263,13 @@ const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
     return {par, ordem, horario, expiracao}
 }
 
+const criarSinalGale = (mensagemDeCanal) => {
+    const agora = new Date()
+    const horarioAtual = `${agora.getHours()}:${agora.getMinutes()}:15`
+    const sinalAnterior = extrairSinalDeMensagemDeCanal(mensagemDeCanal)
+    return {...sinalAnterior, horario: horarioAtual}
+}
+
 const enviarSinalParaCompra = async (sinal) => {
     return await axios.post('http://localhost:5000/buy', sinal)
 }
@@ -280,13 +287,56 @@ bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('message', async (ctx) => {
     console.log('CTX MESSAGE', ctx.message)
     try {
-        const response = await enviarSinalParaCompra(extrairSinalDeMensagemDeCanal(ctx.message))
-        console.log('RESPONSE DA COMPRA', response)
-        let resultado;
+        const agora = new Date()
+        let sinal = extrairSinalDeMensagemDeCanal(ctx.message)
+        let horaAgora = agora.getHours()
+        let minutoAgora = agora.getMinutes()
+        let horaSinal = parseInt(sinal.horario.substring(0, 2))
+        let minutoSinal = parseInt(sinal.horario.substring(3, 4))
+
+        let diffHora = horaSinal - horaAgora
+        let diffMinuto = minutoSinal - minutoAgora
+
+        let milissegundos
+
+        if (diffHora >= 0) {
+            milissegundos += diffHora * 36 * 10000
+        } else {
+            milissegundos += 0
+        }
+        if (diffMinuto >= 0) {
+            milissegundos += diffHora * 6 * 10000
+        } else {
+            milissegundos += 0
+        }
+
+        let response;
+
         setTimeout(async () => {
-            resultado = await checarResultadoCompra(response.data)
-            console.log('WIN OU LOSS?', resultado.data)
-        }, 288000)
+            response = await enviarSinalParaCompra(sinal)
+            console.log('RESPONSE DA COMPRA', response)
+            let resultado;
+            setTimeout(async () => {
+                resultado = await checarResultadoCompra(response.data)
+                console.log('WIN OU LOSS?', resultado.data)
+                if (resultado.data > 0) {
+                    await ctx.reply('WIIIIIN')
+                    await ctx.replyWithSticker('CAACAgIAAxkBAAEBHRtfIKp8WfRdXWS5NU-MfZR0EaDqqgACVQIAApzW5wp4ir1O9pH_pxoE')
+                } else {
+                    const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message))
+                    setTimeout(async () => {
+                        res = await checarResultadoCompra(resp.data)
+                        if (res.data > 0) {
+                            await ctx.reply('WIIIIIN')
+                            await ctx.replyWithSticker('CAACAgIAAxkBAAEBHRtfIKp8WfRdXWS5NU-MfZR0EaDqqgACVQIAApzW5wp4ir1O9pH_pxoE')
+                        } else {
+                            await ctx.reply('Loss')
+                            await ctx.replyWithSticker('CAACAgIAAxkBAAEBHR1fIKqp-MvmVuf07QyXnxuvzDzkrwACZQIAApzW5wpaOiR5R8LtZBoE')
+                        }
+                    }, 48000)
+                }
+            }, 48000)
+        }, milissegundos)
     } catch (err) {
         console.log(err)
     }
