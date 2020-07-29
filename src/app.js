@@ -23,6 +23,8 @@ const { cache } = require('./cache')
 const { enviarEmailDeRelatorioDeErro } = require('./email')
 const { SINAL } = require('./regex')
 const axios = require('axios').default;
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
 
 const conexao = db.conexao
@@ -329,7 +331,13 @@ bot.on('message', async (ctx) => {
                         if (res.data > 0) {
                             await ctx.reply('WIIIIIN')
                             await ctx.replyWithSticker('CAACAgIAAxkBAAEBHRtfIKp8WfRdXWS5NU-MfZR0EaDqqgACVQIAApzW5wp4ir1O9pH_pxoE')
-                        } else {
+                        }
+                        if (res.data === 0) {
+                            await ctx.reply('Loss')
+                            await ctx.replyWithSticker('CAACAgIAAxkBAAEBHR1fIKqp-MvmVuf07QyXnxuvzDzkrwACZQIAApzW5wpaOiR5R8LtZBoE')
+                            await ctx.reply('Vela terminou em doji')
+                        }
+                        if (res.data < 0) {
                             await ctx.reply('Loss')
                             await ctx.replyWithSticker('CAACAgIAAxkBAAEBHR1fIKqp-MvmVuf07QyXnxuvzDzkrwACZQIAApzW5wpaOiR5R8LtZBoE')
                         }
@@ -352,6 +360,123 @@ bot.on('channel_post', async (ctx) => {
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
 cronjobs.start()
+
+app.use(cors())
+app.use(bodyParser.json())
+
+app.post('/mensagem-win', async (req, res) => {
+    console.log(req.body)
+    const { mensagemWin } = req.body
+    try {
+        await dao.atualizarMensagem('win', mensagemWin, conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.sendStatus(200)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+
+app.post('/sticker-win', async (req, res) => {
+    const { stickerWin } = req.body
+    try {
+        await dao.atualizarSticker('win', stickerWin, conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.sendStatus(200)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+
+app.post('/mensagem-loss', async (req, res) => {
+    const { mensagemLoss } = req.body
+    try {
+        await dao.atualizarMensagem('loss', mensagemLoss, conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.sendStatus(200)
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+
+app.post('/sticker-loss', async (req, res) => {
+    const { stickerLoss } = req.body
+    try {
+        await dao.atualizarSticker('loss', stickerLoss, conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.sendStatus(200)
+    } catch (err) {
+        res.sendStatus(500)
+    }
+})
+
+app.post('/mensagem-doji', async (req, res) => {
+    const { mensagemDoji } = req.body
+    try {
+        await dao.atualizarMensagem('doji', mensagemDoji, conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.sendStatus(200)
+    } catch (err) {
+        res.sendStatus(500)
+    }
+})
+
+app.get('/mensagem-win', async (req, res) => {
+    try {
+        const [mensagemWin] = await dao.pegarMensagem('win', conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto })
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+
+app.get('/sticker-win', async (req, res) => {
+    try {
+        const [stickerWin] = await dao.pegarSticker('win', conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.status(200).json({id: stickerWin.id, texto: stickerWin.texto})
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+
+app.get('/mensagem-loss', async (req, res) => {
+    try {
+        const [mensagemLoss] = await dao.pegarMensagem('loss', conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.status(200).json({id: mensagemLoss.id, texto: mensagemLoss.texto})
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+})
+
+app.get('/sticker-loss', async (req, res) => {
+    try {
+        const [stickerLoss] = await dao.pegarSticker('loss', conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.status(200).json({id: stickerLoss.id, texto: stickerLoss.texto})
+    } catch (err) {
+        res.sendStatus(500)
+    }
+})
+
+app.get('/mensagem-doji', async (req, res) => {
+    try {
+        const [mensagemDoji] = await dao.pegarMensagem('doji', conexao)
+        res.set('Access-Control-Allow-Origin', '*')
+        res.status(200).json({id: mensagemDoji.id, texto: mensagemDoji.texto})
+    } catch (err) {
+        res.sendStatus(500)
+    }
+})
+
+
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));
