@@ -312,6 +312,12 @@ bot.on('message', async (ctx) => {
             milissegundos += 0
         }
 
+        const MENSAGEM_WIN = await dao.pegarMensagem('win', conexao)
+        const STICKER_WIN = await dao.pegarSticker('win', conexao)
+        const MENSAGEM_LOSS = await dao.pegarMensagem('loss', conexao)
+        const STICKER_LOSS = await dao.pegarSticker('loss', conexao)
+        const MENSAGEM_DOJI = await dao.pegarMensagem('doji', conexao)
+
         let response;
 
         setTimeout(async () => {
@@ -322,24 +328,24 @@ bot.on('message', async (ctx) => {
                 resultado = await checarResultadoCompra(response.data)
                 console.log('WIN OU LOSS?', resultado.data)
                 if (resultado.data > 0) {
-                    await ctx.reply('WIIIIIN')
-                    await ctx.replyWithSticker('CAACAgIAAxkBAAEBHRtfIKp8WfRdXWS5NU-MfZR0EaDqqgACVQIAApzW5wp4ir1O9pH_pxoE')
+                    await ctx.reply(MENSAGEM_WIN)
+                    await ctx.replyWithSticker(STICKER_WIN)
                 } else {
                     const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message))
                     setTimeout(async () => {
                         res = await checarResultadoCompra(resp.data)
                         if (res.data > 0) {
-                            await ctx.reply('WIIIIIN')
-                            await ctx.replyWithSticker('CAACAgIAAxkBAAEBHRtfIKp8WfRdXWS5NU-MfZR0EaDqqgACVQIAApzW5wp4ir1O9pH_pxoE')
+                            await ctx.reply(MENSAGEM_WIN)
+                            await ctx.replyWithSticker(STICKER_WIN)
                         }
                         if (res.data === 0) {
-                            await ctx.reply('Loss')
-                            await ctx.replyWithSticker('CAACAgIAAxkBAAEBHR1fIKqp-MvmVuf07QyXnxuvzDzkrwACZQIAApzW5wpaOiR5R8LtZBoE')
-                            await ctx.reply('Vela terminou em doji')
+                            await ctx.reply(MENSAGEM_LOSS)
+                            await ctx.replyWithSticker(STICKER_LOSS)
+                            await ctx.reply(MENSAGEM_DOJI)
                         }
                         if (res.data < 0) {
-                            await ctx.reply('Loss')
-                            await ctx.replyWithSticker('CAACAgIAAxkBAAEBHR1fIKqp-MvmVuf07QyXnxuvzDzkrwACZQIAApzW5wpaOiR5R8LtZBoE')
+                            await ctx.reply(MENSAGEM_LOSS)
+                            await ctx.replyWithSticker(STICKER_LOSS)
                         }
                     }, 48000)
                 }
