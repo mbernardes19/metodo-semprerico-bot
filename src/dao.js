@@ -92,6 +92,41 @@ const zerarAvisoDeBanimento = async (usuario, conexao) => {
     }
 }
 
+const pegarMensagem = async (tipo, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        return await query(`select * from Mensagem where id='mensagem-${tipo}'`)
+    } catch (err) {
+        throw err
+    }
+}
+
+const atualizarMensagem = async (tipo, mensagem, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        await query(`update Mensagem set texto='${mensagem}' where id='mensagem-${tipo}'`)
+    } catch (err) {
+        throw err
+    }
+}
+
+const pegarSticker = async (tipo, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        return await query(`select * from Mensagem where id='sticker-${tipo}'`)
+    } catch (err) {
+        throw err
+    }
+}
+const atualizarSticker = async (tipo, sticker, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        await query(`update Mensagem set texto='${sticker}' where id='sticker-${tipo}'`)
+    } catch (err) {
+        throw err
+    }
+}
+
 module.exports = {
     adicionarUsuarioAoBancoDeDados,
     limparBancoDeDados,
@@ -100,5 +135,9 @@ module.exports = {
     atualizarStatusDeAssinaturaDeUsuarios,
     aumentarAvisoDeBanimento,
     zerarAvisoDeBanimento,
-    pegarUsuarioPeloId
+    pegarUsuarioPeloId,
+    atualizarMensagem,
+    atualizarSticker,
+    pegarMensagem,
+    pegarSticker
 }
