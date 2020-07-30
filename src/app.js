@@ -255,7 +255,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
 
 const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
     try {
-        const mensagem = mensagemDeCanal.text.match(SINAL)
+        const mensagem = mensagemDeCanal.match(SINAL)
         const par = mensagem[0]
         const ordem = mensagem[1]
         const horario = mensagem[2]
@@ -291,6 +291,9 @@ bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', async (ctx) => {
+    if (ctx.channelPost.chat.id !== process.env.ID_CANAL_RICO_VIDENTE) {
+        return;
+    }
     if (process.env.CHECAGEM_DE_SINAL) {
         log(`CTX MESSAGE, ${ctx.channelPost.text}`)
         if (ctx.channelPost.text.includes('Par - ')) {
