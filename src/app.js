@@ -255,30 +255,30 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
 
 const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
     const mensagem = mensagemDeCanal.text.match(SINAL)
-    console.log(mensagemDeCanal)
-    console.log('MENSAGEM TRATADA', mensagem)
     const par = mensagem[0]
     const ordem = mensagem[1]
     const horario = mensagem[2]
     const expiracao = 5
-    // console.log('MENSAGEM', mensagem)
     return {par, ordem, horario, expiracao}
 }
 
 const criarSinalGale = (mensagemDeCanal) => {
     const agora = new Date()
-    const horarioAtual = `${agora.getHours()}:${agora.getMinutes()}:15`
+    const horarioAtual = `${agora.getHours()}:${agora.getMinutes()}:05`
     const sinalAnterior = extrairSinalDeMensagemDeCanal(mensagemDeCanal)
     return {...sinalAnterior, horario: horarioAtual}
 }
 
+const SERVIDOR_IQ = process.env.NODE_ENV === 'production'
+    ? process.env.SERVIDOR_IQ : process.env.SERVIDOR_IQ_TEST
+
 const enviarSinalParaCompra = async (sinal) => {
-    return await axios.post('http://localhost:5000/buy', sinal)
+    return await axios.post(`${SERVIDOR_IQ}/buy`, sinal)
 }
 
 const checarResultadoCompra = async (idCompra) => {
     console.log('ID COMPRA', idCompra)
-    return await axios.post('http://localhost:5000/check_win', { idCompra: idCompra })
+    return await axios.post(`${SERVIDOR_IQ}/check_win`, { idCompra: idCompra })
 }
 
 const stage = new Stage([wizard], { ttl: 1500});
@@ -286,83 +286,81 @@ const stage = new Stage([wizard], { ttl: 1500});
 bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
-bot.on('message', async (ctx) => {
-    console.log('CTX MESSAGE', ctx.message)
-    try {
-        const agora = new Date()
-        let sinal = extrairSinalDeMensagemDeCanal(ctx.message)
-        let horaAgora = agora.getHours()
-        let minutoAgora = agora.getMinutes()
-        let horaSinal = parseInt(sinal.horario.substring(0, 2))
-        let minutoSinal = parseInt(sinal.horario.substring(3, 4))
-
-        let diffHora = horaSinal - horaAgora
-        let diffMinuto = minutoSinal - minutoAgora
-
-        let milissegundos
-
-        if (diffHora >= 0) {
-            milissegundos += diffHora * 36 * 10000
-        } else {
-            milissegundos += 0
-        }
-        if (diffMinuto >= 0) {
-            milissegundos += diffHora * 6 * 10000
-        } else {
-            milissegundos += 0
-        }
-
-        const MENSAGEM_WIN = await dao.pegarMensagem('win', conexao)
-        const STICKER_WIN = await dao.pegarSticker('win', conexao)
-        const MENSAGEM_LOSS = await dao.pegarMensagem('loss', conexao)
-        const STICKER_LOSS = await dao.pegarSticker('loss', conexao)
-        const MENSAGEM_DOJI = await dao.pegarMensagem('doji', conexao)
-
-        let response;
-
-        setTimeout(async () => {
-            response = await enviarSinalParaCompra(sinal)
-            console.log('RESPONSE DA COMPRA', response)
-            let resultado;
-            setTimeout(async () => {
-                resultado = await checarResultadoCompra(response.data)
-                console.log('WIN OU LOSS?', resultado.data)
-                if (resultado.data > 0) {
-                    await ctx.reply(MENSAGEM_WIN)
-                    await ctx.replyWithSticker(STICKER_WIN)
+bot.on('channel_post', async (ctx) => {
+    if (process.env.CHECAGEM_DE_SINAL) {
+        console.log('CTX MESSAGE', ctx.channelPost.text)
+        if (ctx.channelPost.text.includes('Par - ')) {
+            try {
+                const agora = new Date()
+                let sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text)
+                let horaAgora = agora.getHours()
+                let minutoAgora = agora.getMinutes()
+                let horaSinal = parseInt(sinal.horario.substring(0, 2))
+                let minutoSinal = parseInt(sinal.horario.substring(3, 4))
+        
+                let diffHora = horaSinal - horaAgora
+                let diffMinuto = minutoSinal - minutoAgora
+        
+                let milissegundos
+        
+                if (diffHora >= 0) {
+                    milissegundos += diffHora * 36 * 10000
                 } else {
-                    const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message))
+                    milissegundos += 0
+                }
+                if (diffMinuto >= 0) {
+                    milissegundos += diffHora * 6 * 10000
+                } else {
+                    milissegundos += 0
+                }
+        
+                const MENSAGEM_WIN = await dao.pegarMensagem('win', conexao)
+                const STICKER_WIN = await dao.pegarSticker('win', conexao)
+                const MENSAGEM_LOSS = await dao.pegarMensagem('loss', conexao)
+                const STICKER_LOSS = await dao.pegarSticker('loss', conexao)
+                const MENSAGEM_DOJI = await dao.pegarMensagem('doji', conexao)
+        
+                let response;
+        
+                setTimeout(async () => {
+                    response = await enviarSinalParaCompra(sinal)
+                    console.log('RESPONSE DA COMPRA', response)
+                    let resultado;
                     setTimeout(async () => {
-                        res = await checarResultadoCompra(resp.data)
-                        if (res.data > 0) {
+                        resultado = await checarResultadoCompra(response.data)
+                        console.log('WIN OU LOSS?', resultado.data)
+                        if (resultado.data > 0) {
                             await ctx.reply(MENSAGEM_WIN)
                             await ctx.replyWithSticker(STICKER_WIN)
+                        } else {
+                            const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text))
+                            setTimeout(async () => {
+                                res = await checarResultadoCompra(resp.data)
+                                if (res.data > 0) {
+                                    await ctx.reply(MENSAGEM_WIN)
+                                    await ctx.replyWithSticker(STICKER_WIN)
+                                }
+                                if (res.data === 0) {
+                                    await ctx.reply(MENSAGEM_LOSS)
+                                    await ctx.replyWithSticker(STICKER_LOSS)
+                                    await ctx.reply(MENSAGEM_DOJI)
+                                }
+                                if (res.data < 0) {
+                                    await ctx.reply(MENSAGEM_LOSS)
+                                    await ctx.replyWithSticker(STICKER_LOSS)
+                                }
+                            }, 294000)
                         }
-                        if (res.data === 0) {
-                            await ctx.reply(MENSAGEM_LOSS)
-                            await ctx.replyWithSticker(STICKER_LOSS)
-                            await ctx.reply(MENSAGEM_DOJI)
-                        }
-                        if (res.data < 0) {
-                            await ctx.reply(MENSAGEM_LOSS)
-                            await ctx.replyWithSticker(STICKER_LOSS)
-                        }
-                    }, 48000)
-                }
-            }, 48000)
-        }, milissegundos)
-    } catch (err) {
-        console.log(err)
+                    }, 294000)
+                }, milissegundos)
+            } catch (err) {
+                await enviarEmailDeRelatorioDeErro(ctx.channelPost.text)
+                console.log(err)
+            }
+        }
     }
 })
-bot.on('channel_post', async (ctx) => {
-    // log(`channel post: ${JSON.stringify(ctx.channelPost)}`)
-    // if (JSON.stringify(ctx.channelPost).includes('Par ')){
-        // const resultado = await enviarSinalParaCompra(extrairSinalDeMensagemDeCanal(ctx.channelPost))
-        // await enviarEmailDeRelatorioDeErro(ctx.channelPost)
-        // console.log(resultado)
-    }
-)
+
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
 cronjobs.start()
@@ -481,7 +479,6 @@ app.get('/mensagem-doji', async (req, res) => {
         res.sendStatus(500)
     }
 })
-
 
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
