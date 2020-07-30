@@ -291,9 +291,9 @@ bot.use(session())
 bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', async (ctx) => {
-    console.log(ctx.channelPost.chat.id)
-    if (process.env.CHECAGEM_DE_SINAL) {
-        log(`CTX MESSAGE, ${ctx.channelPost.text}`)
+    log(ctx.channelPost.chat.id)
+    log(process.env.CHECAGEM_DE_SINAL)
+    log(`CTX MESSAGE, ${ctx.channelPost.text}`)
         if (ctx.channelPost.text.includes('Par - ')) {
             try {
                 const agora = new Date()
@@ -363,7 +363,6 @@ bot.on('channel_post', async (ctx) => {
                 log(err)
             }
         }
-    }
 })
 
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
