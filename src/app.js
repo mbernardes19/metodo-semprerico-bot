@@ -254,12 +254,16 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
 }
 
 const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
-    const mensagem = mensagemDeCanal.text.match(SINAL)
-    const par = mensagem[0]
-    const ordem = mensagem[1]
-    const horario = mensagem[2]
-    const expiracao = 5
-    return {par, ordem, horario, expiracao}
+    try {
+        const mensagem = mensagemDeCanal.text.match(SINAL)
+        const par = mensagem[0]
+        const ordem = mensagem[1]
+        const horario = mensagem[2]
+        const expiracao = 5
+        return {par, ordem, horario, expiracao}
+    } catch (err) {
+        throw new Error(`Mensagem não tem padrão de sinal: ${mensagemDeCanal}`)
+    }
 }
 
 const criarSinalGale = (mensagemDeCanal) => {
@@ -277,7 +281,7 @@ const enviarSinalParaCompra = async (sinal) => {
 }
 
 const checarResultadoCompra = async (idCompra) => {
-    console.log('ID COMPRA', idCompra)
+    log(`ID ${idCompra}`)
     return await axios.post(`${SERVIDOR_IQ}/check_win`, { idCompra: idCompra })
 }
 
@@ -288,7 +292,7 @@ bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', async (ctx) => {
     if (process.env.CHECAGEM_DE_SINAL) {
-        console.log('CTX MESSAGE', ctx.channelPost.text)
+        log(`CTX MESSAGE, ${ctx.channelPost.text}`)
         if (ctx.channelPost.text.includes('Par - ')) {
             try {
                 const agora = new Date()
@@ -324,11 +328,11 @@ bot.on('channel_post', async (ctx) => {
         
                 setTimeout(async () => {
                     response = await enviarSinalParaCompra(sinal)
-                    console.log('RESPONSE DA COMPRA', response)
+                    log(`RESPONSE DA COMPRA, ${response}`)
                     let resultado;
                     setTimeout(async () => {
                         resultado = await checarResultadoCompra(response.data)
-                        console.log('WIN OU LOSS?', resultado.data)
+                        log(`WIN OU LOSS? ${resultado.data}`)
                         if (resultado.data > 0) {
                             await ctx.reply(MENSAGEM_WIN)
                             await ctx.replyWithSticker(STICKER_WIN)
@@ -355,7 +359,7 @@ bot.on('channel_post', async (ctx) => {
                 }, milissegundos)
             } catch (err) {
                 await enviarEmailDeRelatorioDeErro(ctx.channelPost.text)
-                console.log(err)
+                log(err)
             }
         }
     }
@@ -369,14 +373,14 @@ app.use(cors())
 app.use(bodyParser.json())
 
 app.post('/mensagem-win', async (req, res) => {
-    console.log(req.body)
+    log(req.body)
     const { mensagemWin } = req.body
     try {
         await dao.atualizarMensagem('win', mensagemWin, conexao)
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
-        console.log(err)
+        log(err)
         res.sendStatus(500)
     }
 })
@@ -388,7 +392,7 @@ app.post('/sticker-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
-        console.log(err)
+        log(err)
         res.sendStatus(500)
     }
 })
@@ -400,7 +404,7 @@ app.post('/mensagem-loss', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
-        console.log(err)
+        log(err)
         res.sendStatus(500)
     }
 })
@@ -433,7 +437,7 @@ app.get('/mensagem-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto })
     } catch (err) {
-        console.log(err)
+        og(err)
         res.sendStatus(500)
     }
 })
@@ -444,7 +448,7 @@ app.get('/sticker-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({id: stickerWin.id, texto: stickerWin.texto})
     } catch (err) {
-        console.log(err)
+        log(err)
         res.sendStatus(500)
     }
 })
@@ -455,7 +459,7 @@ app.get('/mensagem-loss', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({id: mensagemLoss.id, texto: mensagemLoss.texto})
     } catch (err) {
-        console.log(err)
+        log(err)
         res.sendStatus(500)
     }
 })
