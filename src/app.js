@@ -25,6 +25,13 @@ const { SINAL } = require('./regex')
 const axios = require('axios').default;
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const { listTimeZones } = require('timezone-support')
+const { convertToLocalTime, formatToTimeZone } = require('date-fns-timezone')
+const differenceInMilliseconds = require('date-fns/differenceInMilliseconds')
+const { parseISO } = require('date-fns')
+const timeZones = listTimeZones()
+
+
 
 
 const conexao = db.conexao
@@ -269,8 +276,10 @@ const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
 
 const criarSinalGale = (mensagemDeCanal) => {
     const agora = new Date()
-    const horarioAtual = `${agora.getHours()}:${agora.getMinutes()}:05`
+    const horarioAtual = `${agora.getHours()}:${agora.getMinutes()}:10`
     const sinalAnterior = extrairSinalDeMensagemDeCanal(mensagemDeCanal)
+    log('MENSAGEM GALE')
+    log(JSON.stringify({...sinalAnterior, horario: horarioAtual}))
     return {...sinalAnterior, horario: horarioAtual}
 }
 
@@ -297,12 +306,25 @@ bot.on('channel_post', async (ctx) => {
     log(`CTX MESSAGE, ${ctx.channelPost.text}`)
         if (ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
             try {
-                const agora = new Date()
                 let sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text)
+                let horaSinal = parseInt(sinal.horario.substring(0, 2))
+                let minutoSinal = parseInt(sinal.horario.substring(3, 5))
+                process.env.TZ = 'America/Sao_Paulo'
+                const agora = new Date()
+                const agoraStr = new Date().toISOString()
+                console.log(horaSinal)
+                console.log(minutoSinal)
+                const sinalAgora = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), horaSinal, minutoSinal, 0)
+                const sinalAgoraStr = sinalAgora.toISOString()
+
+                console.log('AGORA', agoraStr)
+                console.log('SINALAGORA', sinalAgoraStr)
+                const diff = Math.abs(differenceInMilliseconds(parseISO(agoraStr), parseISO(sinalAgoraStr)))
+                
                 let horaAgora = agora.getHours()
                 let minutoAgora = agora.getMinutes()
-                let horaSinal = parseInt(sinal.horario.substring(0, 2))
-                let minutoSinal = parseInt(sinal.horario.substring(3, 4))
+
+                console.log('DIFF', diff)
         
                 let diffHora = horaSinal - horaAgora
                 let diffMinuto = minutoSinal - minutoAgora
@@ -319,12 +341,14 @@ bot.on('channel_post', async (ctx) => {
                 } else {
                     milissegundos += 0
                 }
+
+                console.log('MILISSEGUNDOS', milissegundos)
         
-                const MENSAGEM_WIN = await dao.pegarMensagem('win', conexao)
-                const STICKER_WIN = await dao.pegarSticker('win', conexao)
-                const MENSAGEM_LOSS = await dao.pegarMensagem('loss', conexao)
-                const STICKER_LOSS = await dao.pegarSticker('loss', conexao)
-                const MENSAGEM_DOJI = await dao.pegarMensagem('doji', conexao)
+                const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexao)
+                const [STICKER_WIN] = await dao.pegarSticker('win', conexao)
+                const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexao)
+                const [STICKER_LOSS] = await dao.pegarSticker('loss', conexao)
+                const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexao)
         
                 let response;
         
@@ -336,29 +360,33 @@ bot.on('channel_post', async (ctx) => {
                         resultado = await checarResultadoCompra(response.data)
                         log(`WIN OU LOSS? ${resultado.data}`)
                         if (resultado.data > 0) {
-                            await ctx.reply(MENSAGEM_WIN)
-                            await ctx.replyWithSticker(STICKER_WIN)
+                            log('WIN', resultado.data)
+                            await ctx.reply(MENSAGEM_WIN.texto)
+                            await ctx.replyWithSticker(STICKER_WIN.texto)
                         } else {
                             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text))
                             setTimeout(async () => {
                                 res = await checarResultadoCompra(resp.data)
                                 if (res.data > 0) {
-                                    await ctx.reply(MENSAGEM_WIN)
-                                    await ctx.replyWithSticker(STICKER_WIN)
+                                    log('WIN', res.data)
+                                    await ctx.reply(MENSAGEM_WIN.texto)
+                                    await ctx.replyWithSticker(STICKER_WIN.texto)
                                 }
                                 if (res.data === 0) {
-                                    await ctx.reply(MENSAGEM_LOSS)
-                                    await ctx.replyWithSticker(STICKER_LOSS)
-                                    await ctx.reply(MENSAGEM_DOJI)
+                                    log('DOJI LOSS', res.data)
+                                    await ctx.reply(MENSAGEM_LOSS.texto)
+                                    await ctx.replyWithSticker(STICKER_LOSS.texto)
+                                    await ctx.reply(MENSAGEM_DOJI.texto)
                                 }
                                 if (res.data < 0) {
-                                    await ctx.reply(MENSAGEM_LOSS)
-                                    await ctx.replyWithSticker(STICKER_LOSS)
+                                    log('LOSS', res.data)
+                                    await ctx.reply(MENSAGEM_LOSS.texto)
+                                    await ctx.replyWithSticker(STICKER_LOSS.texto)
                                 }
                             }, 294000)
                         }
                     }, 294000)
-                }, milissegundos)
+                }, diff)
             } catch (err) {
                 await enviarEmailDeRelatorioDeErro(ctx.channelPost.text)
                 log(err)
@@ -372,12 +400,28 @@ bot.on('channel_post', async (ctx) => {
 //     log(`CTX MESSAGE, ${ctx.message.text}`)
 //         if (ctx.message.text.includes('Par - ')) {
 //             try {
-//                 const agora = new Date()
 //                 let sinal = extrairSinalDeMensagemDeCanal(ctx.message.text)
+//                 let horaSinal = parseInt(sinal.horario.substring(0, 2))
+//                 let minutoSinal = parseInt(sinal.horario.substring(3, 5))
+//                 process.env.TZ = 'America/Sao_Paulo'
+//                 const agora = new Date()
+//                 const agoraStr = new Date().toISOString()
+//                 console.log(horaSinal)
+//                 console.log(minutoSinal)
+//                 const sinalAgora = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), horaSinal, minutoSinal, 0)
+//                 const sinalAgoraStr = sinalAgora.toISOString()
+//                 // const zonedAgora = convertToLocalTime(agora, { timeZone: 'America/Sao_Paulo'})
+//                 // const zonedSinalAgora = convertToTimeZone(sinalAgora, { timeZone: 'America/Sao_Paulo'})
+
+//                 console.log('AGORA', agoraStr)
+//                 console.log('SINALAGORA', sinalAgoraStr)
+//                 // console.log(differenceInMilliseconds(agoraStr, sinalAgoraStr))
+//                 const diff = Math.abs(differenceInMilliseconds(parseISO(agoraStr), parseISO(sinalAgoraStr)))
+                
 //                 let horaAgora = agora.getHours()
 //                 let minutoAgora = agora.getMinutes()
-//                 let horaSinal = parseInt(sinal.horario.substring(0, 2))
-//                 let minutoSinal = parseInt(sinal.horario.substring(3, 4))
+
+//                 console.log('DIFF', diff)
         
 //                 let diffHora = horaSinal - horaAgora
 //                 let diffMinuto = minutoSinal - minutoAgora
@@ -394,12 +438,14 @@ bot.on('channel_post', async (ctx) => {
 //                 } else {
 //                     milissegundos += 0
 //                 }
+
+//                 console.log('MILISSEGUNDOS', milissegundos)
         
-//                 const MENSAGEM_WIN = await dao.pegarMensagem('win', conexao)
-//                 const STICKER_WIN = await dao.pegarSticker('win', conexao)
-//                 const MENSAGEM_LOSS = await dao.pegarMensagem('loss', conexao)
-//                 const STICKER_LOSS = await dao.pegarSticker('loss', conexao)
-//                 const MENSAGEM_DOJI = await dao.pegarMensagem('doji', conexao)
+//                 const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexao)
+//                 const [STICKER_WIN] = await dao.pegarSticker('win', conexao)
+//                 const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexao)
+//                 const [STICKER_LOSS] = await dao.pegarSticker('loss', conexao)
+//                 const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexao)
         
 //                 let response;
         
@@ -411,29 +457,33 @@ bot.on('channel_post', async (ctx) => {
 //                         resultado = await checarResultadoCompra(response.data)
 //                         log(`WIN OU LOSS? ${resultado.data}`)
 //                         if (resultado.data > 0) {
-//                             await ctx.reply(MENSAGEM_WIN)
-//                             await ctx.replyWithSticker(STICKER_WIN)
+//                             log('WIN', resultado.data)
+//                             await ctx.reply(MENSAGEM_WIN.texto)
+//                             await ctx.replyWithSticker(STICKER_WIN.texto)
 //                         } else {
 //                             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message.text))
 //                             setTimeout(async () => {
 //                                 res = await checarResultadoCompra(resp.data)
 //                                 if (res.data > 0) {
-//                                     await ctx.reply(MENSAGEM_WIN)
-//                                     await ctx.replyWithSticker(STICKER_WIN)
+//                                     log('WIN', res.data)
+//                                     await ctx.reply(MENSAGEM_WIN.texto)
+//                                     await ctx.replyWithSticker(STICKER_WIN.texto)
 //                                 }
 //                                 if (res.data === 0) {
-//                                     await ctx.reply(MENSAGEM_LOSS)
-//                                     await ctx.replyWithSticker(STICKER_LOSS)
-//                                     await ctx.reply(MENSAGEM_DOJI)
+//                                     log('DOJI LOSS', res.data)
+//                                     await ctx.reply(MENSAGEM_LOSS.texto)
+//                                     await ctx.replyWithSticker(STICKER_LOSS.texto)
+//                                     await ctx.reply(MENSAGEM_DOJI.texto)
 //                                 }
 //                                 if (res.data < 0) {
-//                                     await ctx.reply(MENSAGEM_LOSS)
-//                                     await ctx.replyWithSticker(STICKER_LOSS)
+//                                     log('LOSS', res.data)
+//                                     await ctx.reply(MENSAGEM_LOSS.texto)
+//                                     await ctx.replyWithSticker(STICKER_LOSS.texto)
 //                                 }
-//                             }, 294000)
+//                             }, 60000)
 //                         }
-//                     }, 294000)
-//                 }, milissegundos)
+//                     }, 60000)
+//                 }, diff)
 //             } catch (err) {
 //                 await enviarEmailDeRelatorioDeErro(ctx.message.text)
 //                 log(err)
