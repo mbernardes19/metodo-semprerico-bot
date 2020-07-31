@@ -295,7 +295,7 @@ bot.on('channel_post', async (ctx) => {
     log(ctx.channelPost.chat.id)
     log(process.env.CHECAGEM_DE_SINAL)
     log(`CTX MESSAGE, ${ctx.channelPost.text}`)
-        if (ctx.channelPost.text.includes('Par - ')) {
+        if (ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
             try {
                 const agora = new Date()
                 let sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text)
