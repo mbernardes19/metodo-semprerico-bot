@@ -256,6 +256,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
 const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
     try {
         const mensagem = mensagemDeCanal.match(SINAL)
+        console.log('MENSAGEM PARSEADA', mensagem)
         const par = mensagem[0]
         const ordem = mensagem[1]
         const horario = mensagem[2]
@@ -364,6 +365,81 @@ bot.on('channel_post', async (ctx) => {
             }
         }
 })
+
+// bot.on('message', async (ctx) => {
+//     log(ctx.message.chat.id)
+//     log(process.env.CHECAGEM_DE_SINAL)
+//     log(`CTX MESSAGE, ${ctx.message.text}`)
+//         if (ctx.message.text.includes('Par - ')) {
+//             try {
+//                 const agora = new Date()
+//                 let sinal = extrairSinalDeMensagemDeCanal(ctx.message.text)
+//                 let horaAgora = agora.getHours()
+//                 let minutoAgora = agora.getMinutes()
+//                 let horaSinal = parseInt(sinal.horario.substring(0, 2))
+//                 let minutoSinal = parseInt(sinal.horario.substring(3, 4))
+        
+//                 let diffHora = horaSinal - horaAgora
+//                 let diffMinuto = minutoSinal - minutoAgora
+        
+//                 let milissegundos
+        
+//                 if (diffHora >= 0) {
+//                     milissegundos += diffHora * 36 * 10000
+//                 } else {
+//                     milissegundos += 0
+//                 }
+//                 if (diffMinuto >= 0) {
+//                     milissegundos += diffHora * 6 * 10000
+//                 } else {
+//                     milissegundos += 0
+//                 }
+        
+//                 const MENSAGEM_WIN = await dao.pegarMensagem('win', conexao)
+//                 const STICKER_WIN = await dao.pegarSticker('win', conexao)
+//                 const MENSAGEM_LOSS = await dao.pegarMensagem('loss', conexao)
+//                 const STICKER_LOSS = await dao.pegarSticker('loss', conexao)
+//                 const MENSAGEM_DOJI = await dao.pegarMensagem('doji', conexao)
+        
+//                 let response;
+        
+//                 setTimeout(async () => {
+//                     response = await enviarSinalParaCompra(sinal)
+//                     log(`RESPONSE DA COMPRA, ${response}`)
+//                     let resultado;
+//                     setTimeout(async () => {
+//                         resultado = await checarResultadoCompra(response.data)
+//                         log(`WIN OU LOSS? ${resultado.data}`)
+//                         if (resultado.data > 0) {
+//                             await ctx.reply(MENSAGEM_WIN)
+//                             await ctx.replyWithSticker(STICKER_WIN)
+//                         } else {
+//                             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message.text))
+//                             setTimeout(async () => {
+//                                 res = await checarResultadoCompra(resp.data)
+//                                 if (res.data > 0) {
+//                                     await ctx.reply(MENSAGEM_WIN)
+//                                     await ctx.replyWithSticker(STICKER_WIN)
+//                                 }
+//                                 if (res.data === 0) {
+//                                     await ctx.reply(MENSAGEM_LOSS)
+//                                     await ctx.replyWithSticker(STICKER_LOSS)
+//                                     await ctx.reply(MENSAGEM_DOJI)
+//                                 }
+//                                 if (res.data < 0) {
+//                                     await ctx.reply(MENSAGEM_LOSS)
+//                                     await ctx.replyWithSticker(STICKER_LOSS)
+//                                 }
+//                             }, 294000)
+//                         }
+//                     }, 294000)
+//                 }, milissegundos)
+//             } catch (err) {
+//                 await enviarEmailDeRelatorioDeErro(ctx.message.text)
+//                 log(err)
+//             }
+//         }
+// })
 
 bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
