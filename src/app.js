@@ -360,7 +360,8 @@ bot.on('channel_post', async (ctx) => {
                         resultado = await checarResultadoCompra(response.data)
                         log(`WIN OU LOSS? ${resultado.data}`)
                         if (resultado.data > 0) {
-                            log('WIN', resultado.data)
+                            log('WIN')
+                            log(resultado.data)
                             await ctx.reply(MENSAGEM_WIN.texto)
                             await ctx.replyWithSticker(STICKER_WIN.texto)
                         } else {
@@ -368,18 +369,21 @@ bot.on('channel_post', async (ctx) => {
                             setTimeout(async () => {
                                 res = await checarResultadoCompra(resp.data)
                                 if (res.data > 0) {
-                                    log('WIN', res.data)
+                                    log('WIN')
+                                    log(res.data)
                                     await ctx.reply(MENSAGEM_WIN.texto)
                                     await ctx.replyWithSticker(STICKER_WIN.texto)
                                 }
                                 if (res.data === 0) {
-                                    log('DOJI LOSS', res.data)
+                                    log('DOJI LOSS')
+                                    log(res.data)
                                     await ctx.reply(MENSAGEM_LOSS.texto)
                                     await ctx.replyWithSticker(STICKER_LOSS.texto)
                                     await ctx.reply(MENSAGEM_DOJI.texto)
                                 }
                                 if (res.data < 0) {
-                                    log('LOSS', res.data)
+                                    log('LOSS')
+                                    log(res.data)
                                     await ctx.reply(MENSAGEM_LOSS.texto)
                                     await ctx.replyWithSticker(STICKER_LOSS.texto)
                                 }
