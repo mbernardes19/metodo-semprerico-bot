@@ -56,4 +56,17 @@ const enviarEmailDeRelatorioDeErro = async (erro) => {
     }
 }
 
-module.exports = { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro }
+const enviarEmailDeRelatorioDeErroCliente = async (erro, mensagem) => {
+    try {
+        await enviarEmail({
+            de: process.env.USUARIO_EMAIL,
+            para: 'as_galgal@hotmail.com',
+            assunto: 'Ocorreu um erro ao verificar uma compra na IQ Option',
+            texto: `O seguinte erro ocorreu:\n\n${JSON.stringify(erro)}\n\npara o seguinte sinal:\n\n${mensagem}`,
+        })
+    } catch (err) {
+        log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${JSON.stringify(err)}`)
+    }
+}
+
+module.exports = { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro, enviarEmailDeRelatorioDeErroCliente }
