@@ -125,7 +125,7 @@ const darBoasVindas = async (ctx) => {
 }
 
 const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaInformacao, ctx) => {
-
+    console.log('MENSAGEM', ctx.message.text)
     ctx.wizard.state.novoUsuario[informacao] = ctx.message.text
     ctx.wizard.state.informacao = informacao
     ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao

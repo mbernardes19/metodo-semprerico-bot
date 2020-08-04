@@ -29,7 +29,7 @@ const getTransactions = async (auth, options={product, transaction, email, date_
     }
 }
 
-const pegarTransacaoNaMonetizze = async (options={product, transaction, email, date_min, date_max, end_date_min, end_date_max, 'status[]': any, 'forma_pagamento[]': any, page}) => {
+const pegarTransacaoNaMonetizze = async (options={product, transaction, email, date_min, date_max, end_date_min, end_date_max, 'status': any, 'forma_pagamento': any, page}) => {
     try {
         const token  = await auth()
         return await getTransactions(token, options)

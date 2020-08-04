@@ -9,7 +9,7 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
     const pagamento = regex.CARTAO.test(formaDePagamento) ? 1 : 3
     try {
         const response = await pegarTransacaoNaMonetizze({
-            product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento, "status[]": 2, "status[]": 6
+            product: process.env.ID_PRODUTO, email, "status[]": 2
         })
         log(`Verificando compra de usuário na Monetizze ${JSON.stringify(response)}`)
         return response.recordCount == 0 ? false : true
