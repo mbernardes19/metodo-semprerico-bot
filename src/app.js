@@ -296,8 +296,12 @@ const criarSinalGale = (mensagemDeCanal) => {
 const SERVIDOR_IQ = process.env.NODE_ENV === 'production'
     ? process.env.SERVIDOR_IQ : process.env.SERVIDOR_IQ_TEST
 
-const enviarSinalParaCompra = async (sinal) => {
-    return await axios.post(`${SERVIDOR_IQ}/buy`, sinal)
+const enviarSinalParaCompra = async (sinal, ctx) => {
+    try {
+        return await axios.post(`${SERVIDOR_IQ}/buy`, sinal)
+    } catch (err) {
+        await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
+    }
 }
 
 const checarResultadoCompra = async (idCompra, ctx) => {
@@ -305,7 +309,7 @@ const checarResultadoCompra = async (idCompra, ctx) => {
         log(`ID ${idCompra}`)
         return await axios.post(`${SERVIDOR_IQ}/check_win`, { idCompra: idCompra })
     } catch (err) {
-        enviarEmailDeRelatorioDeErroCliente(idCompra, ctx.channelPost.text)
+        await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
     }
 }
 
@@ -334,29 +338,8 @@ bot.on('channel_post', async (ctx) => {
                 console.log('AGORA', agoraStr)
                 console.log('SINALAGORA', sinalAgoraStr)
                 const diff = Math.abs(differenceInMilliseconds(parseISO(agoraStr), parseISO(sinalAgoraStr)))
-                
-                let horaAgora = agora.getHours()
-                let minutoAgora = agora.getMinutes()
 
                 console.log('DIFF', diff)
-        
-                let diffHora = horaSinal - horaAgora
-                let diffMinuto = minutoSinal - minutoAgora
-        
-                let milissegundos
-        
-                if (diffHora >= 0) {
-                    milissegundos += diffHora * 36 * 10000
-                } else {
-                    milissegundos += 0
-                }
-                if (diffMinuto >= 0) {
-                    milissegundos += diffHora * 6 * 10000
-                } else {
-                    milissegundos += 0
-                }
-
-                console.log('MILISSEGUNDOS', milissegundos)
         
                 const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexao)
                 const [STICKER_WIN] = await dao.pegarSticker('win', conexao)
@@ -367,8 +350,12 @@ bot.on('channel_post', async (ctx) => {
                 let response;
         
                 setTimeout(async () => {
-                    response = await enviarSinalParaCompra(sinal)
+                    response = await enviarSinalParaCompra(sinal, ctx)
                     log(`RESPONSE DA COMPRA, ${response.data}`)
+                    if (!response.data) {
+                        await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
+                        return
+                    }
                     let resultado;
                     setTimeout(async () => {
                         resultado = await checarResultadoCompra(response.data, ctx)
@@ -376,30 +363,30 @@ bot.on('channel_post', async (ctx) => {
                         if (resultado.data > 0) {
                             log('WIN')
                             log(resultado.data)
-                            await ctx.reply(MENSAGEM_WIN.texto)
-                            await ctx.replyWithSticker(STICKER_WIN.texto)
+                            await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id))
+                            await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id))
                         } else {
-                            const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text))
+                            const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text), ctx)
                             setTimeout(async () => {
                                 res = await checarResultadoCompra(resp.data, ctx)
                                 if (res.data > 0) {
                                     log('WIN')
                                     log(res.data)
-                                    await ctx.reply(MENSAGEM_WIN.texto)
-                                    await ctx.replyWithSticker(STICKER_WIN.texto)
+                                    await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id))
+                                    await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id))
                                 }
                                 if (res.data === 0) {
                                     log('DOJI LOSS')
                                     log(res.data)
-                                    await ctx.reply(MENSAGEM_LOSS.texto)
-                                    await ctx.replyWithSticker(STICKER_LOSS.texto)
-                                    await ctx.reply(MENSAGEM_DOJI.texto)
+                                    await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id))
+                                    await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id))
+                                    await ctx.reply(MENSAGEM_DOJI.texto, Extra.inReplyTo(ctx.channelPost.message_id))
                                 }
                                 if (res.data < 0) {
                                     log('LOSS')
                                     log(res.data)
-                                    await ctx.reply(MENSAGEM_LOSS.texto)
-                                    await ctx.replyWithSticker(STICKER_LOSS.texto)
+                                    await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id))
+                                    await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id))
                                 }
                             }, 294000)
                         }
@@ -465,43 +452,47 @@ bot.on('channel_post', async (ctx) => {
 //                 let response;
         
 //                 setTimeout(async () => {
-//                     response = await enviarSinalParaCompra(sinal)
-//                     log(`RESPONSE DA COMPRA, ${response}`)
+//                     response = await enviarSinalParaCompra(sinal, ctx)
+//                     log(`RESPONSE DA COMPRA, ${response.data}`)
+//                     if (!response.data) {
+//                         await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.message.message_id))
+//                         return
+//                     }
 //                     let resultado;
 //                     setTimeout(async () => {
-//                         resultado = await checarResultadoCompra(response.data)
+//                         resultado = await checarResultadoCompra(response.data, ctx)
 //                         log(`WIN OU LOSS? ${resultado.data}`)
 //                         if (resultado.data > 0) {
 //                             log('WIN')
 //                             log(resultado.data)
-//                             await ctx.reply(MENSAGEM_WIN.texto)
-//                             await ctx.replyWithSticker(STICKER_WIN.texto)
+//                             await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.message.message_id))
+//                             await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.message.message_id))
 //                         } else {
-//                             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message.text))
+//                             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.message.text), ctx)
 //                             setTimeout(async () => {
-//                                 res = await checarResultadoCompra(resp.data)
+//                                 res = await checarResultadoCompra(resp.data, ctx)
 //                                 if (res.data > 0) {
 //                                     log('WIN')
 //                                     log(res.data)
-//                                     await ctx.reply(MENSAGEM_WIN.texto)
-//                                     await ctx.replyWithSticker(STICKER_WIN.texto)
+//                                     await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.message.message_id))
+//                                     await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.message.message_id))
 //                                 }
 //                                 if (res.data === 0) {
 //                                     log('DOJI LOSS')
 //                                     log(res.data)
-//                                     await ctx.reply(MENSAGEM_LOSS.texto)
-//                                     await ctx.replyWithSticker(STICKER_LOSS.texto)
-//                                     await ctx.reply(MENSAGEM_DOJI.texto)
+//                                     await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.message.message_id))
+//                                     await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.message.message_id))
+//                                     await ctx.reply(MENSAGEM_DOJI.texto, Extra.inReplyTo(ctx.message.message_id))
 //                                 }
 //                                 if (res.data < 0) {
 //                                     log('LOSS')
 //                                     log(res.data)
-//                                     await ctx.reply(MENSAGEM_LOSS.texto)
-//                                     await ctx.replyWithSticker(STICKER_LOSS.texto)
+//                                     await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.message.message_id))
+//                                     await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.message.message_id))
 //                                 }
-//                             }, 294000)
+//                             }, 60000)
 //                         }
-//                     }, 294000)
+//                     }, 60000)
 //                 }, diff)
 //             } catch (err) {
 //                 await enviarEmailDeRelatorioDeErro(ctx.message.text)
