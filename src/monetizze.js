@@ -31,16 +31,15 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
 } 
 
 const pegarNovoStatusDeAssinaturaDeUsuario = async (usuario) => {
-    const { email, forma_de_pagamento } = usuario
-    const pagamento = regex.CARTAO.test(forma_de_pagamento) ? 1 : 3
+    const { email, status_assinatura } = usuario
     try {
         const response = await pegarTransacaoNaMonetizze({
-            product: process.env.ID_PRODUTO, email, "forma_pagamento[]": pagamento
+            product: process.env.ID_PRODUTO, email
         })
         if (response.recordCount > 0) {
-            return response.dados[0].venda.status.toLowerCase().replace(/ /g, "_")
+            return response.dados[0].assinatura.status.toLowerCase().replace(/ /g, "_")
         }
-        return forma_de_pagamento
+        return status_assinatura
     } catch (err) {
         throw err
     }
