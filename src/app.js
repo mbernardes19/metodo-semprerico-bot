@@ -125,12 +125,13 @@ const darBoasVindas = async (ctx) => {
 }
 
 const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaInformacao, ctx) => {
-    console.log('MENSAGEM', ctx.message.text)
-    ctx.wizard.state.novoUsuario[informacao] = ctx.message.text
+    const mensagem = await ctx.message
+    const textoDaMensagem = await ctx.message.text
+    ctx.wizard.state.novoUsuario[informacao] = textoDaMensagem
     ctx.wizard.state.informacao = informacao
     ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
     ctx.wizard.state.mensagemProximaInformacao = mensagemProximaInformacao
-    ctx.wizard.state.mensagem = ctx.message
+    ctx.wizard.state.mensagem = mensagem
 
     const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
     await ctx.reply(`${messagem} ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
