@@ -125,15 +125,16 @@ const darBoasVindas = async (ctx) => {
 }
 
 const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaInformacao, ctx) => {
-    console.log('MENSAGEM', ctx.message.text)
-    ctx.wizard.state.novoUsuario[informacao] = ctx.message.text
+    const mensagem = await ctx.message
+    const textoDaMensagem = await ctx.message.text
+    ctx.wizard.state.novoUsuario[informacao] = textoDaMensagem
     ctx.wizard.state.informacao = informacao
     ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
     ctx.wizard.state.mensagemProximaInformacao = mensagemProximaInformacao
-    ctx.wizard.state.mensagem = ctx.message
+    ctx.wizard.state.mensagem = mensagem
 
     const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
-    await ctx.reply(`${messagem} ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+    await ctx.reply(`${messagem} ${textoDaMensagem}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
     log(`${informacao} definido`)
     return ctx.wizard.next()
 }
@@ -501,7 +502,7 @@ bot.on('channel_post', async (ctx) => {
 //         }
 // })
 
-bot.on('message', ctx => ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
+bot.on('message', async ctx => await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
 bot.launch()
 cronjobs.start()
 
