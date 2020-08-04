@@ -34,6 +34,15 @@ const adicionarEmEmailsBloqueados = async (email, conexao) => {
     }
 }
 
+const pegarTodosEmailsBloqueados = async (conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        return await query(`select * from EmailBloqueado`)
+    } catch (err) {
+        throw err
+    }
+}
+
 const pegarTodosUsuariosDoBancoDeDados = async (conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
@@ -131,6 +140,7 @@ module.exports = {
     adicionarUsuarioAoBancoDeDados,
     limparBancoDeDados,
     adicionarEmEmailsBloqueados,
+    pegarTodosEmailsBloqueados,
     pegarTodosUsuariosDoBancoDeDados,
     atualizarStatusDeAssinaturaDeUsuarios,
     aumentarAvisoDeBanimento,

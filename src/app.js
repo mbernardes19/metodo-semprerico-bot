@@ -149,6 +149,17 @@ const confirmacaoPositiva = async (ctx) => {
         await ctx.reply(`${mensagemConfirmacao.positivo}`, Extra.inReplyTo(mensagem.id))
         await ctx.reply(`${mensagemProximaInformacao}`)
         if (informacao === 'email') {
+            try {
+                const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexao)
+                const emailBloqueado = emailsBloqueados.filter(emailBloqueado => emailBloqueado.email === ctx.wizard.state.novoUsuario.email)
+                if (emailBloqueado.length > 0) {
+                    await ctx.reply(`Seu email está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email para explicando sua situação ${process.env.EMAIL_PARA}`)
+                    return ctx.scene.leave()
+                }
+            } catch (err) {
+                log(`ERRO AO VERIFICAR SE EMAIL JÁ ESTÁ BLOQUEADO, ${ctx.wizard.state.novoUsuario.email}, ${JSON.stringify(err)}`)
+                enviarEmailDeRelatorioDeErro(err)
+            }
             await ctx.reply(`Estou verificando no servidor da Monetizze a sua compra, só um momento...`)
             try {
                 return await verificarCompraDeUsuarioNaMonetizze(ctx) ?
