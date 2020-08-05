@@ -6,6 +6,7 @@ const { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro } = require('./email')
 const Telegram = require('telegraf/telegram')
 const { log } = require('./logger')
 const { cache } = require('./cache')
+const csv = require('./csv')
 
 const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia()
@@ -39,6 +40,7 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
             await enviarCSVParaEmail()
             log(`Email com relatório de usuários enviado com sucesso!`)
         } catch (err) {
+            log(err)
             log(`ERRO AO CRIAR CSV: ${JSON.stringify(err)}`)
             await enviarEmailDeRelatorioDeErro(err)
         }

@@ -49,7 +49,7 @@ const enviarEmailDeRelatorioDeErro = async (erro) => {
             de: process.env.USUARIO_EMAIL,
             para: 'bernardes.matheus@outlook.com',
             assunto: 'Ocorreu um erro no MSR Bot!',
-            texto: `Segue o erro:\n${JSON.stringify(erro)}`,
+            texto: `Segue o erro:\n${erro}`,
         })
     } catch (err) {
         log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${JSON.stringify(err)}`)
