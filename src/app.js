@@ -130,20 +130,23 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
     try {
         mensagem = ctx.message
         textoDaMensagem = ctx.message.text
+        if (informacao === 'telefone') {
+            textoDaMensagem = textoDaMensagem.replace(/ /g, "")
+        }
         ctx.wizard.state.novoUsuario[informacao] = textoDaMensagem
         ctx.wizard.state.informacao = informacao
         ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
         ctx.wizard.state.mensagemProximaInformacao = mensagemProximaInformacao
         ctx.wizard.state.mensagem = mensagem
+        const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
+        await ctx.reply(`${messagem} ${textoDaMensagem}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+        log(`${informacao} definido`)
+        return ctx.wizard.next()
     } catch (err) {
         log(err)
         await ctx.reply('Puxa vida... 😰 Me desculpe por isso, mas aconteceu um erro aqui comigo agora e eu vou ter que recomeçar a nossa conversa do zero... Tudo bem? É só digitar o comando /start .\n\nMil perdões... Tenho muito que melhorar como bot 😓')
         return ctx.scene.leave()
     }
-    const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
-    await ctx.reply(`${messagem} ${textoDaMensagem}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
-    log(`${informacao} definido`)
-    return ctx.wizard.next()
 }
 
 const confirmacaoPositiva = async (ctx) => {
