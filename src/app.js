@@ -332,14 +332,14 @@ bot.use(stage.middleware())
 bot.command('start', (ctx) => ctx.scene.enter('start'))
 bot.on('channel_post', async (ctx) => {
     log(ctx.channelPost.chat.id)
-    if(ctx.channelPost.chat.id === process.env.ID_CANAL_RICO_VIDENTE) {
+    if(ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE) {
         log('CANAL RICO VIDENTE')
     }
-    if(ctx.channelPost.chat.id === process.env.ID_CANAL_SINAIS_RICOS) {
+    if(ctx.channelPost.chat.id == process.env.ID_CANAL_SINAIS_RICOS) {
         log('CANAL SINAIS RICOS')
     }
     log(`CTX MESSAGE, ${ctx.channelPost.text}`)
-        if (ctx.channelPost.chat.id === process.env.ID_CANAL_RICO_VIDENTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
+        if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
             try {
                 let sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text)
                 let horaSinal = parseInt(sinal.horario.substring(0, 2))
