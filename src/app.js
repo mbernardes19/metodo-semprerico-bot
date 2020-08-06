@@ -160,7 +160,7 @@ const confirmacaoPositiva = async (ctx) => {
                 const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexao)
                 const emailBloqueado = emailsBloqueados.filter(emailBloqueado => emailBloqueado.email === ctx.wizard.state.novoUsuario.email)
                 if (emailBloqueado.length > 0) {
-                    await ctx.reply(`Seu email está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email para explicando sua situação ${process.env.EMAIL_PARA}`)
+                    await ctx.reply(`Seu email está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email explicando sua situação para ${process.env.EMAIL_PARA}`)
                     return ctx.scene.leave()
                 }
             } catch (err) {
