@@ -136,6 +136,7 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
         ctx.wizard.state.mensagemProximaInformacao = mensagemProximaInformacao
         ctx.wizard.state.mensagem = mensagem
     } catch (err) {
+        log(err)
         await ctx.reply('Puxa vida... 😰 Me desculpe por isso, mas aconteceu um erro aqui comigo agora e eu vou ter que recomeçar a nossa conversa do zero... Tudo bem? É só digitar o comando /start .\n\nMil perdões... Tenho muito que melhorar como bot 😓')
         return ctx.scene.leave()
     }
