@@ -23,6 +23,7 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             log(`Status de assinatura de usuários atualizado com sucesso!`)
         } catch (err) {
             log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${JSON.stringify(err)}`)
+            log(err)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });
@@ -40,8 +41,8 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
             await enviarCSVParaEmail()
             log(`Email com relatório de usuários enviado com sucesso!`)
         } catch (err) {
-            log(err)
             log(`ERRO AO CRIAR CSV: ${JSON.stringify(err)}`)
+            log(err)
             await enviarEmailDeRelatorioDeErro(err)
         }
     });
