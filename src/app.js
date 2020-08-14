@@ -159,6 +159,9 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
         if (informacao === 'telefone') {
             textoDaMensagem = textoDaMensagem.replace(/ /g, "")
         }
+        if (informacao === 'cpf') {
+            textoDaMensagem = textoDaMensagem.replace(/[^0-9]/g, '')
+        }
         ctx.wizard.state.novoUsuario[informacao] = textoDaMensagem
         ctx.wizard.state.informacao = informacao
         ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
