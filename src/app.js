@@ -336,7 +336,8 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
             Markup.urlButton('Canal Teste', linkCanal1),
         ])
     }
-    await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
+    // await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
+    await ctx.reply('Cadastro confirmado! Em breve vamos mandar os canais para você!')
     log(`Canais de Telegram enviados`)
     return ctx.scene.leave()
 }
