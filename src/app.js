@@ -90,6 +90,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         }
         await ctx.reply('Certo!')
         ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
+        await ctx.reply('Vou precisar confirmar seu CPF para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
         await ctx.reply('Qual é o seu CPF?')
         log('Plano gratuito definido')
         return ctx.wizard.next()
@@ -336,7 +337,8 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
             Markup.urlButton('Canal Teste', linkCanal1),
         ])
     }
-    await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
+    // await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
+    await ctx.reply('Cadastro confirmado! Em breve vamos mandar os canais para você!')
     log(`Canais de Telegram enviados`)
     return ctx.scene.leave()
 }
