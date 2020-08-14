@@ -136,8 +136,32 @@ const atualizarSticker = async (tipo, sticker, conexao) => {
     }
 }
 
+const adicionarUsuarioGratuitoAoBancoDeDados = async (usuario, conexao) => {
+    const {idTelegram, nomeCompleto, cpf, email, telefone, dataAssinatura, diasDeUso} = usuario
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        await query(
+            `insert into UsuarioGratuito (id, nome_completo, cpf, telefone, email, data_de_assinatura, dias_de_uso) values ('${idTelegram}', '${nomeCompleto}', '${cpf}',  '${telefone}', '${email}', '${dataAssinatura}', '${diasDeUso}')`
+            )
+    } catch (err) {
+        throw err
+    }
+}
+
+const verificarSeJaExisteUsuarioComCpf = async (cpf, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        return await query(`select * from UsuarioGratuito where cpf='${cpf}'`)
+    } catch (err) {
+        throw err
+    }
+    
+}
+
 module.exports = {
     adicionarUsuarioAoBancoDeDados,
+    adicionarUsuarioGratuitoAoBancoDeDados,
+    verificarSeJaExisteUsuarioComCpf,
     limparBancoDeDados,
     adicionarEmEmailsBloqueados,
     pegarTodosEmailsBloqueados,

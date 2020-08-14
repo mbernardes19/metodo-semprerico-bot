@@ -15,7 +15,8 @@ const mensagem = require('./mensagem')
 const dao = require('./dao')
 const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
-const {confirmado, negado, cartao, boleto, validar} = require('./validacao');
+const UsuarioGratuito = require('./model/usuario_gratuito')
+const {confirmado, negado, cartao, boleto, planoGratuito, validar, validarCPF} = require('./validacao');
 const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
@@ -45,14 +46,22 @@ pedirFormaDePagamento.action('cartao_de_credito', async (ctx) => {
     await ctx.reply('Certo!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
     await ctx.reply(mensagem.pedir_nome_completo)
-    return ctx.wizard.next()
+    return ctx.wizard.selectStep(3)
   })
 pedirFormaDePagamento.action('boleto', async (ctx) => {
     await ctx.answerCbQuery()
     await ctx.reply('Certo!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
   await ctx.reply(mensagem.pedir_nome_completo)
-  return ctx.wizard.next()
+  return ctx.wizard.selectStep(3)
+})
+pedirFormaDePagamento.action('plano_gratuito', async (ctx) => {
+    await ctx.answerCbQuery()
+    await ctx.reply('Certo!')
+    ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
+    await ctx.reply('Vou precisar confirmar seu CPF para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
+    await ctx.reply('Qual é o seu CPF?')
+    return ctx.wizard.next()
 })
 pedirFormaDePagamento.use(async (ctx) => {
     if (cartao(ctx)) {
@@ -63,7 +72,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
         await ctx.reply(mensagem.pedir_nome_completo)
         log('Forma de pagamento definida')
-        return ctx.wizard.next()
+        return ctx.wizard.selectStep(3)
     }
     if (boleto(ctx)) {
         if (!ctx.message) {
@@ -73,6 +82,16 @@ pedirFormaDePagamento.use(async (ctx) => {
         ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
         await ctx.reply(mensagem.pedir_nome_completo)
         log('Forma de pagamento definida')
+        return ctx.wizard.selectStep(3)
+    }
+    if (planoGratuito(ctx)) {
+        if (!ctx.message) {
+            await ctx.answerCbQuery()
+        }
+        await ctx.reply('Certo!')
+        ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
+        await ctx.reply('Qual é o seu CPF?')
+        log('Plano gratuito definido')
         return ctx.wizard.next()
     }
     await ctx.reply('Por favor, escolha uma das opções.')
@@ -94,14 +113,20 @@ confirmar.use(async (ctx) => {
     }
     await ctx.reply('Por favor, escolha uma das opções.')
 })
-
-const bot = new Telegraf(process.env.BOT_TOKEN)
+const tokenBot = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN : process.env.BOT_TOKEN_TESTE
+const bot = new Telegraf(tokenBot)
 cache.set('bot', bot.telegram)
 
 const wizard = new WizardScene(
     'start',
     async ctx => darBoasVindas(ctx),
     pedirFormaDePagamento,
+    async ctx => pegar('cpf', "Confirmando, seu CPF é...", {
+        positivo: "Ok!",
+        negativo: "Por favor, insira seu CPF novamente",
+        erro: "Não entendi"
+    }, mensagem.pedir_nome_completo, ctx),
+    confirmar,
     async ctx => pegar('nomeCompleto', mensagem.nome_completo, mensagem.confirmacao_nome_completo, mensagem.pedir_telefone, ctx),
     confirmar,
     async ctx => pegar('telefone', mensagem.telefone, mensagem.confirmacao_telefone, mensagem.pedir_email, ctx),
@@ -118,7 +143,8 @@ const darBoasVindas = async (ctx) => {
     ctx.wizard.state.novoUsuario = {}
     const pagamento = Markup.inlineKeyboard([
         [Markup.callbackButton('💳 Cartão de Crédito', 'cartao_de_credito')],
-        [Markup.callbackButton('📄 Boleto', 'boleto')]
+        [Markup.callbackButton('📄 Boleto', 'boleto')],
+        [Markup.callbackButton('🆓 Plano Gratuito', 'plano_gratuito')]
     ])
     await ctx.reply(mensagem.pedir_forma_pagamento, Extra.markup(pagamento))
     return ctx.wizard.next()
@@ -156,9 +182,17 @@ const confirmacaoPositiva = async (ctx) => {
     const { informacao, mensagemConfirmacao, mensagemProximaInformacao, mensagem } = ctx.wizard.state
     const validacaoDeInformacao = validar(informacao, ctx.wizard.state.novoUsuario[informacao])
     if (!validacaoDeInformacao.temErro) {
+        if (informacao === 'cpf') {
+            const jaExiste = await verificarSeJaExisteUsuarioComCpf(ctx.wizard.state.novoUsuario.cpf)
+            if(jaExiste) {
+                await ctx.reply(`Você já fez um cadastro comigo com esse CPF!`)
+                await ctx.reply(`Infelizmente não tenho como te oferecer mais tempo de teste gratuito. Caso queira continuar em nossos canais VIP, faça aqui sua compra: ${process.env.LINK_COMPRA}`)
+                return ctx.scene.leave()
+            }
+        }
         await ctx.reply(`${mensagemConfirmacao.positivo}`, Extra.inReplyTo(mensagem.id))
         await ctx.reply(`${mensagemProximaInformacao}`)
-        if (informacao === 'email') {
+        if (informacao === 'email' && !ctx.wizard.state.novoUsuario.cpf) {
             try {
                 const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexao)
                 const emailBloqueado = emailsBloqueados.filter(emailBloqueado => emailBloqueado.email === ctx.wizard.state.novoUsuario.email)
@@ -179,6 +213,10 @@ const confirmacaoPositiva = async (ctx) => {
                 log(`ERRO AO VERIFICAR COMPRA DE USUÁRIO NA MONETIZZE, ${err}`)
                 return ctx.scene.leave()
             }
+        }
+
+        if (informacao === 'email' && ctx.wizard.state.novoUsuario.cpf) {
+            await enviarCanaisTelegramGratuito(ctx)
         }
         return ctx.wizard.next()
     }
@@ -253,6 +291,53 @@ const enviarCanaisTelegram = async (ctx) => {
     return ctx.scene.leave()
 }
 
+const enviarCanaisTelegramGratuito = async (ctx) => {
+    log(`Sua assinatura Monetizze foi ativada! 🎉`)
+    const {email} = ctx.wizard.state.novoUsuario
+    try {
+        atribuirIdTelegramAoNovoUsuario(ctx)
+        await adicionarUsuarioGratuitoAoBancoDeDados(ctx);
+    } catch (err) {
+        if (err.errno === 1062) {
+            log(`ERRO: Usuário já existe no banco de dados`)
+            await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`)
+            await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
+            const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
+            const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+            const teclado = Markup.inlineKeyboard([
+                Markup.urlButton('Canal Sinais Ricos', linkCanal1),
+                Markup.urlButton('Canal Rico Vidente', linkCanal2)
+            ])
+            await ctx.reply('Aqui:', Extra.markup(teclado))
+            return ctx.scene.leave()
+        } else {
+            log(`ERRO: Genérico`)
+            await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
+            return ctx.scene.leave()
+        }
+    }
+    log(`Usuário adicionado ao BD`)
+    await ctx.reply('Sua assinatura Monetizze foi ativada! 🎉')
+    await ctx.reply('Seja bem-vindo!')
+    let teclado
+    try {
+        const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
+        const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+        teclado = Markup.inlineKeyboard([
+            Markup.urlButton('Canal Sinais Ricos', linkCanal1),
+            Markup.urlButton('Canal Rico Vidente', linkCanal2)
+        ])
+    } catch (err) {
+        const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_TESTE)
+        teclado = Markup.inlineKeyboard([
+            Markup.urlButton('Canal Teste', linkCanal1),
+        ])
+    }
+    await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
+    log(`Canais de Telegram enviados`)
+    return ctx.scene.leave()
+}
+
 const atribuirIdTelegramAoNovoUsuario = (ctx) => {
     log(`ID Telegram atribuido`)
     ctx.wizard.state.novoUsuario.idTelegram = ctx.chat.id;
@@ -263,6 +348,21 @@ const adicionarUsuarioAoBancoDeDados = async (ctx) => {
     const novoUsuario = new Usuario(idTelegram, nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
     try {
         await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+    } catch (err) {
+        throw err
+    }
+}
+
+const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
+    const data = new Date()
+    const ano = data.getFullYear()
+    const mes = data.getMonth() + 1 < 10 ? `0${data.getMonth() + 1}` : `${data.getMonth() + 1}`
+    const dia = data.getDate() + 1 < 10 ? `0${data.getDate()}` : `${data.getDate()}`
+    const hoje = `${ano}-${mes}-${dia}`
+    const {idTelegram, nomeCompleto, cpf, email, telefone} = ctx.wizard.state.novoUsuario
+    const novoUsuario = new UsuarioGratuito(idTelegram, nomeCompleto, cpf, email, telefone, hoje, 30)
+    try {
+        await dao.adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexao)
     } catch (err) {
         throw err
     }
@@ -280,6 +380,11 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
         await ctx.reply(`Caso houve algum engano, verifique se o status da sua compra na Monetizze está como finalizada e inicie novamente sua conversa comigo usando o comando /start, ou envie um email para ${process.env.EMAIL_PARA} para pedir a liberação do seu acesso.`)
         return ctx.scene.leave()
     }
+}
+
+const verificarSeJaExisteUsuarioComCpf = async (cpf) => {
+    const usuarioComMesmoCpf = await dao.verificarSeJaExisteUsuarioComCpf(cpf, conexao)
+    return usuarioComMesmoCpf.length > 0 ? true : false
 }
 
 const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
