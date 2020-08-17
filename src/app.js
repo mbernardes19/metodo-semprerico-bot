@@ -133,8 +133,13 @@ const wizard = new WizardScene(
 wizard.command('stop', async ctx => ctx.scene.leave())
 
 const darBoasVindas = async (ctx) => {
-    await ctx.reply(mensagem.boas_vindas)
-    await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...')
+    try {
+        await ctx.reply(mensagem.boas_vindas)
+    } catch (err) {
+        await ctx.reply(mensagem.boas_vindas)
+        await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...')
+        log('ERRO AO ENVIAR PRIMEIRA MENSAGEM', err)
+    }
     ctx.wizard.state.novoUsuario = {}
     const pagamento = Markup.inlineKeyboard([
         [Markup.callbackButton('💳 Cartão de Crédito', 'cartao_de_credito')],
