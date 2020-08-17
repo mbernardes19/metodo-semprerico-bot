@@ -412,7 +412,6 @@ const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
         const expiracao = 5
         return {par, ordem, horario, expiracao}
     } catch (err) {
-        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         throw new Error(`Mensagem não tem padrão de sinal: ${mensagemDeCanal}`)
     }
 }
