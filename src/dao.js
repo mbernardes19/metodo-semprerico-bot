@@ -186,7 +186,7 @@ const pegarMensagem = async (tipo, conexao) => {
 const pegarIdDeTodosUsuariosGratuitos = async (conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
-        return await query(`select id from UsuarioGratuito'`)
+        return await query(`select id from UsuarioGratuito`)
     } catch (err) {
         throw err
     }
