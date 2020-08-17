@@ -136,7 +136,6 @@ const darBoasVindas = async (ctx) => {
     try {
         await ctx.reply(mensagem.boas_vindas)
     } catch (err) {
-        await ctx.reply(mensagem.boas_vindas)
         await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...')
         log('ERRO AO ENVIAR PRIMEIRA MENSAGEM', err)
     }
@@ -450,7 +449,15 @@ const stage = new Stage([wizard], { ttl: 1500 });
 
 bot.use(session())
 bot.use(stage.middleware())
-bot.command('start', (ctx) => ctx.scene.enter('start'))
+bot.command('start', (ctx) => {
+    bot.telegram.sendMessage('Oi!')
+    .then(res => ctx.scene.enter('start'))
+    .catch(err => {
+        if (err.response && err.response.statusCode === 403) {
+            log(`Usuário bloqueado ${ctx.chat.id}`)
+        }
+    });
+});
 bot.on('channel_post', async (ctx) => {
     log(ctx.channelPost.chat.id)
     if(ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE) {
