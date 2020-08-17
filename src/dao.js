@@ -52,6 +52,15 @@ const pegarTodosUsuariosDoBancoDeDados = async (conexao) => {
     }
 }
 
+const pegarTodosUsuariosGratuitosDoBancoDeDados = async (conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        return await query(`select * from UsuarioGratuito`)
+    } catch (err) {
+        throw err
+    }
+}
+
 const pegarUsuarioPeloId = async (id, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
@@ -69,7 +78,71 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios, novosStatus, cone
         queries.push(query(`update Usuario set status_assinatura='${novosStatus[index]}' where id=${usuario.id}`))
     })
     try {
-        await Promise.all(usuarios)
+        await Promise.all(queries)
+    } catch (err) {
+        throw err
+    }
+}
+
+const atualizarDiasDeUso = async (usuarios, conexao) => {
+    const diasDeUso = await pegarDiasDeUsoDeTodosUsuariosGratuitos(usuarios, conexao)
+    const diasDeUsoAtualizados = diasDeUso.map(dias => dias.dias_de_uso = dias.dias_de_uso - 1)
+    const query = util.promisify(conexao.query).bind(conexao)
+    const queries = []
+    console.log('ATUALIZADOS',diasDeUsoAtualizados);
+    usuarios.forEach((usuario, index) => {
+        queries.push(query(`update UsuarioGratuito set dias_de_uso='${diasDeUsoAtualizados[index]}' where id=${usuario.id}`))
+    })
+    try {
+        await Promise.all(queries)
+    } catch (err) {
+        throw err
+    }
+}
+
+const pegarDiasDeUsoDeTodosUsuariosGratuitos = async (usuarios, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    const queries = []
+    usuarios.forEach((usuario) => {
+        queries.push(query(`select * from UsuarioGratuito where id=${usuario.id}`))
+    })
+    try {
+        const diasDeUso = await Promise.all(queries)
+        return diasDeUso[0];
+    } catch (err) {
+        throw err
+    }
+}
+
+const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
+    const usuariosASeremBanidos = []
+    const usuariosBanidos = []
+    usuarios.forEach(usuario => {
+        if (usuario.dias_de_uso == 0) {
+            usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+            usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+            usuariosBanidos.push(usuario)
+        }
+    })
+    try {
+        await Promise.all(usuariosASeremBanidos)
+        console.log(`Usuários gratuitos vencidos banidos`)
+        return usuariosBanidos
+    } catch (err) {
+        throw err
+    }
+}
+
+const enviarMensagemPrivadaParaUsuariosGratuitosVencidos = async (usuariosVencidos, telegramClient) => {
+    const mensagemPrivada = `Curtiu esse mês com a gente? 😍 Acredito que sim!! Que mês incrível, que assertividade!! Mas como tudo que é bom dura pouco, Infelizmente seu mês gratuito encerrou. Mas não deixe sua banca parada, não perca tudo que conquistou com salas mentirosas e falsas promessas ❌.\n💰Continue com a gente e você terá acesso a muito mais: terá acesso a nossa mentoria, ao nosso gerenciamento com uma planilha exclusiva, ao nosso material didático interativo 📕 e muito mais. Além disso, teremos novidades que será adicionada para todos os membros de forma gratuita. Temos o orgulho de dizer que esse é o método que não para e está sempre se inovando.\nVenha fazer parte dessa família de forma definitiva:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082\n\nAgradecemos por toda a confiança que você nos deu❤️ e até daqui a pouco com mais sinais incríveis🏆`
+    const stickerMensagemPrivada = 'CAACAgIAAxkBAAEBNKlfOAV8X58j0iAGkjDysQU2g3ZsZAACvAADJQNSD9AxVNZarPUYGgQ'
+    const mensagensAEnviar = []
+    usuariosVencidos.forEach(usuario => {
+        mensagensAEnviar.push(telegramClient.sendMessage(usuario.id, mensagemPrivada))
+        mensagensAEnviar.push(telegramClient.sendSticker(usuario.id, stickerMensagemPrivada))
+    })
+    try {
+        await Promise.all(mensagensAEnviar)
     } catch (err) {
         throw err
     }
@@ -166,7 +239,11 @@ module.exports = {
     adicionarEmEmailsBloqueados,
     pegarTodosEmailsBloqueados,
     pegarTodosUsuariosDoBancoDeDados,
+    pegarTodosUsuariosGratuitosDoBancoDeDados,
     atualizarStatusDeAssinaturaDeUsuarios,
+    atualizarDiasDeUso,
+    enviarMensagemPrivadaParaUsuariosGratuitosVencidos,
+    banirUsuariosGratuitosDiasVencidos,
     aumentarAvisoDeBanimento,
     zerarAvisoDeBanimento,
     pegarUsuarioPeloId,

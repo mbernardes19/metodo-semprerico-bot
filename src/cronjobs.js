@@ -11,6 +11,7 @@ const csv = require('./csv')
 const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia()
     enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha()
+    atualizarPeriodoDeTesteGratuito()
 }
 
 const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
@@ -27,6 +28,25 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             await enviarEmailDeRelatorioDeErro(err)
         }
     });
+}
+
+const atualizarPeriodoDeTesteGratuito = () => {
+    cron.schedule("40 9 * * *", async () => {
+        const telegramClient = cache.get('bot')
+        try {
+            const usuarios = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexao)
+            console.log('USUARIOS GRATUITOS', usuarios)
+            await dao.atualizarDiasDeUso(usuarios, conexao);
+            const usuariosAtualizados = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexao)
+            const usuariosVencidos = await dao.banirUsuariosGratuitosDiasVencidos(usuariosAtualizados, telegramClient, conexao)
+            await dao.enviarMensagemPrivadaParaUsuariosGratuitosVencidos(usuariosVencidos, telegramClient)
+            log(`Dias de uso de usuários gratuitos atualizado com sucesso`)
+        } catch (err) {
+            log(`ERRO AO ATUALIZAR DIAS DE USO DE USUÁRIOS GRATUITOS: ${JSON.stringify(err)}`)
+            log(err)
+            await enviarEmailDeRelatorioDeErro(err)
+        }
+    })
 }
 
 const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {

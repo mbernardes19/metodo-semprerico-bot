@@ -16,24 +16,18 @@ const dao = require('./dao')
 const StatusAssinatura = require('./model/status_assinatura')
 const Usuario = require('./model/usuario')
 const UsuarioGratuito = require('./model/usuario_gratuito')
-const {confirmado, negado, cartao, boleto, planoGratuito, validar, validarCPF} = require('./validacao');
+const {confirmado, negado, cartao, boleto, planoGratuito, validar} = require('./validacao');
 const { verificarCompraDeUsuarioNaMonetizze } = require('./monetizze')
 const cronjobs = require('./cronjobs')
 const { log } = require('./logger')
 const { cache } = require('./cache')
-const { enviarEmailDeRelatorioDeErro, enviarEmailDeRelatorioDeErroCliente } = require('./email')
+const { enviarEmailDeRelatorioDeErro } = require('./email')
 const { SINAL } = require('./regex')
 const axios = require('axios').default;
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const { listTimeZones } = require('timezone-support')
-const { convertToLocalTime, formatToTimeZone } = require('date-fns-timezone')
 const differenceInMilliseconds = require('date-fns/differenceInMilliseconds')
 const { parseISO } = require('date-fns')
-const timeZones = listTimeZones()
-
-
-
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -59,7 +53,7 @@ pedirFormaDePagamento.action('plano_gratuito', async (ctx) => {
     await ctx.answerCbQuery()
     await ctx.reply('Certo!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
-    await ctx.reply('Vou precisar confirmar seu CPF para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
+    await ctx.reply('Vou precisar de alguns dados para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
     await ctx.reply('Qual é o seu CPF?')
     return ctx.wizard.next()
 })
@@ -126,7 +120,7 @@ const wizard = new WizardScene(
         positivo: "Ok!",
         negativo: "Por favor, insira seu CPF novamente",
         erro: "Não entendi"
-    }, mensagem.pedir_nome_completo, ctx),
+    }, mensagem.pedir_nome_completo_gratuito, ctx),
     confirmar,
     async ctx => pegar('nomeCompleto', mensagem.nome_completo, mensagem.confirmacao_nome_completo, mensagem.pedir_telefone, ctx),
     confirmar,
@@ -166,10 +160,13 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
         ctx.wizard.state.novoUsuario[informacao] = textoDaMensagem
         ctx.wizard.state.informacao = informacao
         ctx.wizard.state.mensagemConfirmacao = mensagemConfirmacao
-        ctx.wizard.state.mensagemProximaInformacao = mensagemProximaInformacao
-        ctx.wizard.state.mensagem = mensagem
+        ctx.wizard.state.mensagemProximaInformacao = ctx.wizard.state.novoUsuario.cpf && informacao === 'telefone' ? 'Qual é o seu email?' : mensagemProximaInformacao
+        ctx.wizard.state.mensagem = ctx.wizard.state.novoUsuario.cpf && informacao === 'email' 
+        ? 'Última confirmação... Esse é o seu email:' : mensagem
+        const messagemGratuito = ctx.wizard.state.novoUsuario.cpf && informacao === 'email' 
+        ? 'Última confirmação... Esse é o seu email:' : messagem;
         const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
-        await ctx.reply(`${messagem} ${textoDaMensagem}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+        await ctx.reply(`${messagemGratuito} ${textoDaMensagem}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
         log(`${informacao} definido`)
         return ctx.wizard.next()
     } catch (err) {
@@ -190,7 +187,7 @@ const confirmacaoPositiva = async (ctx) => {
             const jaExiste = await verificarSeJaExisteUsuarioComCpf(ctx.wizard.state.novoUsuario.cpf)
             if(jaExiste) {
                 await ctx.reply(`Você já fez um cadastro comigo com esse CPF!`)
-                await ctx.reply(`Infelizmente não tenho como te oferecer mais tempo de teste gratuito. Caso queira continuar em nossos canais VIP, faça aqui sua compra: ${process.env.LINK_COMPRA}`)
+                await ctx.reply(`Infelizmente não tenho como te oferecer mais tempo de teste gratuito. Caso queira continuar em nossos canais VIP, faça aqui sua compra:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082`)
                 return ctx.scene.leave()
             }
         }
@@ -296,7 +293,7 @@ const enviarCanaisTelegram = async (ctx) => {
 }
 
 const enviarCanaisTelegramGratuito = async (ctx) => {
-    log(`Sua assinatura Monetizze foi ativada! 🎉`)
+    log(`Seu período de 1 mês de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉`)
     const {email} = ctx.wizard.state.novoUsuario
     try {
         atribuirIdTelegramAoNovoUsuario(ctx)
@@ -321,7 +318,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
         }
     }
     log(`Usuário adicionado ao BD`)
-    await ctx.reply('Sua assinatura Monetizze foi ativada! 🎉')
+    await ctx.reply('Seu período de 1 mês de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉')
     await ctx.reply('Seja bem-vindo!')
     let teclado
     try {
@@ -337,8 +334,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
             Markup.urlButton('Canal Teste', linkCanal1),
         ])
     }
-    // await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
-    await ctx.reply('Cadastro confirmado! Em breve vamos mandar os canais para você!')
+    await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
     log(`Canais de Telegram enviados`)
     return ctx.scene.leave()
 }
