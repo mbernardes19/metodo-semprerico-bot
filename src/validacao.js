@@ -70,11 +70,11 @@ const validarCPF = (valor) => {
 
 module.exports = {
     formaDePagamentoValida: (ctx) => regex.CARTAO.test(ctx.message.text) || regex.BOLETO.test(ctx.message.text),
-    cartao: (ctx) => regex.CARTAO.test(ctx.message.text),
-    boleto: (ctx) => regex.BOLETO.test(ctx.message.text),
-    planoGratuito: (ctx) => regex.PLANO_GRATUITO.test(ctx.message.text),
-    confirmado: (ctx) => regex.SIM.test(ctx.message.text),
-    negado: (ctx) => regex.NAO.test(ctx.message.text),
+    cartao: (ctx) => ctx.message ? regex.CARTAO.test(ctx.message.text) : regex.CARTAO.test(ctx.update.message.text),
+    boleto: (ctx) => ctx.message ? regex.BOLETO.test(ctx.message.text) : regex.BOLETO.test(ctx.update.message.text),
+    planoGratuito: (ctx) => ctx.message ? regex.PLANO_GRATUITO.test(ctx.message.text) : regex.PLANO_GRATUITO.test(ctx.update.message.text),
+    confirmado: (ctx) => ctx.message ? regex.SIM.test(ctx.message.text) : regex.SIM.test(ctx.update.message.text),
+    negado: (ctx) => ctx.message ? regex.NAO.test(ctx.message.text) : regex.NAO.test(ctx.update.message.text),
     validar,
     validarCPF
 }
