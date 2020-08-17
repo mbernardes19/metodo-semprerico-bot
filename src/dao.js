@@ -183,6 +183,15 @@ const pegarMensagem = async (tipo, conexao) => {
     }
 }
 
+const pegarIdDeTodosUsuariosGratuitos = async (conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        return await query(`select id from UsuarioGratuito'`)
+    } catch (err) {
+        throw err
+    }
+}
+
 const atualizarMensagem = async (tipo, mensagem, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
@@ -241,6 +250,7 @@ module.exports = {
     pegarTodosUsuariosDoBancoDeDados,
     pegarTodosUsuariosGratuitosDoBancoDeDados,
     atualizarStatusDeAssinaturaDeUsuarios,
+    pegarIdDeTodosUsuariosGratuitos,
     atualizarDiasDeUso,
     enviarMensagemPrivadaParaUsuariosGratuitosVencidos,
     banirUsuariosGratuitosDiasVencidos,

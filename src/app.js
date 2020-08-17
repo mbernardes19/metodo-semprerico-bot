@@ -268,6 +268,8 @@ const enviarCanaisTelegram = async (ctx) => {
             log(`ERRO: Usuário já existe no banco de dados`)
             await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`)
             await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
+            log(process.env.ID_CANAL_SINAIS_RICOS)
+            log(process.env.ID_CANAL_RICO_VIDENTE)
             const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
             const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
             const teclado = Markup.inlineKeyboard([
@@ -449,6 +451,29 @@ const stage = new Stage([wizard], { ttl: 1500 });
 
 bot.use(session())
 bot.use(stage.middleware())
+const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
+const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+const teclado = Markup.inlineKeyboard([
+    Markup.urlButton('Canal Sinais Ricos', linkCanal1),
+    Markup.urlButton('Canal Rico Vidente', linkCanal2)
+])
+
+bot.command('emergencia', async (ctx) => {
+    const idsUsuariosGratuitos = await dao.pegarIdDeTodosUsuariosGratuitos();
+    const mensagensAEnviar = []
+    const mensagem = "Nossa, que dia 😩😩😩! Tivemos tantas pessoas vindo falar comigo pedindo o período de 1 mês gratuito de acesso às salas VIPs do Método Sempre Rico que eu simplesmente buguei e algumas ficaram sem o acesso aos canais. 😫\n\nEu vi que você foi uma dessas pessoas, por isso, te peço mil desculpas por todo esse transtorno!\n\nEstou te enviando agora o acesso aos canais!"
+    idsUsuariosGratuitos.map(usuario => {
+        mensagensAEnviar.push(bot.telegram.sendMessage(usuario.id, mensagem, Extra.markup(teclado)))
+    })
+
+    try {
+        await Promise.all(mensagensAEnviar)
+        log('Mensagem de emergência enviada a todos os usuários com sucesso!')
+    } catch (err) {
+        log('Erro ao enviar mensagem de emergência pra todos usuários')
+    }
+})
+
 bot.command('start', async (ctx) => {
     try {
         await bot.telegram.sendMessage(ctx.chat.id,'🦁')
@@ -460,6 +485,7 @@ bot.command('start', async (ctx) => {
         log(err);
     }
 });
+
 bot.on('channel_post', async (ctx) => {
     log(ctx.channelPost.chat.id)
     if(ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE) {
