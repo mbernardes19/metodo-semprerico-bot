@@ -449,9 +449,9 @@ const stage = new Stage([wizard], { ttl: 1500 });
 
 bot.use(session())
 bot.use(stage.middleware())
-bot.command('start', (ctx) => {
+bot.command('start', async (ctx) => {
     try {
-        await bot.telegram.sendMessage('Oi!')
+        await bot.telegram.sendMessage(ctx.chat.id,'🦁')
         ctx.scene.enter('start');
     } catch (err) {
         if (err.response && err.response.statusCode === 403) {
