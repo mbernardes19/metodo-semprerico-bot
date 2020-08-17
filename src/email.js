@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer')
 const path = require('path')
 const { log } = require('./logger')
+const { cache } = require('./cache');
 
 const transportador = nodemailer.createTransport({
     // host: process.env.SERVIDOR_SMTP,
@@ -39,11 +40,12 @@ const enviarCSVParaEmail = async () => {
             anexos: [{path: path.join(__dirname, '..', 'csv', 'usuarios.csv')}]
         })
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         log(`ERRO AO ENVIAR ARQUIVO CSV POR EMAIL: ${JSON.stringify(err)}`)
     }
 }
 
-const enviarEmailDeRelatorioDeErro = async (erro) => {
+const enviarEmailDeRelatorioDeErro = async (erro, userId='0') => {
     try {
         await enviarEmail({
             de: process.env.USUARIO_EMAIL,
@@ -51,6 +53,8 @@ const enviarEmailDeRelatorioDeErro = async (erro) => {
             assunto: 'Ocorreu um erro no MSR Bot!',
             texto: `Segue o erro:\n${erro}`,
         })
+        const bot = cache.get('bot');
+        await bot.telegram.sendMessage(process.env.ID_ADMIN, `Ocorreu um erro no bot do Método Sempre Rico: ${err}\n\n user id: ${userId}`)
     } catch (err) {
         log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${JSON.stringify(err)}`)
     }

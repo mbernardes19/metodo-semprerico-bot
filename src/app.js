@@ -40,14 +40,14 @@ pedirFormaDePagamento.action('cartao_de_credito', async (ctx) => {
     await ctx.reply('Certo!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
     await ctx.reply(mensagem.pedir_nome_completo)
-    return ctx.wizard.selectStep(3)
+    return ctx.wizard.selectStep(4)
   })
 pedirFormaDePagamento.action('boleto', async (ctx) => {
     await ctx.answerCbQuery()
     await ctx.reply('Certo!')
     ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
   await ctx.reply(mensagem.pedir_nome_completo)
-  return ctx.wizard.selectStep(3)
+  return ctx.wizard.selectStep(4)
 })
 pedirFormaDePagamento.action('plano_gratuito', async (ctx) => {
     await ctx.answerCbQuery()
@@ -100,6 +100,8 @@ confirmar.action('nao', async (ctx) => {
     confirmacaoNegativa(ctx)
 })
 confirmar.use(async (ctx) => {
+    log(`Sim/Não`)
+    log(ctx)
     if (confirmado(ctx)) {
         return confirmacaoPositiva(ctx)
     }
@@ -175,6 +177,7 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
         return ctx.wizard.next()
     } catch (err) {
         log(err)
+        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         await ctx.reply('Puxa vida... 😰 Me desculpe por isso, mas aconteceu um erro aqui comigo agora e eu vou ter que recomeçar a nossa conversa do zero... Tudo bem? É só digitar o comando /start .\n\nMil perdões... Tenho muito que melhorar como bot 😓')
         return ctx.scene.leave()
     }
@@ -207,6 +210,7 @@ const confirmacaoPositiva = async (ctx) => {
                 }
             } catch (err) {
                 log(`ERRO AO VERIFICAR SE EMAIL JÁ ESTÁ BLOQUEADO, ${ctx.wizard.state.novoUsuario.email}, ${JSON.stringify(err)}`)
+                await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
                 enviarEmailDeRelatorioDeErro(err)
             }
             await ctx.reply(`Estou verificando no servidor da Monetizze a sua compra, só um momento...`)
@@ -216,6 +220,7 @@ const confirmacaoPositiva = async (ctx) => {
             } catch (err) {
                 await ctx.reply(`Erro ao acessar Monetizze para verificação de dados. Tente iniciar uma conversa comigo novamente mais tarde usando o comando /start. Caso este erro persista, envie um email para ${process.env.EMAIL_PARA} com o print desta conversa`)
                 log(`ERRO AO VERIFICAR COMPRA DE USUÁRIO NA MONETIZZE, ${err}`)
+                await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
                 return ctx.scene.leave()
             }
         }
@@ -280,6 +285,7 @@ const enviarCanaisTelegram = async (ctx) => {
             return ctx.scene.leave()
         } else {
             log(`ERRO: Genérico`)
+            await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
             await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
             return ctx.scene.leave()
         }
@@ -319,6 +325,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
             return ctx.scene.leave()
         } else {
             log(`ERRO: Genérico`)
+            await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
             await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
             return ctx.scene.leave()
         }
@@ -381,6 +388,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     try {
         await dao.adicionarEmEmailsBloqueados(email, conexao)
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado: ${JSON.stringify(err)}`)
     } finally {
         await ctx.reply(`O usuário do email ${email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`)
@@ -404,6 +412,7 @@ const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
         const expiracao = 5
         return {par, ordem, horario, expiracao}
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         throw new Error(`Mensagem não tem padrão de sinal: ${mensagemDeCanal}`)
     }
 }
@@ -471,6 +480,7 @@ bot.command('emergencia', async (ctx) => {
         .then(res => res.forEach((result) => log(`Mensagem de emergência enviada a todos os usuários com sucesso! ${result.status}`)))
         .catch(err => res.forEach((result) => log(`Erro ao enviar mensagem de emergência pra todos usuários ${result.status}`)))
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         log(err)
         log('Erro ao enviar mensagem de emergência pra todos usuários')
     }
@@ -481,6 +491,7 @@ bot.command('start', async (ctx) => {
         await bot.telegram.sendMessage(ctx.chat.id,'🦁')
         ctx.scene.enter('start');
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         if (err.response && err.response.statusCode === 403) {
             log(`Usuário bloqueado ${ctx.chat.id}`)
         }
@@ -568,7 +579,7 @@ bot.on('channel_post', async (ctx) => {
                     }, 294000)
                 }, diff)
             } catch (err) {
-                await enviarEmailDeRelatorioDeErro(ctx.channelPost.text)
+                await enviarEmailDeRelatorioDeErro(ctx.channelPost.text, ctx.chat.id)
                 log(err)
             }
         }
@@ -691,6 +702,7 @@ app.post('/mensagem-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         log(err)
         res.sendStatus(500)
     }
@@ -703,6 +715,7 @@ app.post('/sticker-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         log(err)
         res.sendStatus(500)
     }
@@ -715,6 +728,7 @@ app.post('/mensagem-loss', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         log(err)
         res.sendStatus(500)
     }
@@ -727,6 +741,7 @@ app.post('/sticker-loss', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         res.sendStatus(500)
     }
 })
@@ -738,6 +753,7 @@ app.post('/mensagem-doji', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.sendStatus(200)
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         res.sendStatus(500)
     }
 })
@@ -748,7 +764,8 @@ app.get('/mensagem-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto })
     } catch (err) {
-        og(err)
+        await enviarEmailDeRelatorioDeErro(err)
+        log(err)
         res.sendStatus(500)
     }
 })
@@ -759,6 +776,7 @@ app.get('/sticker-win', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({id: stickerWin.id, texto: stickerWin.texto})
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         log(err)
         res.sendStatus(500)
     }
@@ -770,6 +788,7 @@ app.get('/mensagem-loss', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({id: mensagemLoss.id, texto: mensagemLoss.texto})
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         log(err)
         res.sendStatus(500)
     }
@@ -781,6 +800,7 @@ app.get('/sticker-loss', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({id: stickerLoss.id, texto: stickerLoss.texto})
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         res.sendStatus(500)
     }
 })
@@ -791,6 +811,7 @@ app.get('/mensagem-doji', async (req, res) => {
         res.set('Access-Control-Allow-Origin', '*')
         res.status(200).json({id: mensagemDoji.id, texto: mensagemDoji.texto})
     } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err)
         res.sendStatus(500)
     }
 })
