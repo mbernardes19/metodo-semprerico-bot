@@ -481,6 +481,25 @@ bot.command('canais', async (ctx) => {
     }
 });
 
+bot.command('n0t1f1c4c40', async (ctx) => {
+    const idsUsuariosGratuitos = await dao.pegarIdDeTodosUsuariosGratuitos(conexao);
+    const mensagem = 'Ainda está tendo problemas para acessar os canais do Método Sempre Rico? 😯\n\nFique tranquilo! Meu desenvolvedor acabou de criar um comando que permite que você tenha acesso garantido ao canal sempre que precisar! Basta digitar /canais para mim que vou te mandar os botões de acesso aos canais na hora! 😁😁'
+    const mensagensAEnviar = []
+    idsUsuariosGratuitos.map(usuario => {
+        mensagensAEnviar.push(bot.telegram.sendMessage(usuario.id, mensagem))
+    })
+
+    try {
+        await Promise.allSettled(mensagensAEnviar)
+        .then(res => res.forEach((result) => log(`Mensagem de emergência enviada a todos os usuários com sucesso! ${result.status}`)))
+        .catch(err => res.forEach((result) => log(`Erro ao enviar mensagem de emergência pra todos usuários ${result.status}`)))
+    } catch (err) {
+        await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
+        log(err)
+        log('Erro ao enviar notificação pra todos usuários')
+    }
+})
+
 bot.command('3m3rg3nc14', async (ctx) => {
     const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
     const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
