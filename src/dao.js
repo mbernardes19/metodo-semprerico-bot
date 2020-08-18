@@ -62,6 +62,26 @@ const pegarTodosUsuariosGratuitosDoBancoDeDados = async (conexao) => {
     }
 }
 
+const usuarioGratuitoExisteEValido = async (id, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const resultado = await query(`select * from UsuarioGratuito where id='${id}' and not dias_de_uso=0`)
+        return resultado.length > 0 ? true : false;
+    } catch (err) {
+        throw err
+    }
+}
+
+const usuarioGratuitoExiste = async (id, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const resultado = await query(`select * from UsuarioGratuito where id='${id}'`)
+        return resultado.length > 0 ? true : false;
+    } catch (err) {
+        throw err
+    }
+}
+
 const pegarUsuarioPeloId = async (id, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
@@ -259,6 +279,8 @@ module.exports = {
     adicionarUsuarioGratuitoAoBancoDeDados,
     verificarSeJaExisteUsuarioComCpf,
     limparBancoDeDados,
+    usuarioGratuitoExiste,
+    usuarioGratuitoExisteEValido,
     adicionarEmEmailsBloqueados,
     pegarTodosEmailsBloqueados,
     pegarTodosUsuariosDoBancoDeDados,

@@ -461,6 +461,26 @@ const stage = new Stage([wizard], { ttl: 1500 });
 bot.use(session())
 bot.use(stage.middleware())
 
+bot.command('canais', async (ctx) => {
+    const usuarioExiste = await dao.usuarioGratuitoExiste(ctx.chat.id, conexao);
+    if (usuarioExiste) {
+        const usuarioValido = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexao);
+        if (usuarioValido) {
+            const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
+            const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+            const teclado = Markup.inlineKeyboard([
+                Markup.urlButton('Canal Sinais Ricos', linkCanal1),
+                Markup.urlButton('Canal Rico Vidente', linkCanal2)
+            ])
+            await ctx.reply('É pra já!', Extra.markup(teclado))
+        } else {
+            await ctx.reply('Seu período gratuito de acesso aos canais do Método Sempre Rico expirou!\n\nCaso queira continuar em nossos canais VIP, faça aqui sua compra:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082.')
+        }
+    } else {
+        await ctx.reply('Você ainda não ativou sua assinatura Monettize comigo. Digite o comando /start para começar!')
+    }
+});
+
 bot.command('3m3rg3nc14', async (ctx) => {
     const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
     const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
@@ -700,7 +720,7 @@ bot.on('channel_post', async (ctx) => {
 //         }
 // })
 
-bot.on('message', async ctx => await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa'))
+bot.on('message', async ctx => await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n/canais - Receber acesso aos canais VIP do Método Sempre Rico'))
 bot.launch()
 cronjobs.start()
 
