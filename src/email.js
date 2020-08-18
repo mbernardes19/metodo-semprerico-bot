@@ -53,8 +53,8 @@ const enviarEmailDeRelatorioDeErro = async (erro, userId='0') => {
             assunto: 'Ocorreu um erro no MSR Bot!',
             texto: `Segue o erro:\n${erro}`,
         })
-        const bot = cache.get('bot');
-        await bot.telegram.sendMessage(process.env.ID_ADMIN, `Ocorreu um erro no bot do Método Sempre Rico: ${err}\n\n user id: ${userId}`)
+        const telegramClient = cache.get('bot');
+        await telegramClient.sendMessage(process.env.ID_ADMIN, `Ocorreu um erro no bot do Método Sempre Rico: ${err}\n\n user id: ${userId}`)
     } catch (err) {
         log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${err}`)
     }
