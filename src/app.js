@@ -177,6 +177,7 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
         return ctx.wizard.next()
     } catch (err) {
         log(err)
+        log(`CTX ${ctx}`)
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         await ctx.reply('Puxa vida... 😰 Me desculpe por isso, mas aconteceu um erro aqui comigo agora e eu vou ter que recomeçar a nossa conversa do zero... Tudo bem? É só digitar o comando /start .\n\nMil perdões... Tenho muito que melhorar como bot 😓')
         return ctx.scene.leave()
