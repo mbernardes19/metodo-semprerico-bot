@@ -155,8 +155,8 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
     let mensagem
     let textoDaMensagem
     try {
-        mensagem = ctx.message
-        textoDaMensagem = ctx.message.text
+        mensagem = ctx.message ? ctx.message : ctx.update.message
+        textoDaMensagem = ctx.message ? ctx.message.text : ctx.update.message.text
         if (informacao === 'telefone') {
             textoDaMensagem = textoDaMensagem.replace(/ /g, "")
         }
