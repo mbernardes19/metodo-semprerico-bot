@@ -1,4 +1,5 @@
 const util = require('util')
+const { log } = require('./logger')
 
 const adicionarUsuarioAoBancoDeDados = async (usuario, conexao) => {
     const {idTelegram, nomeCompleto, formaDePagamento, email, telefone, statusAssinatura} = usuario
@@ -71,6 +72,16 @@ const pegarUsuarioPeloId = async (id, conexao) => {
     }
 }
 
+const pegarUsuarioGratuitoPeloId = async (id, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const usuario = await query(`select * from UsuarioGratuito where id=${id}`)
+        return usuario[0]
+    } catch (err) {
+        throw err
+    }
+}
+
 const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios, novosStatus, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     const queries = []
@@ -86,7 +97,8 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios, novosStatus, cone
 
 const atualizarDiasDeUso = async (usuarios, conexao) => {
     const diasDeUso = await pegarDiasDeUsoDeTodosUsuariosGratuitos(usuarios, conexao)
-    const diasDeUsoAtualizados = diasDeUso.map(dias => dias.dias_de_uso = dias.dias_de_uso - 1)
+    console.log('DIAS DE USO', diasDeUso)
+    const diasDeUsoAtualizados = diasDeUso.map(dias => dias[0].dias_de_uso - 1)
     const query = util.promisify(conexao.query).bind(conexao)
     const queries = []
     console.log('ATUALIZADOS',diasDeUsoAtualizados);
@@ -104,11 +116,11 @@ const pegarDiasDeUsoDeTodosUsuariosGratuitos = async (usuarios, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     const queries = []
     usuarios.forEach((usuario) => {
-        queries.push(query(`select * from UsuarioGratuito where id=${usuario.id}`))
+        queries.push(query(`select dias_de_uso from UsuarioGratuito where id=${usuario.id}`))
     })
     try {
         const diasDeUso = await Promise.all(queries)
-        return diasDeUso[0];
+        return diasDeUso;
     } catch (err) {
         throw err
     }
@@ -118,7 +130,7 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
     const usuariosASeremBanidos = []
     const usuariosBanidos = []
     usuarios.forEach(usuario => {
-        if (usuario.dias_de_uso == 0) {
+        if (usuario.dias_de_uso === 0) {
             usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
             usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
             usuariosBanidos.push(usuario)
@@ -126,7 +138,8 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
     })
     try {
         await Promise.all(usuariosASeremBanidos)
-        console.log(`Usuários gratuitos vencidos banidos`)
+        log(`Usuários gratuitos vencidos banidos`)
+        log(`Usuários banidos: ${usuariosBanidos}`)
         return usuariosBanidos
     } catch (err) {
         throw err
@@ -143,6 +156,7 @@ const enviarMensagemPrivadaParaUsuariosGratuitosVencidos = async (usuariosVencid
     })
     try {
         await Promise.all(mensagensAEnviar)
+        log(`Usuários gratuitos vencidos removidos dos canais com sucesso`)
     } catch (err) {
         throw err
     }
@@ -257,6 +271,7 @@ module.exports = {
     aumentarAvisoDeBanimento,
     zerarAvisoDeBanimento,
     pegarUsuarioPeloId,
+    pegarUsuarioGratuitoPeloId,
     atualizarMensagem,
     atualizarSticker,
     pegarMensagem,

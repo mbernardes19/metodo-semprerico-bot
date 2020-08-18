@@ -461,7 +461,7 @@ const stage = new Stage([wizard], { ttl: 1500 });
 bot.use(session())
 bot.use(stage.middleware())
 
-bot.command('emergencia', async (ctx) => {
+bot.command('3m3rg3nc14', async (ctx) => {
     const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
     const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
     const teclado = Markup.inlineKeyboard([
@@ -470,15 +470,28 @@ bot.command('emergencia', async (ctx) => {
     ])
     const idsUsuariosGratuitos = await dao.pegarIdDeTodosUsuariosGratuitos(conexao);
     const mensagensAEnviar = []
-    const mensagem = "Nossa, que dia 😩😩😩! Tivemos tantas pessoas vindo falar comigo pedindo o período de 1 mês gratuito de acesso às salas VIPs do Método Sempre Rico que eu simplesmente buguei e algumas ficaram sem o acesso aos canais. 😫\n\nEu vi que você foi uma dessas pessoas, por isso, te peço mil desculpas por todo esse transtorno!\n\nEstou te enviando agora o acesso aos canais!"
+    const desbanirDoSinaisRicos = []
+    const desbanirDoRicoVidente = []
+    const mensagem = "Fizemos uma atualização no meu banco de dados hoje que pode ter tido alguns efeitos não esperados... 😵 Caso os canais do Método Sempre Rico não estejam aparecendo mais pra você, estou te enviando de novo os links de acesso a eles!"
     idsUsuariosGratuitos.map(usuario => {
         mensagensAEnviar.push(bot.telegram.sendMessage(usuario.id, mensagem, Extra.markup(teclado)))
+        desbanirDoRicoVidente.push(bot.telegram.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+        desbanirDoSinaisRicos.push(bot.telegram.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
     })
 
     try {
         await Promise.allSettled(mensagensAEnviar)
         .then(res => res.forEach((result) => log(`Mensagem de emergência enviada a todos os usuários com sucesso! ${result.status}`)))
         .catch(err => res.forEach((result) => log(`Erro ao enviar mensagem de emergência pra todos usuários ${result.status}`)))
+
+        await Promise.allSettled(desbanirDoRicoVidente)
+        .then(res => res.forEach((result) => log(`Usuário desbanido do RICO VIDENTE! ${result.status}`)))
+        .catch(err => res.forEach((result) => log(`Erro desbanir usário do RICO VIDENTE ${result.status}`)))
+
+        await Promise.allSettled(desbanirDoSinaisRicos)
+        .then(res => res.forEach((result) => log(`Usuário desbanido do SINAIS RICOS! ${result.status}`)))
+        .catch(err => res.forEach((result) => log(`Erro desbanir usário do SINAIS RICOS ${result.status}`)))
+
     } catch (err) {
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         log(err)
