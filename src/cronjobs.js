@@ -32,7 +32,7 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
 }
 
 const atualizarPeriodoDeTesteGratuito = () => {
-    cron.schedule("00 2 * * *", async () => {
+    cron.schedule("00 0 * * *", async () => {
         const telegramClient = cache.get('bot')
         try {
             const usuarios = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexao)
