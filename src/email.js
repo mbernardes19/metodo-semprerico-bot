@@ -56,7 +56,7 @@ const enviarEmailDeRelatorioDeErro = async (erro, userId='0') => {
         const bot = cache.get('bot');
         await bot.telegram.sendMessage(process.env.ID_ADMIN, `Ocorreu um erro no bot do Método Sempre Rico: ${err}\n\n user id: ${userId}`)
     } catch (err) {
-        log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${JSON.stringify(err)}`)
+        log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${err}`)
     }
 }
 
