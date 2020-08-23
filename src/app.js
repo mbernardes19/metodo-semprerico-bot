@@ -180,7 +180,7 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
     } catch (err) {
         log(err)
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
-        await ctx.reply('Puxa vida... 😰 Me desculpe por isso, mas aconteceu um erro aqui comigo agora e eu vou ter que recomeçar a nossa conversa do zero... Tudo bem? É só digitar o comando /start .\n\nMil perdões... Tenho muito que melhorar como bot 😓')
+        await ctx.reply('Ocorreu um erro agora para conseguir atualizações do Telegram. Por favor, inicie uma conversa comigo novamente mais tarde digitando o comando /start .')
         return ctx.scene.leave()
     }
 }
