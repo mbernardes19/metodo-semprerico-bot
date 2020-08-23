@@ -20,9 +20,9 @@ const exportarLinksDosChats = async () => {
     }
 }
 
-const comecarValidacaoDeLinks = () => {
+const comecarValidacaoDeLinks = async () => {
     log(`VALIDAÇÃO DE LINKS INICIADA!`);
-    exportarLinksDosChats();
+    await exportarLinksDosChats();
     setInterval(async () => await exportarLinksDosChats(), 300000)
 }
 

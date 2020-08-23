@@ -102,7 +102,6 @@ confirmar.action('nao', async (ctx) => {
 })
 confirmar.use(async (ctx) => {
     log(`Sim/Não`)
-    log(ctx)
     if (confirmado(ctx)) {
         return confirmacaoPositiva(ctx)
     }
@@ -178,7 +177,6 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
         return ctx.wizard.next()
     } catch (err) {
         log(err)
-        log(`CTX ${ctx}`)
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         await ctx.reply('Puxa vida... 😰 Me desculpe por isso, mas aconteceu um erro aqui comigo agora e eu vou ter que recomeçar a nossa conversa do zero... Tudo bem? É só digitar o comando /start .\n\nMil perdões... Tenho muito que melhorar como bot 😓')
         return ctx.scene.leave()
@@ -470,11 +468,20 @@ bot.command('canais', async (ctx) => {
         if (usuarioValido) {
             const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
             const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
+            console.log('LINK CANAL', linkCanal1)
+            console.log('LINK CANAL', linkCanal2)
             const teclado = Markup.inlineKeyboard([
                 Markup.urlButton('Canal Sinais Ricos', linkCanal1),
                 Markup.urlButton('Canal Rico Vidente', linkCanal2)
             ])
-            await ctx.reply('É pra já!', Extra.markup(teclado))
+            try {
+                await ctx.reply('É pra já!', Extra.markup(teclado))
+            } catch (err) {
+                if (err.response && err.response.error_code === 403) {
+                    return;
+                }
+                await ctx.reply('Ocorreu um erro ao gerar os links dos canais para você. Tente digitar o comando /canais novamentem, por favor.')
+            }
         } else {
             await ctx.reply('Seu período gratuito de acesso aos canais do Método Sempre Rico expirou!\n\nCaso queira continuar em nossos canais VIP, faça aqui sua compra:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082.')
         }
@@ -741,7 +748,13 @@ bot.on('channel_post', async (ctx) => {
 //         }
 // })
 
-bot.on('message', async ctx => await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n/canais - Receber acesso aos canais VIP do Método Sempre Rico'))
+bot.on('message', async ctx => {
+    try {
+        await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n/canais - Receber acesso aos canais VIP do Método Sempre Rico')
+    } catch (err) {
+        return;
+    }
+})
 bot.launch()
 cronjobs.start()
 comecarValidacaoDeLinks()
