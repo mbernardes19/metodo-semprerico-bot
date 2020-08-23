@@ -38,4 +38,4 @@ const pegarLinkDeChat = (chatId) => {
     }
 }
 
-module.exports = { pegarLinkDeChat, comecarValidacaoDeLinks, exportarLinksDosChats }
+module.exports = { pegarLinkDeChat, comecarValidacaoDeLinks }

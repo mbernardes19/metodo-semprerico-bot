@@ -28,7 +28,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const differenceInMilliseconds = require('date-fns/differenceInMilliseconds')
 const { parseISO } = require('date-fns')
-const { comecarValidacaoDeLinks, pegarLinkDeChat, exportarLinksDosChats } = require('./chatLink')
+const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./chatLink')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -466,7 +466,6 @@ bot.command('canais', async (ctx) => {
     if (usuarioExiste) {
         const usuarioValido = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexao);
         if (usuarioValido) {
-            await exportarLinksDosChats()
             const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
             const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
             console.log('LINK CANAL', linkCanal1)
