@@ -28,6 +28,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const differenceInMilliseconds = require('date-fns/differenceInMilliseconds')
 const { parseISO } = require('date-fns')
+const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./chatLink')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -276,8 +277,8 @@ const enviarCanaisTelegram = async (ctx) => {
             await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
             log(process.env.ID_CANAL_SINAIS_RICOS)
             log(process.env.ID_CANAL_RICO_VIDENTE)
-            const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
-            const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+            const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+            const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
             const teclado = Markup.inlineKeyboard([
                 Markup.urlButton('Canal Sinais Ricos', linkCanal1),
                 Markup.urlButton('Canal Rico Vidente', linkCanal2)
@@ -294,8 +295,8 @@ const enviarCanaisTelegram = async (ctx) => {
     log(`Usuário adicionado ao BD`)
     await ctx.reply('Sua assinatura Monetizze foi ativada! 🎉')
     await ctx.reply('Seja bem-vindo!')
-    const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
-    const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+    const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+    const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
     const teclado = Markup.inlineKeyboard([
         Markup.urlButton('Canal Sinais Ricos', linkCanal1),
         Markup.urlButton('Canal Rico Vidente', linkCanal2)
@@ -316,8 +317,8 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
             log(`ERRO: Usuário já existe no banco de dados`)
             await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`)
             await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
-            const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
-            const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+            const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+            const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
             const teclado = Markup.inlineKeyboard([
                 Markup.urlButton('Canal Sinais Ricos', linkCanal1),
                 Markup.urlButton('Canal Rico Vidente', linkCanal2)
@@ -336,14 +337,14 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
     await ctx.reply('Seja bem-vindo!')
     let teclado
     try {
-        const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
-        const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+        const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+        const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
         teclado = Markup.inlineKeyboard([
             Markup.urlButton('Canal Sinais Ricos', linkCanal1),
             Markup.urlButton('Canal Rico Vidente', linkCanal2)
         ])
     } catch (err) {
-        const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_TESTE)
+        const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_TESTE)
         teclado = Markup.inlineKeyboard([
             Markup.urlButton('Canal Teste', linkCanal1),
         ])
@@ -466,8 +467,8 @@ bot.command('canais', async (ctx) => {
     if (usuarioExiste) {
         const usuarioValido = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexao);
         if (usuarioValido) {
-            const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
-            const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+            const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+            const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
             const teclado = Markup.inlineKeyboard([
                 Markup.urlButton('Canal Sinais Ricos', linkCanal1),
                 Markup.urlButton('Canal Rico Vidente', linkCanal2)
@@ -501,8 +502,8 @@ bot.command('n0t1f1c4c40', async (ctx) => {
 })
 
 bot.command('3m3rg3nc14', async (ctx) => {
-    const linkCanal1 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_SINAIS_RICOS)
-    const linkCanal2 = await ctx.telegram.exportChatInviteLink(process.env.ID_CANAL_RICO_VIDENTE)
+    const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+    const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
     const teclado = Markup.inlineKeyboard([
     Markup.urlButton('Canal Sinais Ricos', linkCanal1),
     Markup.urlButton('Canal Rico Vidente', linkCanal2)
@@ -742,6 +743,7 @@ bot.on('channel_post', async (ctx) => {
 bot.on('message', async ctx => await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n/canais - Receber acesso aos canais VIP do Método Sempre Rico'))
 bot.launch()
 cronjobs.start()
+comecarValidacaoDeLinks()
 
 app.use(cors())
 app.use(bodyParser.json())
