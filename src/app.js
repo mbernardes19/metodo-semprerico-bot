@@ -546,7 +546,7 @@ bot.command('start', async (ctx) => {
         ctx.scene.enter('start');
     } catch (err) {
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
-        if (err.response && err.response.statusCode === 403) {
+        if (err.response && err.response.error_code === 403) {
             log(`Usuário bloqueado ${ctx.chat.id}`)
         }
         log(err);
