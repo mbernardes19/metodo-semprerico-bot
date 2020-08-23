@@ -155,6 +155,8 @@ const pegar = async (informacao, messagem, mensagemConfirmacao, mensagemProximaI
     let mensagem
     let textoDaMensagem
     try {
+        console.log('MESSAGE', ctx.message)
+        console.log('UPDATE', ctx.update)
         mensagem = ctx.message ? ctx.message : ctx.update.message
         textoDaMensagem = ctx.message ? ctx.message.text : ctx.update.message.text
         if (informacao === 'telefone') {
