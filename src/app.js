@@ -351,6 +351,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
     }
     await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado))
     log(`Canais de Telegram enviados`)
+    await ctx.reply('Caso ocorra algum erro ao acessá-los, digite o comando /canais para recebê-los novamente')
     return ctx.scene.leave()
 }
 
