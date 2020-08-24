@@ -12,8 +12,12 @@ async function runDeploy() {
     }
 }
 
+app.get('/', async (req, res) => {
+    res.send('Hello').status(200)
+})
 app.get('/revive', async (req, res) => {
     await runDeploy()
+    res.sendStatus(200);
 })
 
 const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_HEALTH_CHECKER || process.env.PORT_APP || 21563 || 3000
