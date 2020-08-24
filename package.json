@@ -7,7 +7,8 @@
   "scripts": {
     "test": "jest",
     "start": "NODE_ENV=production node src/app.js",
-    "dev": "nodemon NODE_ENV=development node src/app.js"
+    "dev": "nodemon NODE_ENV=development node src/app.js",
+    "health": "node health-checker.js"
   },
   "keywords": [],
   "author": "",
