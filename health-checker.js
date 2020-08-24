@@ -16,5 +16,5 @@ app.get('/revive', async (req, res) => {
     await runDeploy()
 })
 
-const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
+const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_HEALTH_CHECKER || process.env.PORT_APP || 3000
 app.listen(PORT, () => log(`Health checker rodando na porta ${PORT}`));
