@@ -13,7 +13,7 @@ async function runDeploy() {
 }
 
 app.get('/', (req, res) => {
-    res.send('Hello').status(200)
+    res.send('Hello SEMPRE RICO').status(200)
 })
 app.get('/revive', async (req, res) => {
     await runDeploy()
