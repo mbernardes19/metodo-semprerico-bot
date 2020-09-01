@@ -4,7 +4,7 @@ const exec = util.promisify(require('child_process').exec);
 
 async function runDeploy() {
     try {
-        const {stdout, stderr} = await exec('cd .. && cd metodo-semprerico-bot && bash ../../restart.sh && pwd')
+        const {stdout, stderr} = await exec('pm2 restart app')
         console.log('stdout', stdout)
         console.log('stderr', stderr)
     } catch (err) {
