@@ -609,7 +609,6 @@ bot.on('channel_post', async (ctx) => {
                     log(`RESPONSE DA COMPRA, ${response.data}`)
                     if (!response.data.idCompra) {
                         log(`Moeda indisponível para binária`)
-                        log(err)
                         // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
                         return
                     }
