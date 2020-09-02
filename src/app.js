@@ -438,10 +438,11 @@ const criarSinalGale = (mensagemDeCanal) => {
     return {...sinalAnterior, horario: horarioAtual}
 }
 
-const SERVIDOR_IQ = process.env.NODE_ENV === 'production'
+let SERVIDOR_IQ = process.env.NODE_ENV === 'production'
     ? process.env.SERVIDOR_IQ : process.env.SERVIDOR_IQ_TEST
 
 const enviarSinalParaCompra = async (sinal, ctx) => {
+    SERVIDOR_IQ = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_IQ_TEST : process.env.SERVIDOR_IQ
     try {
         return await axios.post(`${SERVIDOR_IQ}/buy`, sinal)
     } catch (err) {
@@ -453,6 +454,7 @@ const enviarSinalParaCompra = async (sinal, ctx) => {
 }
 
 const checarResultadoCompra = async (responseCompra, ctx) => {
+    SERVIDOR_IQ = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_IQ_TEST : process.env.SERVIDOR_IQ
     try {
         log(`ID ${responseCompra}`)
         return await axios.post(`${SERVIDOR_IQ}/check_win`, { idCompra: responseCompra.idCompra, isDigital: responseCompra.isDigital })
