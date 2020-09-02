@@ -445,7 +445,7 @@ const enviarSinalParaCompra = async (sinal, ctx) => {
     try {
         return await axios.post(`${SERVIDOR_IQ}/buy`, sinal)
     } catch (err) {
-        log(`Moeda indisponível para binária`)
+        log(`Moeda indisponível na binária e na digital`)
         log(err)
         // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
         return
@@ -457,7 +457,7 @@ const checarResultadoCompra = async (responseCompra, ctx) => {
         log(`ID ${responseCompra}`)
         return await axios.post(`${SERVIDOR_IQ}/check_win`, { idCompra: responseCompra.idCompra, isDigital: responseCompra.isDigital })
     } catch (err) {
-        log(`Moeda indisponível para binária`)
+        log(`Moeda indisponível na binária e na digital`)
         log(err)
         // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
         return
@@ -608,7 +608,7 @@ bot.on('channel_post', async (ctx) => {
                     response = await enviarSinalParaCompra(sinal, ctx)
                     log(`RESPONSE DA COMPRA, ${response.data}`)
                     if (!response.data.idCompra) {
-                        log(`Moeda indisponível para binária`)
+                        log(`Moeda indisponível na binária e na digital`)
                         // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
                         return
                     }
