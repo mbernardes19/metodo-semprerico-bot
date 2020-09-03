@@ -3,15 +3,16 @@ const dao = require('./dao')
 const { conexao } = require('./db')
 const { atualizarStatusDeAssinaturaDeUsuarios, banirUsuariosSeStatusNaoForAtivo } = require('./monetizze')
 const { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro } = require('./email')
-const Telegram = require('telegraf/telegram')
 const { log } = require('./logger')
 const { cache } = require('./cache')
 const csv = require('./csv')
+const mysqldump = require('mysqldump').default;
 
 const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia()
     enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha()
     atualizarPeriodoDeTesteGratuito()
+    criaBackUpDoBancoDeDados()
 }
 
 const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
@@ -26,7 +27,6 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
             await enviarEmailDeRelatorioDeErro(err)
             log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${JSON.stringify(err)}`)
             log(err)
-            await enviarEmailDeRelatorioDeErro(err)
         }
     });
 }
@@ -65,9 +65,28 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
             await enviarEmailDeRelatorioDeErro(err)
             log(`ERRO AO CRIAR CSV: ${JSON.stringify(err)}`)
             log(err)
-            await enviarEmailDeRelatorioDeErro(err)
         }
     });
+}
+
+const criaBackUpDoBancoDeDados = () => {
+    cron.schedule('0 */5 * * *', async () => {
+        try {
+            mysqldump({
+                connection: {
+                    host: process.env.DB_HOST,
+                    user: process.env.DB_USER,
+                    password: process.env.DB_PASSWORD,
+                    database: process.env.DB_DATABASE
+                },
+                dumpToFile: './dump.sql'
+            })
+        } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err)
+            log(`ERRO GERAR BACKUP DE BANCO DE DADOS: ${JSON.stringify(err)}`)
+            log(err)
+        }
+    })
 }
 
 module.exports = { start }
