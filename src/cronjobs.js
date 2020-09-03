@@ -2,7 +2,7 @@ const cron = require('node-cron')
 const dao = require('./dao')
 const { conexao } = require('./db')
 const { atualizarStatusDeAssinaturaDeUsuarios, banirUsuariosSeStatusNaoForAtivo } = require('./monetizze')
-const { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro } = require('./email')
+const { enviarCSVParaEmail, enviarBackupParaEmail, enviarEmailDeRelatorioDeErro } = require('./email')
 const { log } = require('./logger')
 const { cache } = require('./cache')
 const csv = require('./csv')
@@ -70,9 +70,9 @@ const enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha = () => {
 }
 
 const criaBackUpDoBancoDeDados = () => {
-    cron.schedule('0 */5 * * *', async () => {
+    cron.schedule('0 */2 * * *', async () => {
         try {
-            mysqldump({
+            await mysqldump({
                 connection: {
                     host: process.env.DB_HOST,
                     user: process.env.DB_USER,
@@ -81,6 +81,7 @@ const criaBackUpDoBancoDeDados = () => {
                 },
                 dumpToFile: './dump.sql'
             })
+            await enviarBackupParaEmail()
         } catch (err) {
             await enviarEmailDeRelatorioDeErro(err)
             log(`ERRO GERAR BACKUP DE BANCO DE DADOS: ${JSON.stringify(err)}`)

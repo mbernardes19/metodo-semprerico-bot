@@ -40,8 +40,23 @@ const enviarCSVParaEmail = async () => {
             anexos: [{path: path.join(__dirname, '..', 'csv', 'usuarios.csv')}]
         })
     } catch (err) {
-        await enviarEmailDeRelatorioDeErro(err)
         log(`ERRO AO ENVIAR ARQUIVO CSV POR EMAIL: ${JSON.stringify(err)}`)
+        await enviarEmailDeRelatorioDeErro(err)
+    }
+}
+
+const enviarBackupParaEmail = async () => {
+    try {
+        await enviarEmail({
+            de: process.env.USUARIO_EMAIL,
+            para: 'bernardes.matheus@outlook.com',
+            assunto: '[MSR BOT] Backup do banco de dados atualizado!',
+            texto: 'Segue o backup com a sua base de usuários atual',
+            anexos: [{path: path.join(__dirname, '..', 'dump.sql')}]
+        })
+    } catch (err) {
+        log(`ERRO AO ENVIAR BACKUP POR EMAIL: ${JSON.stringify(err)}`)
+        await enviarEmailDeRelatorioDeErro(err)
     }
 }
 
@@ -53,8 +68,6 @@ const enviarEmailDeRelatorioDeErro = async (erro, userId='0') => {
             assunto: 'Ocorreu um erro no MSR Bot!',
             texto: `Segue o erro:\n${erro}`,
         })
-        const telegramClient = cache.get('bot');
-        await telegramClient.sendMessage(process.env.ID_ADMIN, `Ocorreu um erro no bot do Método Sempre Rico: ${err}\n\n user id: ${userId}`)
     } catch (err) {
         log(`ERRO AO ENVIAR EMAIL DE RELATÓRIO: ${err}`)
     }
@@ -73,4 +86,4 @@ const enviarEmailDeRelatorioDeErroCliente = async (erro, mensagem) => {
     }
 }
 
-module.exports = { enviarCSVParaEmail, enviarEmailDeRelatorioDeErro, enviarEmailDeRelatorioDeErroCliente }
+module.exports = { enviarCSVParaEmail, enviarBackupParaEmail, enviarEmailDeRelatorioDeErro, enviarEmailDeRelatorioDeErroCliente }
