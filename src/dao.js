@@ -148,16 +148,20 @@ const pegarDiasDeUsoDeTodosUsuariosGratuitos = async (usuarios, conexao) => {
 
 const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
     const usuariosASeremBanidos = []
+    const usuariosATirarBloqueio = []
     const usuariosBanidos = []
     usuarios.forEach(usuario => {
         if (usuario.dias_de_uso === 0) {
             usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
             usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
-            usuariosBanidos.push(usuario)
+            usuariosBanidos.push(usuario.id)
+            usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+            usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
         }
     })
     try {
         await Promise.all(usuariosASeremBanidos)
+        await Promise.all(usuariosATirarBloqueio)
         log(`Usuários gratuitos vencidos banidos`)
         log(`Usuários banidos: ${usuariosBanidos}`)
         return usuariosBanidos
