@@ -1,4 +1,4 @@
-const regex = require('./regex')
+const regex = require('../utils/regex')
 
 const validar = (informacao, dado) => {
     switch(informacao) {

@@ -1,5 +1,5 @@
 const util = require('util')
-const { log } = require('./logger')
+const { log } = require('./servicos/logger')
 
 const adicionarUsuarioAoBancoDeDados = async (usuario, conexao) => {
     const {idTelegram, nomeCompleto, formaDePagamento, email, telefone, statusAssinatura} = usuario

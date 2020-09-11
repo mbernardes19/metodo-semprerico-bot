@@ -1,7 +1,7 @@
 const {pegarTransacaoNaMonetizze} = require('./request')
-const regex = require('./regex')
-const dao = require('./dao')
-const { conexao } = require('./db')
+const regex = require('../utils/regex')
+const dao = require('../dao')
+const { conexao } = require('../db')
 const { log } = require('./logger')
 
 const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {

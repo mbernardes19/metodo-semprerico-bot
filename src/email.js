@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer')
 const path = require('path')
-const { log } = require('./logger')
-const { cache } = require('./cache');
+const { log } = require('./servicos/logger')
+const { cache } = require('./servicos/cache');
 
 const transportador = nodemailer.createTransport({
     // host: process.env.SERVIDOR_SMTP,
