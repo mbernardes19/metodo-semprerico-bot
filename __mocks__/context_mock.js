@@ -49,7 +49,7 @@ function makeMockContext(update = {}, contextExtra = {}) {
       next: () => true,
       leave: () => false,
       state: {
-        novoUsuario: {nomeCompleto: 'asdasd', formaDePagamento: 'afads', email: 'asdasda', telefone: 'asdads'}
+        novoUsuario: {nomeCompleto: 'asdasd', formaDePagamento: 'afads', email: 'asdasda', telefone: 'asdads', cpf: '12343454543'}
       }
   }
 

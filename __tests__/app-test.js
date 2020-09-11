@@ -38,7 +38,7 @@ describe('App', () => {
         const ctx = makeMockContext({ message: {text: 'hehe', chat: { id: 1234 } } });
         confirmado.mockReturnValue(true)
         verificarCompraDeUsuarioNaMonetizze.mockImplementation(() => Promise.resolve(false));
-        await app.confirmarEmail({positivo: "oi", negativo: "tchau", erro: "ai"}, "tchau", ctx)
+        await app.confirmacaoPositiva(ctx)
         expect(adicionarEmEmailsBloqueados).toHaveBeenCalled()
     })
 })
