@@ -440,6 +440,6 @@ let PORT
 if (process.env.NODE_ENV === 'production') {
     PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
 } else {
-    PORT = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_SRC_APP || process.env.PORT_APP || 3000
+    PORT = 6000
 }
 app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));
