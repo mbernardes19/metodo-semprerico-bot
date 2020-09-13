@@ -16,6 +16,8 @@ const cenaPlanoGratuito = new WizardScene(
     async ctx => validarTelefone(ctx),
 )
 
+cenaPlanoGratuito.command('stop', async ctx => ctx.scene.leave())
+
 const passoUm = async (ctx) => {
     ctx.reply('Olá, plano gratuito!')
 }
