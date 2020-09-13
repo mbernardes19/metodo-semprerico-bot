@@ -1,6 +1,6 @@
 const Composer = require('telegraf/composer')
-const { log } = require('../servicos/logger')
-const { boleto, cartao, planoGratuito } = require('../servicos/validacao')
+const { log } = require('../../servicos/logger')
+const { boleto, cartao, planoGratuito } = require('../../servicos/validacao')
 
 const pedirFormaDePagamento = new Composer()
 pedirFormaDePagamento.action('cartao_de_credito', async (ctx) => {
@@ -26,9 +26,7 @@ pedirFormaDePagamento.action('plano_gratuito', async (ctx) => {
     ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
     log('Forma de pagamento definida')
     await ctx.reply('Certo!')
-    await ctx.reply('Vou precisar de alguns dados para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
-    await ctx.reply('Qual é o seu nome completo?')
-    return ctx.wizard.next()
+    return ctx.scene.enter('planoGratuito')
 })
 pedirFormaDePagamento.use(async (ctx) => {
     if (cartao(ctx)) {
@@ -60,9 +58,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
         log('Plano gratuito definido')
         await ctx.reply('Certo!')
-        await ctx.reply('Vou precisar de alguns dados para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
-        await ctx.reply('Qual é o seu nome completo?')
-        return ctx.wizard.next()
+        return ctx.scene.enter('planoGratuito')
     }
     await ctx.reply('Por favor, escolha uma das opções.')
 })

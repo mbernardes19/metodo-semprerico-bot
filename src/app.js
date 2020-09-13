@@ -6,14 +6,12 @@ const { Telegraf } = require('telegraf')
 require('dotenv').config({path: path.join(__dirname, "../", '.env')})
 const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
-const WizardScene = require('telegraf/scenes/wizard')
 const Extra = require('telegraf/extra')
 const Markup = require('telegraf/markup')
 const db = require('./db');
-const mensagem = require('./utils/mensagem')
 const dao = require('./dao')
 const cronjobs = require('./servicos/cronjobs')
-const { log ,logError } = require('./servicos/logger')
+const { log } = require('./servicos/logger')
 const { cache } = require('./servicos/cache')
 const { enviarEmailDeRelatorioDeErro } = require('./email')
 const { SINAL } = require('./utils/regex')
@@ -24,11 +22,8 @@ const differenceInMilliseconds = require('date-fns/differenceInMilliseconds')
 const { parseISO } = require('date-fns')
 const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLink')
 
-const { pegarNome, confirmarNome } = require('./cenas/nomeCompleto')
-const { pegarEmail, confirmarEmail } = require('./cenas/email')
-const { pegarTelefone, confirmarTelefone } = require('./cenas/telefone')
-const { pedirFormaDePagamento } = require('./cenas/formaPagamento')
-const { validarTelefone } = require('./cenas/validarTelefone')
+const cenaPlanoGratuito = require('./cenas/planoGratuito')
+const cenaPlanoPago = require('./cenas/planoPago')
 
 const conexao = db.conexao
 conexao.connect((err) => {
@@ -38,38 +33,6 @@ conexao.connect((err) => {
 const tokenBot = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN : process.env.BOT_TOKEN_TESTE
 const bot = new Telegraf(tokenBot)
 cache.set('bot', bot.telegram)
-
-const wizard = new WizardScene(
-    'start',
-    async ctx => darBoasVindas(ctx),
-    pedirFormaDePagamento,
-    async ctx => pegarNome(ctx),
-    confirmarNome,
-    async ctx => pegarTelefone(ctx),
-    confirmarTelefone,
-    async ctx => validarTelefone(ctx),
-    async ctx => pegarEmail(ctx),
-    confirmarEmail
-)
-
-wizard.command('stop', async ctx => ctx.scene.leave())
-
-const darBoasVindas = async (ctx) => {
-    try {
-        await ctx.reply(mensagem.boas_vindas)
-    } catch (err) {
-        await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...')
-        logError('ERRO AO ENVIAR PRIMEIRA MENSAGEM', err)
-    }
-    ctx.wizard.state.novoUsuario = {}
-    const pagamento = Markup.inlineKeyboard([
-        [Markup.callbackButton('💳 Cartão de Crédito', 'cartao_de_credito')],
-        [Markup.callbackButton('📄 Boleto', 'boleto')],
-        [Markup.callbackButton('🆓 Plano Gratuito', 'plano_gratuito')]
-    ])
-    await ctx.reply(mensagem.pedir_forma_pagamento, Extra.markup(pagamento))
-    return ctx.wizard.next()
-}
 
 const verificarSeJaExisteUsuarioComCpf = async (cpf) => {
     const usuarioComMesmoCpf = await dao.verificarSeJaExisteUsuarioComCpf(cpf, conexao)
@@ -137,7 +100,7 @@ const checarResultadoCompra = async (responseCompra, ctx) => {
     }
 }
 
-const stage = new Stage([wizard], { ttl: 1500 });
+const stage = new Stage([cenaPlanoPago, cenaPlanoGratuito], { ttl: 1500 });
 
 bot.use(session())
 bot.use(stage.middleware())
@@ -147,8 +110,15 @@ bot.command('canais', async (ctx) => {
     if (usuarioExiste) {
         const usuarioValido = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexao);
         if (usuarioValido) {
-            const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
-            const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
+            let linkCanal1;
+            let linkCanal2;
+            if (process.env.NODE_ENV === 'production') {
+                linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS)
+                linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE)
+            } else {
+                linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_TESTE)
+                linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_TESTE)
+            }
             console.log('LINK CANAL', linkCanal1)
             console.log('LINK CANAL', linkCanal2)
             const teclado = Markup.inlineKeyboard([
@@ -233,7 +203,7 @@ bot.command('3m3rg3nc14', async (ctx) => {
 bot.command('start', async (ctx) => {
     try {
         await bot.telegram.sendMessage(ctx.chat.id,'🦁')
-        ctx.scene.enter('start');
+        ctx.scene.enter('planoPago');
     } catch (err) {
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         if (err.response && err.response.error_code === 403) {
@@ -466,6 +436,10 @@ app.get('/mensagem-doji', async (req, res) => {
     }
 })
 
-
-const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
+let PORT
+if (process.env.NODE_ENV === 'production') {
+    PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000
+} else {
+    PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP_TESTE || process.env.PORT_APP || 3000
+}
 app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));

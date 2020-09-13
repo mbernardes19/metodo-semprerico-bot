@@ -1,8 +1,8 @@
 const Composer = require('telegraf/composer')
 const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
-const { log } = require('../servicos/logger')
-const { confirmado, negado } = require('../servicos/validacao')
+const { log } = require('../../servicos/logger')
+const { confirmado, negado } = require('../../servicos/validacao')
 
 const pegarNome = async (ctx) => {
     if (!ctx.message) {

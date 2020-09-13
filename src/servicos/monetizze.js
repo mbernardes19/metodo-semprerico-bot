@@ -66,8 +66,13 @@ const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
     usuarios.forEach(usuario => {
         if (usuario.status_assinatura !== 'ativa') {
             if (usuario.aviso_banimento > 2) {
-                usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
-                usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+                if (process.env.NODE_ENV === 'development') {
+                    usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_TESTE, usuario.id))
+                    usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_TESTE, usuario.id))
+                } else {
+                    usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+                    usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+                }
                 dadosUsuariosASeremBanidos.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
                 return
             }

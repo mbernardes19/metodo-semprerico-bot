@@ -35,10 +35,33 @@ const adicionarEmEmailsBloqueados = async (email, conexao) => {
     }
 }
 
+const adicionarEmNumerosBloqueados = async (numero, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const numerosBloqueados = await query(`select * from NumeroBloqueado`)
+        const numerosIguais = numerosBloqueados.filter(numerosBloqueados => numerosBloqueados.numero === numero)
+        if (numerosIguais.length === 0) {
+            await query(`insert into NumeroBloqueado values ('${numero}')`)
+        }
+    } catch (err) {
+        throw err
+    }
+}
+
 const pegarTodosEmailsBloqueados = async (conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
         return await query(`select * from EmailBloqueado`)
+    } catch (err) {
+        throw err
+    }
+}
+
+const pegarTodosNumerosBloqueados = async (conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const numeros = await query(`select * from NumeroBloqueado`)
+        return numeros.map(numero => numero.numero)
     } catch (err) {
         throw err
     }
@@ -57,6 +80,16 @@ const pegarTodosUsuariosGratuitosDoBancoDeDados = async (conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
         return await query(`select * from UsuarioGratuito`)
+    } catch (err) {
+        throw err
+    }
+}
+
+const usuarioExisteEValido = async (id, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        const resultado = await query(`select * from Usuario where id='${id}' and status_assinatura='ativa'`)
+        return resultado.length > 0 ? true : false;
     } catch (err) {
         throw err
     }
@@ -152,11 +185,17 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
     const usuariosBanidos = []
     usuarios.forEach(usuario => {
         if (usuario.dias_de_uso === 0) {
-            usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
-            usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
-            usuariosBanidos.push(usuario.id)
-            usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
-            usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+            if (process.env.NODE_ENV === 'production') {
+                usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+                usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+                usuariosBanidos.push(usuario.id)
+                usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
+                usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
+            } else {
+                usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_TESTE, usuario.id))
+                usuariosBanidos.push(usuario.id)
+                usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_TESTE, usuario.id))
+            }
         }
     })
     try {
@@ -283,10 +322,13 @@ module.exports = {
     adicionarUsuarioGratuitoAoBancoDeDados,
     verificarSeJaExisteUsuarioComCpf,
     limparBancoDeDados,
+    usuarioExisteEValido,
     usuarioGratuitoExiste,
     usuarioGratuitoExisteEValido,
     adicionarEmEmailsBloqueados,
+    adicionarEmNumerosBloqueados,
     pegarTodosEmailsBloqueados,
+    pegarTodosNumerosBloqueados,
     pegarTodosUsuariosDoBancoDeDados,
     pegarTodosUsuariosGratuitosDoBancoDeDados,
     atualizarStatusDeAssinaturaDeUsuarios,
