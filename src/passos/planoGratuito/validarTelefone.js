@@ -115,10 +115,18 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
 const validarTelefone = async (ctx) => {
     ctx.wizard.state.tentativasSms += 1
 
-    if (ctx.message.text == ctx.wizard.state.numeroValidacao) {
-        await ctx.reply('Confirmado!')
-        await enviarCanaisTelegramGratuito()
-        return ctx.wizard.leave()
+    if(!ctx.message) {
+        if (ctx.update.message.text == ctx.wizard.state.numeroValidacao) {
+            await ctx.reply('Confirmado!')
+            await enviarCanaisTelegramGratuito()
+            return ctx.wizard.leave()
+        }
+    } else {
+        if (ctx.message.text == ctx.wizard.state.numeroValidacao) {
+            await ctx.reply('Confirmado!')
+            await enviarCanaisTelegramGratuito()
+            return ctx.wizard.leave()
+        }
     }
     if (ctx.wizard.state.tentativasSms < 2) {
         const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
