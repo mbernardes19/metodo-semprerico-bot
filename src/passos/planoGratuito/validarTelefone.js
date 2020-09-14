@@ -4,7 +4,7 @@ const Markup = require('telegraf/markup')
 const dao = require('../../dao')
 const { conexao } = require('../../db')
 const { log, logError } = require('../../servicos/logger')
-const UsuarioGratuito = require('../..//model/usuario_gratuito')
+const UsuarioGratuito = require('../../model/usuario_gratuito')
 
 const gerarNumeroValidacaoSms = () => {
     let numero = ''
