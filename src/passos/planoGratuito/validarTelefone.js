@@ -1,7 +1,7 @@
 const { enviarSms } = require('../../servicos/request')
 const Extra = require('telegraf/extra')
 const Markup = require('telegraf/markup')
-const { adicionarEmNumerosBloqueados, usuarioGratuitoExisteEValido, adicionarEmEmailsBloqueados, adicionarUsuarioGratuitoAoBancoDeDados } = require('../../dao')
+const dao = require('../../dao')
 const { conexao } = require('../../db')
 const { log, logError } = require('../../servicos/logger')
 
@@ -34,7 +34,7 @@ const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
     const {idTelegram, nomeCompleto, cpf, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new UsuarioGratuito(idTelegram, nomeCompleto, cpf, email, telefone, hoje, 30)
     try {
-        await adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexao)
+        await dao.adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexao)
     } catch (err) {
         throw err
     }
@@ -56,7 +56,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
         if (err.errno === 1062) {
             log(`ERRO: Usuário já existe no banco de dados`)
             await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`)
-            const usuarioValidoEExiste = await usuarioGratuitoExisteEValido(ctx.chat.id, conexao)
+            const usuarioValidoEExiste = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexao)
             if (usuarioValidoEExiste) {
                 await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
                 let linkCanal1
@@ -134,8 +134,8 @@ const validarTelefone = async (ctx) => {
         return ctx.wizard.back()
     } else {
         try {
-            await adicionarEmNumerosBloqueados(ctx.wizard.state.novoUsuario.telefone, conexao)
-            await adicionarEmEmailsBloqueados(ctx.wizard.state.novoUsuario.email, conexao)
+            await dao.adicionarEmNumerosBloqueados(ctx.wizard.state.novoUsuario.telefone, conexao)
+            await dao.adicionarEmEmailsBloqueados(ctx.wizard.state.novoUsuario.email, conexao)
             await ctx.reply(`O número que você passou não confere com o que foi enviado pelo SMS novamente.`)
             await ctx.reply(`Por isso, vou deixar seu número de telefone e email registrados como bloqueados. Para desbloqueá-los, envie um email para ${process.env.EMAIL_PARA} com seu nome completo, email e telefone solicitando o desbloqueamento.`)
             await ctx.scene.leave()

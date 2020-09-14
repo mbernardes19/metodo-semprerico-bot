@@ -2,3 +2,4 @@
 .env
 dist
 acessar_servidor.exp
+dump.sql
