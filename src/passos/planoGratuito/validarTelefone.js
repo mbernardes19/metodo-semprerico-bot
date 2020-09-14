@@ -5,6 +5,7 @@ const dao = require('../../dao')
 const { conexao } = require('../../db')
 const { log, logError } = require('../../servicos/logger')
 const UsuarioGratuito = require('../../model/usuario_gratuito')
+const { pegarLinkDeChat } = require('../../servicos/chatLink')
 
 const gerarNumeroValidacaoSms = () => {
     let numero = ''
