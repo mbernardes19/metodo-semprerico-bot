@@ -119,13 +119,13 @@ const validarTelefone = async (ctx) => {
         if (ctx.update.message.text == ctx.wizard.state.numeroValidacao) {
             await ctx.reply('Confirmado!')
             await enviarCanaisTelegramGratuito(ctx)
-            return ctx.wizard.leave()
+            return ctx.scene.leave()
         }
     } else {
         if (ctx.message.text == ctx.wizard.state.numeroValidacao) {
             await ctx.reply('Confirmado!')
             await enviarCanaisTelegramGratuito(ctx)
-            return ctx.wizard.leave()
+            return ctx.scene.leave()
         }
     }
     if (ctx.wizard.state.tentativasSms < 2) {
