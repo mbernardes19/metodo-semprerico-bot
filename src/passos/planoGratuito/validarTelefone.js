@@ -1,7 +1,7 @@
 const { enviarSms } = require('../../servicos/request')
 const Extra = require('telegraf/extra')
 const Markup = require('telegraf/markup')
-const { adicionarEmNumerosBloqueados, usuarioGratuitoExisteEValido, adicionarEmEmailsBloqueados } = require('../../dao')
+const { adicionarEmNumerosBloqueados, usuarioGratuitoExisteEValido, adicionarEmEmailsBloqueados, adicionarUsuarioGratuitoAoBancoDeDados } = require('../../dao')
 const { conexao } = require('../../db')
 const { log, logError } = require('../../servicos/logger')
 
@@ -34,7 +34,7 @@ const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
     const {idTelegram, nomeCompleto, cpf, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new UsuarioGratuito(idTelegram, nomeCompleto, cpf, email, telefone, hoje, 30)
     try {
-        await dao.adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexao)
+        await adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexao)
     } catch (err) {
         throw err
     }
@@ -77,7 +77,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
             return ctx.scene.leave()
         } else {
             log(`ERRO: Genérico`)
-            await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
+            logError(`ERRO AO SALVAR USUÁRIO NO BD`, err)
             await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`)
             return ctx.scene.leave()
         }
@@ -118,13 +118,13 @@ const validarTelefone = async (ctx) => {
     if(!ctx.message) {
         if (ctx.update.message.text == ctx.wizard.state.numeroValidacao) {
             await ctx.reply('Confirmado!')
-            await enviarCanaisTelegramGratuito()
+            await enviarCanaisTelegramGratuito(ctx)
             return ctx.wizard.leave()
         }
     } else {
         if (ctx.message.text == ctx.wizard.state.numeroValidacao) {
             await ctx.reply('Confirmado!')
-            await enviarCanaisTelegramGratuito()
+            await enviarCanaisTelegramGratuito(ctx)
             return ctx.wizard.leave()
         }
     }

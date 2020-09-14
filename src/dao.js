@@ -179,6 +179,15 @@ const pegarDiasDeUsoDeTodosUsuariosGratuitos = async (usuarios, conexao) => {
     }
 }
 
+const marcarUsuarioGratuitoComoKickado = async (usuario, conexao) => {
+    const query = util.promisify(conexao.query).bind(conexao)
+    try {
+        await query(`update UsuarioGratuito set kickado='S' where id='${usuario.id}'`)
+    } catch (err) {
+        throw err
+    }
+}
+
 const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
     const usuariosASeremBanidos = []
     const usuariosATirarBloqueio = []
@@ -189,6 +198,7 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
                 usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
                 usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
                 usuariosBanidos.push(usuario.id)
+                usuariosASeremBanidos.push(marcarUsuarioGratuitoComoKickado(usuario, conexao))
                 usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
                 usuariosATirarBloqueio.push(telegramClient.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
             } else {
@@ -300,7 +310,7 @@ const adicionarUsuarioGratuitoAoBancoDeDados = async (usuario, conexao) => {
     const query = util.promisify(conexao.query).bind(conexao)
     try {
         await query(
-            `insert into UsuarioGratuito (id, nome_completo, cpf, telefone, email, data_de_assinatura, dias_de_uso) values ('${idTelegram}', '${nomeCompleto}', '${cpf}',  '${telefone}', '${email}', '${dataAssinatura}', '${diasDeUso}')`
+            `insert into UsuarioGratuito (id, nome_completo, cpf, telefone, email, data_de_assinatura, dias_de_uso, kickado) values ('${idTelegram}', '${nomeCompleto}', '${cpf}',  '${telefone}', '${email}', '${dataAssinatura}', '${diasDeUso}', 'N')`
             )
     } catch (err) {
         throw err
@@ -339,6 +349,7 @@ module.exports = {
     aumentarAvisoDeBanimento,
     zerarAvisoDeBanimento,
     pegarUsuarioPeloId,
+    marcarUsuarioGratuitoComoKickado,
     pegarUsuarioGratuitoPeloId,
     atualizarMensagem,
     atualizarSticker,
