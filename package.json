@@ -33,9 +33,13 @@
     "sandwich-stream": "^2.0.2",
     "sexy-require": "^1.1.2",
     "telegraf": "^3.38.0",
-    "timezone-support": "^2.0.2"
+    "timezone-support": "^2.0.2",
+    "twilio": "^3.49.1"
   },
   "devDependencies": {
+    "eslint": "^7.9.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
     "jest": "^26.1.0",
     "nodemon": "^2.0.4"
   }
