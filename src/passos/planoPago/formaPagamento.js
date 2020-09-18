@@ -21,13 +21,13 @@ pedirFormaDePagamento.action('boleto', async (ctx) => {
     await ctx.reply('Qual é o seu nome completo?')
     return ctx.wizard.next()
 })
-pedirFormaDePagamento.action('plano_gratuito', async (ctx) => {
-    await ctx.answerCbQuery()
-    ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
-    log('Forma de pagamento definida')
-    await ctx.reply('Certo!')
-    return ctx.scene.enter('planoGratuito')
-})
+// pedirFormaDePagamento.action('plano_gratuito', async (ctx) => {
+//     await ctx.answerCbQuery()
+//     ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
+//     log('Forma de pagamento definida')
+//     await ctx.reply('Certo!')
+//     return ctx.scene.enter('planoGratuito')
+// })
 pedirFormaDePagamento.use(async (ctx) => {
     if (cartao(ctx)) {
         if (!ctx.message) {
@@ -51,15 +51,15 @@ pedirFormaDePagamento.use(async (ctx) => {
         await ctx.reply('Qual é o seu nome completo?')
         return ctx.wizard.next()
     }
-    if (planoGratuito(ctx)) {
-        if (!ctx.message) {
-            await ctx.answerCbQuery()
-        }
-        ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
-        log('Plano gratuito definido')
-        await ctx.reply('Certo!')
-        return ctx.scene.enter('planoGratuito')
-    }
+    // if (planoGratuito(ctx)) {
+    //     if (!ctx.message) {
+    //         await ctx.answerCbQuery()
+    //     }
+    //     ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
+    //     log('Plano gratuito definido')
+    //     await ctx.reply('Certo!')
+    //     return ctx.scene.enter('planoGratuito')
+    // }
     await ctx.reply('Por favor, escolha uma das opções.')
 })
 

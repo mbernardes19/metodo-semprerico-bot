@@ -1,7 +1,7 @@
 const {pegarTransacaoNaMonetizze} = require('./request')
 const regex = require('../utils/regex')
 const dao = require('../dao')
-const { conexao } = require('../db')
+const { conexaoDb } = require('../db')
 const { log } = require('./logger')
 
 const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
@@ -23,7 +23,7 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
     usuarios.forEach(usuario => novosStatusAsync.push(pegarNovoStatusDeAssinaturaDeUsuario(usuario)))
     try {
         const novosStatus = await Promise.all(novosStatusAsync)
-        await dao.atualizarStatusDeAssinaturaDeUsuarios(usuarios, novosStatus, conexao)
+        await dao.atualizarStatusDeAssinaturaDeUsuarios(usuarios, novosStatus, conexaoDb)
         log(`Status de assinatura de todos os usuários atualizado`)
     } catch (err) {
         throw err
@@ -45,8 +45,8 @@ const pegarNovoStatusDeAssinaturaDeUsuario = async (usuario) => {
     }
 }
 const mandarAvisoDeBanimento = async (usuario, telegramClient) => {
-    await dao.aumentarAvisoDeBanimento(usuario, conexao)
-    const usuarioAtualizado = await dao.pegarUsuarioPeloId(usuario.id, conexao);
+    await dao.aumentarAvisoDeBanimento(usuario, conexaoDb)
+    const usuarioAtualizado = await dao.pegarUsuarioPeloId(usuario.id, conexaoDb);
     if (usuarioAtualizado.aviso_banimento === 1) {
         return telegramClient.sendMessage(usuario.id, `A sua assinatura no curso da Monetizze não está como ativa. Procure realizar o pagamento do curso para evitar seu banimento dos nossos canais em 2 dias. Caso já tenha realizado o pagamento desse mês, favor ignorar esta mensagem`)
     }
@@ -81,7 +81,7 @@ const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
             return
         } else {
             if (usuario.aviso_banimento > 0) {
-                usuariosATeremAvisosZerados.push(dao.zerarAvisoDeBanimento(usuario, conexao))
+                usuariosATeremAvisosZerados.push(dao.zerarAvisoDeBanimento(usuario, conexaoDb))
                 dadosUsuariosComAvisosZerados.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
             }
         }

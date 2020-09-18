@@ -6,13 +6,13 @@ const { confirmado, negado } = require('../../servicos/validacao')
 
 const receberNome = async (ctx) => {
     if (!ctx.message) {
-        await ctx.answerCbQuery()
+        await ctx.answerCbQuery();
     }
-    ctx.wizard.state.novoUsuario = {}
-    ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito'
+    ctx.wizard.state.novoUsuario = {};
+    ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito';
     await ctx.reply('Vou precisar de alguns dados para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
-    await ctx.reply('Qual é o seu nome completo?')
-    return await ctx.wizard.next()
+    await ctx.reply('Qual é o seu nome completo?');
+    return ctx.wizard.next();
 }
 
 const pegarNome = async (ctx) => {

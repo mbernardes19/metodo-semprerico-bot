@@ -20,5 +20,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = {
-    conexao: dbConnection
+    conexaoDb: dbConnection
 }

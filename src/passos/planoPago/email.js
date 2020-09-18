@@ -11,13 +11,13 @@ const { validar } = require('../../servicos/validacao')
 const StatusAssinatura = require('../../model/status_assinatura')
 const Usuario = require('../../model/usuario')
 const UsuarioGratuito = require('../../model/usuario_gratuito')
-const { conexao } = require('../../db')
+const { conexaoDb } = require('../../db')
 
 const adicionarUsuarioAoBancoDeDados = async (ctx) => {
     const {idTelegram, nomeCompleto, formaDePagamento, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new Usuario(idTelegram, nomeCompleto, formaDePagamento, email, telefone, StatusAssinatura.ATIVA)
     try {
-        await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexao)
+        await dao.adicionarUsuarioAoBancoDeDados(novoUsuario, conexaoDb)
     } catch (err) {
         throw err
     }
@@ -32,7 +32,7 @@ const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
     const {idTelegram, nomeCompleto, cpf, email, telefone} = ctx.wizard.state.novoUsuario
     const novoUsuario = new UsuarioGratuito(idTelegram, nomeCompleto, cpf, email, telefone, hoje, 30)
     try {
-        await dao.adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexao)
+        await dao.adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexaoDb)
     } catch (err) {
         throw err
     }
@@ -42,7 +42,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     const { email } = ctx.wizard.state.novoUsuario
     log(`Email ${email} adicionado como bloqueado`)
     try {
-        await dao.adicionarEmEmailsBloqueados(email, conexao)
+        await dao.adicionarEmEmailsBloqueados(email, conexaoDb)
     } catch (err) {
         await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
         log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado: ${JSON.stringify(err)}`)
@@ -68,7 +68,7 @@ const enviarCanaisTelegram = async (ctx) => {
         if (err.errno === 1062) {
             log(`ERRO: Usuário já existe no banco de dados`)
             await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`)
-            const usuarioValidoEExiste = await dao.usuarioExisteEValido(ctx.chat.id, conexao)
+            const usuarioValidoEExiste = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb)
             if (usuarioValidoEExiste) {
                 await ctx.reply(`Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:`)
                 let linkCanal1
@@ -123,7 +123,7 @@ const confirmacaoPositiva = async (ctx) => {
     if (!validacao.temErro) {
         if (ctx.wizard.state.novoUsuario.formaDePagamento !== 'plano_gratuito') {
             try {
-                const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexao)
+                const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexaoDb)
                 const emailBloqueado = emailsBloqueados.filter(emailBloqueado => emailBloqueado.email === ctx.wizard.state.novoUsuario.email)
                 if (emailBloqueado.length > 0) {
                     await ctx.reply(`Seu email está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email explicando sua situação para ${process.env.EMAIL_PARA}`)

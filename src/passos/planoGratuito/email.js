@@ -5,12 +5,12 @@ const { log } = require('../../servicos/logger')
 const { confirmado, negado } = require('../../servicos/validacao')
 const dao = require('../../dao')
 const { validar } = require('../../servicos/validacao')
-const { conexao } = require('../../db')
+const { conexaoDb } = require('../../db')
 
 const confirmacaoPositiva = async (ctx) => {
     const validacao = validar('email', ctx.wizard.state.novoUsuario.email);
     if (!validacao.temErro) {
-        const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexao)
+        const emailsBloqueados = await dao.pegarTodosEmailsBloqueados(conexaoDb)
         const emailBloqueado = emailsBloqueados.filter(emailBloqueado => emailBloqueado.email === ctx.wizard.state.novoUsuario.email)
         if (emailBloqueado.length > 0) {
             await ctx.reply(`Seu email está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email explicando sua situação para ${process.env.EMAIL_PARA}`)

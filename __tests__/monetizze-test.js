@@ -4,7 +4,7 @@ const {makeMockContext} = require('../__mocks__/context_mock')
 const regex = require('../src/regex')
 const { usuariosDoBD } = require('../__mocks__/usuario_mock')
 const { response } = require('../__mocks__/monetizze_response_mock')
-const { conexao } = require('../src/db')
+const { conexaoDb } = require('../src/db')
 
 jest.mock('../src/request', () => ({
     pegarTransacaoNaMonetizze: jest.fn()

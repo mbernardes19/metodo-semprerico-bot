@@ -34,7 +34,7 @@ const darBoasVindas = async (ctx) => {
     const pagamento = Markup.inlineKeyboard([
         [Markup.callbackButton('💳 Cartão de Crédito', 'cartao_de_credito')],
         [Markup.callbackButton('📄 Boleto', 'boleto')],
-        [Markup.callbackButton('🆓 Plano Gratuito', 'plano_gratuito')]
+        // [Markup.callbackButton('🆓 Plano Gratuito', 'plano_gratuito')]
     ])
     await ctx.reply('Você pagou em cartão de crédito, boleto ou contratou o plano gratuito de 1 mês?', Extra.markup(pagamento))
     return ctx.wizard.next()
