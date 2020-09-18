@@ -195,7 +195,7 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
   const usuariosATirarBloqueio = [];
   const usuariosBanidos = [];
   usuarios.forEach((usuario) => {
-    if (usuario.kickado === 'N') {
+    if (usuario.dias_de_uso == 0 && usuario.kickado === 'N') {
       if (process.env.NODE_ENV === 'production') {
         usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id));
         usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id));
