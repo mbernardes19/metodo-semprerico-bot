@@ -36,7 +36,9 @@ const darBoasVindas = async (ctx) => {
         [Markup.callbackButton('📄 Boleto', 'boleto')],
         // [Markup.callbackButton('🆓 Plano Gratuito', 'plano_gratuito')]
     ])
-    await ctx.reply('Você pagou em cartão de crédito, boleto ou contratou o plano gratuito de 1 mês?', Extra.markup(pagamento))
+    // await ctx.reply('Você pagou em cartão de crédito, boleto ou contratou o plano gratuito de 1 mês?', Extra.markup(pagamento))
+    await ctx.reply('Você pagou em cartão de crédito ou boleto?', Extra.markup(pagamento));
+
     return ctx.wizard.next()
 }
 
