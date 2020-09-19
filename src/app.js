@@ -144,16 +144,14 @@ bot.use(stage.middleware());
 // });
 
 bot.command('n0t1f1c4c40', async (ctx) => {
-  const query = util.promisify(conexaoDb.query).bind(conexaoDb);
-  try {
-    const usuarios = await query(`select * from UsuarioGratuito where data_de_assinatura='2020-09-17'`);
-    console.log(usuarios)
-    const usuariosVencidos = await dao.banirUsuariosGratuitosDiasVencidos(usuarios, bot.telegram, conexaoDb);
-    // await dao.enviarMensagemPrivadaParaUsuariosGratuitosVencidos(usuariosVencidos, bot.telegram);
-    log('Fim - DEU TUDO CERTO');
-  } catch (err) {
-    log(`ERRO AO KICKAR USUÁRIOS${err}`);
-  }
+  // try {
+  //   const usuarios = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexaoDb);
+  //   const usuariosVencidos = await dao.banirUsuariosGratuitosDiasVencidos(usuarios, bot.telegram, conexaoDb);
+  //   await dao.enviarMensagemPrivadaParaUsuariosGratuitosVencidos(usuariosVencidos, bot.telegram);
+  //   log('Fim - DEU TUDO CERTO');
+  // } catch (err) {
+  //   log(`ERRO AO KICKAR USUÁRIOS${err}`);
+  // }
   // try {
   //     await Promise.allSettled(mensagensAEnviar)
   //     .then(res => res.forEach((result) => log(`Mensagem de emergência enviada a todos os usuários com sucesso! ${result.status}`)))

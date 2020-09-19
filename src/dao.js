@@ -195,7 +195,7 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
   const usuariosATirarBloqueio = [];
   const usuariosBanidos = [];
   usuarios.forEach((usuario) => {
-    if (usuario.dias_de_uso == 0 && usuario.kickado === 'N') {
+    if (usuario.dias_de_uso === 0 && usuario.kickado === 'N') {
       if (process.env.NODE_ENV === 'production') {
         usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id));
         usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id));
@@ -210,15 +210,30 @@ const banirUsuariosGratuitosDiasVencidos = async (usuarios, telegramClient) => {
       }
     }
   });
+
+  if (!Promise.allSettled) {
+    Promise.allSettled = (promises) => Promise.all(
+      promises.map((promise, i) => promise
+        .then((value) => ({
+          status: 'fulfilled',
+          value,
+        }))
+        .catch((reason) => ({
+          status: 'rejected',
+          reason,
+        }))),
+    );
+  }
+
   try {
     await Promise.allSettled(usuariosASeremBanidos)
-    .then(res => res.forEach((result) => log(`Banimento realizado! ${result.status} ${result.value}`)))
-    .catch(err => res.forEach((result) => log(`Erro ao banir ${result.status} ${result.value}`)))
+      .then((res) => res.forEach((result) => log(`Banimento realizado! ${result.status} ${result.value}`)))
+      .catch((err) => res.forEach((result) => log(`Erro ao banir ${result.status} ${result.value}`)));
     // await Promise.allSettled(usuariosATirarBloqueio)
     // .then(res => res.forEach((result) => log(`Bloqueio retirado! ${result.status} ${result.value}`)))
     // .catch(err => res.forEach((result) => log(`Erro ao retirar bloqueio ${result.status} ${result.value}`)))
     log('Usuários gratuitos vencidos banidos');
-    log(`Usuários banidos: ${usuariosBanidos.map(usuario => usuario.nome_completo)}`);
+    log(`Usuários banidos: ${usuariosBanidos.map((usuario) => usuario.nome_completo)}`);
     return usuariosBanidos;
   } catch (err) {
     throw err;
@@ -235,14 +250,14 @@ const enviarMensagemPrivadaParaUsuariosGratuitosVencidos = async (usuariosVencid
   });
   try {
     await Promise.allSettled(mensagensAEnviar)
-    .then(res => {
-      log(`${res.length} Receberam a mensagem!`)
-      res.forEach((result) => log(`Mensagem enviada! ${result.status} ${result.value}`))
-    })
-    .catch(err => {
-      log(`${res.length} Não receberam a mensagem!`)
-      res.forEach((result) => log(`Erro mandar mensagem ${result.status} ${result.value}`))
-    })
+      .then((res) => {
+        log(`${res.length} Receberam a mensagem!`);
+        res.forEach((result) => log(`Mensagem enviada! ${result.status} ${result.value}`));
+      })
+      .catch((err) => {
+        log(`${res.length} Não receberam a mensagem!`);
+        res.forEach((result) => log(`Erro mandar mensagem ${result.status} ${result.value}`));
+      });
     log('Usuários gratuitos vencidos removidos dos canais com sucesso');
   } catch (err) {
     throw err;
