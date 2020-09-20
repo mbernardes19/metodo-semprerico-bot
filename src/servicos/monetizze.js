@@ -24,6 +24,7 @@ const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
     try {
         const novosStatus = await Promise.all(novosStatusAsync)
         await dao.atualizarStatusDeAssinaturaDeUsuarios(usuarios, novosStatus, conexaoDb)
+        log(usuarios.map(usuario => usuario.nome_completo))
         log(`Status de assinatura de todos os usuários atualizado`)
     } catch (err) {
         throw err
@@ -73,16 +74,16 @@ const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
                     usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id))
                     usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id))
                 }
-                dadosUsuariosASeremBanidos.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
+                dadosUsuariosASeremBanidos.push(usuario.nome_completo)
                 return
             }
             usuariosASeremAvisados.push(mandarAvisoDeBanimento(usuario, telegramClient))
-            dadosUsuariosAvisados.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
+            dadosUsuariosAvisados.push(usuario.nome_completo)
             return
         } else {
             if (usuario.aviso_banimento > 0) {
                 usuariosATeremAvisosZerados.push(dao.zerarAvisoDeBanimento(usuario, conexaoDb))
-                dadosUsuariosComAvisosZerados.push({id: usuario.id, nomeCompleto: usuario.nome_completo, email: usuario.email})
+                dadosUsuariosComAvisosZerados.push(usuario.nome_completo)
             }
         }
     })

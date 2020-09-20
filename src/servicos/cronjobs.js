@@ -13,8 +13,19 @@ const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
     const telegramClient = cache.get('bot');
     try {
       const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexaoDb);
-      await atualizarStatusDeAssinaturaDeUsuarios(usuarios);
-      await banirUsuariosSeStatusNaoForAtivo(usuarios, telegramClient);
+      let comeco = 0;
+      let limite = 10;
+      const intervalId = setInterval(async () => {
+        await atualizarStatusDeAssinaturaDeUsuarios(usuarios.slice(comeco, limite));
+        await banirUsuariosSeStatusNaoForAtivo(usuarios.slice(comeco, limite), telegramClient);
+        if (limite >= usuarios.length) {
+          log('Todos usuários atualizados com sucesso');
+          clearInterval(intervalId);
+        } else {
+          comeco = limite;
+          limite += 10;
+        }
+      }, 10000);
       log('Status de assinatura de usuários atualizado com sucesso!');
     } catch (err) {
       await enviarEmailDeRelatorioDeErro(err);

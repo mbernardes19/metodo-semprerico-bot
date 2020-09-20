@@ -16,7 +16,8 @@ if (process.env.NODE_ENV === 'production') {
         port: process.env.DB_HOST_PORT_TEST,
         database: process.env.DB_DATABASE_TEST,
         user: process.env.DB_USER_TEST,
-        password: process.env.DB_PASSWORD_TEST
+        password: process.env.DB_PASSWORD_TEST,
+        dateStrings: true,
     })
 }
 
