@@ -23,6 +23,7 @@ const { SINAL } = require('./utils/regex');
 const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLink');
 const { enviarWhatsappValidacao } = require('./servicos/validarTelefone');
 const util = require('util');
+const { pegarTransacaoNaMonetizze } = require('./servicos/request')
 
 const cenaPlanoGratuito = require('./cenas/planoGratuito');
 const cenaPlanoPago = require('./cenas/planoPago');
@@ -107,43 +108,46 @@ const stage = new Stage([cenaPlanoPago], { ttl: 1500 });
 bot.use(session());
 bot.use(stage.middleware());
 
-// bot.command('canais', async (ctx) => {
-//   const usuarioExiste = await dao.usuarioGratuitoExiste(ctx.chat.id, conexaoDb);
-//   if (usuarioExiste) {
-//     const usuarioValido = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexaoDb);
-//     if (usuarioValido) {
-//       let linkCanal1;
-//       let linkCanal2;
-//       if (process.env.NODE_ENV === 'production') {
-//         linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS);
-//         linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE);
-//       } else {
-//         linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_TESTE);
-//         linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_TESTE);
-//       }
-//       console.log('LINK CANAL', linkCanal1);
-//       console.log('LINK CANAL', linkCanal2);
-//       const teclado = Markup.inlineKeyboard([
-//         Markup.urlButton('Canal Sinais Ricos', linkCanal1),
-//         Markup.urlButton('Canal Rico Vidente', linkCanal2),
-//       ]);
-//       try {
-//         await ctx.reply('É pra já!', Extra.markup(teclado));
-//       } catch (err) {
-//         if (err.response && err.response.error_code === 403) {
-//           return;
-//         }
-//         await ctx.reply('Ocorreu um erro ao gerar os links dos canais para você. Tente digitar o comando /canais novamentem, por favor.');
-//       }
-//     } else {
-//       await ctx.reply('Seu período gratuito de acesso aos canais do Método Sempre Rico expirou!\n\nCaso queira continuar em nossos canais VIP, faça aqui sua compra:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082.');
-//     }
-//   } else {
-//     await ctx.reply('Você ainda não ativou sua assinatura Monettize comigo. Digite o comando /start para começar!');
-//   }
-// });
+bot.command('canais', async (ctx) => {
+  const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
+  if (usuarioExiste) {
+    const usuarioValido = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb);
+    if (usuarioValido) {
+      let linkCanal1;
+      let linkCanal2;
+      if (process.env.NODE_ENV === 'production') {
+        linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS);
+        linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE);
+      } else {
+        linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_TESTE);
+        linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_TESTE);
+      }
+      console.log('LINK CANAL', linkCanal1);
+      console.log('LINK CANAL', linkCanal2);
+      const teclado = Markup.inlineKeyboard([
+        Markup.urlButton('Canal Sinais Ricos', linkCanal1),
+        Markup.urlButton('Canal Rico Vidente', linkCanal2),
+      ]);
+      try {
+        await ctx.reply('É pra já!', Extra.markup(teclado));
+      } catch (err) {
+        if (err.response && err.response.error_code === 403) {
+          return;
+        }
+        await ctx.reply('Ocorreu um erro ao gerar os links dos canais para você. Tente digitar o comando /canais novamente, por favor.');
+      }
+    } else {
+      await ctx.reply('Sua assinatura Monetizze não está ativa. Ative-a novamente para ter acesso aos canais exclusivos do Método Sempre Rico!');
+      // await ctx.reply('Seu período gratuito de acesso aos canais do Método Sempre Rico expirou!\n\nCaso queira continuar em nossos canais VIP, faça aqui sua compra:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082.');
+    }
+  } else {
+    await ctx.reply('Você ainda não ativou sua assinatura Monettize comigo. Digite o comando /start para começar!');
+  }
+});
 
 bot.command('n0t1f1c4c40', async (ctx) => {
+  // const resp = await pegarTransacaoNaMonetizze({email: 'nicoabreubr@gmail.com'});
+  // console.log(resp.dados.map(dado => console.log(dado.venda, dado.assinatura)));
   // try {
   //   const usuarios = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexaoDb);
   //   const usuariosVencidos = await dao.banirUsuariosGratuitosDiasVencidos(usuarios, bot.telegram, conexaoDb);

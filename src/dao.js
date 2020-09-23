@@ -87,6 +87,17 @@ const pegarTodosUsuariosGratuitosDoBancoDeDados = async (conexao) => {
   }
 };
 
+const usuarioExiste = async (id, conexao) => {
+  const query = util.promisify(conexao.query).bind(conexao);
+  try {
+    const resultado = await query(`select * from Usuario where id='${id}'`);
+    return resultado.length > 0;
+  } catch (err) {
+    throw err;
+  }
+};
+
+
 const usuarioExisteEValido = async (id, conexao) => {
   const query = util.promisify(conexao.query).bind(conexao);
   try {
@@ -362,6 +373,7 @@ module.exports = {
   adicionarUsuarioGratuitoAoBancoDeDados,
   verificarSeJaExisteUsuarioComCpf,
   limparBancoDeDados,
+  usuarioExiste,
   usuarioExisteEValido,
   usuarioGratuitoExiste,
   usuarioGratuitoExisteEValido,
