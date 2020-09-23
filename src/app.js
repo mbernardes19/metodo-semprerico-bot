@@ -445,7 +445,7 @@ app.get('/mensagem-doji', async (req, res) => {
 
 let PORT;
 if (process.env.NODE_ENV === 'production') {
-  PORT = process.env.PORT_METODO_SEMPRERICO_BOT_APP || process.env.PORT_APP || 3000;
+  PORT = process.env.PORT_METODO_SEMPRERICO_BOT_SRC_APP || process.env.PORT_APP || 3000;
 } else {
   PORT = 6000;
 }
