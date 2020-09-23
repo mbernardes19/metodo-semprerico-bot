@@ -381,6 +381,10 @@ app.post('/mensagem-doji', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.status(200).send('<h1>Olá!</h1>');
+});
+
 app.get('/mensagem-win', async (req, res) => {
   try {
     const [mensagemWin] = await dao.pegarMensagem('win', conexaoDb);
