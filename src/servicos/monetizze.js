@@ -7,17 +7,18 @@ const { log } = require('./logger');
 const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
   const { email } = await ctx.wizard.state.novoUsuario;
   try {
-    log(`Verificando compra de usuário na Monetizze ${JSON.stringify(response)}`);
     const response = await pegarTransacaoNaMonetizze({
       product: process.env.ID_PRODUTO, email, 'status[]': 2,
     });
+    log(`Verificando compra de usuário na Monetizze ${JSON.stringify(response)}`);
     if (response.recordCount != 0) {
       return true;
     } else {
-      const response = await pegarTransacaoNaMonetizze({
+      const response2 = await pegarTransacaoNaMonetizze({
         product: process.env.ID_PRODUTO, email, 'status[]': 6,
       });
-      if (response.recordCount != 0) {
+      log(`Verificando compra de usuário na Monetizze ${JSON.stringify(response2)}`);
+      if (response2.recordCount != 0) {
         return true;
       }
       return false;
