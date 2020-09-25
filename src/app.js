@@ -58,7 +58,7 @@ let SERVIDOR_TRADING = process.env.NODE_ENV === 'production'
 
 const enviarSinalParaCompra = async (sinal, ctx) => {
   try {
-    return await axios.post(`${process.env.SERVIDOR_TRADING_TEST}/check-signal`, sinal);
+    return await axios.post(`http://45.93.100.211/nodejs/check-signal`, sinal);
   } catch (err) {
     log('Moeda indisponível na binária e na digital');
     log(err);
