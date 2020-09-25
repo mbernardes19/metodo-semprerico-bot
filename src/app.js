@@ -24,6 +24,9 @@ const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLin
 
 const cenaPlanoPago = require('./cenas/planoPago');
 
+console.log('TRADING', process.env.SERVIDOR_TRADING)
+console.log('TRADING TEST', process.env.SERVIDOR_TRADING_TESTE)
+
 const { conexaoDb } = db;
 conexaoDb.connect((err) => {
   if (err) return log(err);
