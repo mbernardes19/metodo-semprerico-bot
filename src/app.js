@@ -147,8 +147,6 @@ bot.on('channel_post', async (ctx) => {
 
       let response;
 
-      cache.set('channelMessageId', ctx.channelPost.message_id);
-
       setTimeout(async () => {
         response = await enviarSinalParaCompra(sinal, ctx);
         if (response.status === 400) {
@@ -191,6 +189,8 @@ app.post('/operation-result', async (req, res) => {
   const resultadoOperacao = req.body
   if (resultadoOperacao.result === 'WIN') {
     log('WIN');
+    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
@@ -198,6 +198,8 @@ app.post('/operation-result', async (req, res) => {
   }
   if (resultadoOperacao.result === 'LOSS') {
     log('LOSS');
+    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
@@ -205,6 +207,9 @@ app.post('/operation-result', async (req, res) => {
   }
   if (resultadoOperacao.result === 'DOJI') {
     log('DOJI LOSS');
+    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
