@@ -44,7 +44,9 @@ const extrairSinalDeMensagemDeCanal = (ctx) => {
     const action = mensagem[1];
     const time = mensagem[2];
     const expiration = 5;
-    const telegramMessageId = ctx.channelPost.message_id;
+    const telegramMessageId = ctx.channelPost.chat.id === process.env.ID_CANAL_RICO_VIDENTE ?
+      parseInt(`10${ctx.channelPost.message_id}`, 10) :
+      parseInt(`20${ctx.channelPost.message_id}`, 10)
     return {
       asset, action, time, expiration, telegramMessageId
     };
@@ -181,6 +183,7 @@ app.use(bodyParser.json());
 app.post('/operation-result', async (req, res) => {
   const telegramClient = bot.telegram;
   const channelMessageId = req.body.telegramMessageId
+  const channelToSend = channelMessageId.toString().substring(0, 2) === "10" ? process.env.ID_CANAL_RICO_VIDENTE : process.env.ID_CANAL_TESTE;
 
   const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
   const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
@@ -191,30 +194,23 @@ app.post('/operation-result', async (req, res) => {
   const resultadoOperacao = req.body
   if (resultadoOperacao.result === 'WIN') {
     log('WIN');
-    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
-    // await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendMessage(channelToSend, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(channelToSend, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
     return;
   }
   if (resultadoOperacao.result === 'LOSS') {
     log('LOSS');
-    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    // await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
     return;
   }
   if (resultadoOperacao.result === 'DOJI') {
     log('DOJI LOSS');
-    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    // await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendMessage(channelToSend, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
     return;
   }
