@@ -128,7 +128,7 @@ bot.on('channel_post', async (ctx) => {
     log('CANAL SINAIS RICOS');
   }
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
-  if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
+  if (ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
     try {
       const sinal = extrairSinalDeMensagemDeCanal(ctx);
       const horaSinal = parseInt(sinal.time.substring(0, 2));
@@ -191,8 +191,8 @@ app.post('/operation-result', async (req, res) => {
   const resultadoOperacao = req.body
   if (resultadoOperacao.result === 'WIN') {
     log('WIN');
-    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
@@ -200,8 +200,8 @@ app.post('/operation-result', async (req, res) => {
   }
   if (resultadoOperacao.result === 'LOSS') {
     log('LOSS');
-    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     res.status(200).send();
@@ -209,9 +209,9 @@ app.post('/operation-result', async (req, res) => {
   }
   if (resultadoOperacao.result === 'DOJI') {
     log('DOJI LOSS');
-    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendSticker(process.env.ID_CANAL_RICO_VIDENTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    // await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
