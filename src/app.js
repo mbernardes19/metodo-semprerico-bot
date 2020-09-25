@@ -21,11 +21,7 @@ const { cache } = require('./servicos/cache');
 const { enviarEmailDeRelatorioDeErro } = require('./email');
 const { SINAL } = require('./utils/regex');
 const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLink');
-const { enviarWhatsappValidacao } = require('./servicos/validarTelefone');
-const util = require('util');
-const { pegarTransacaoNaMonetizze } = require('./servicos/request')
 
-const cenaPlanoGratuito = require('./cenas/planoGratuito');
 const cenaPlanoPago = require('./cenas/planoPago');
 
 const { conexaoDb } = db;
@@ -37,24 +33,20 @@ const tokenBot = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN :
 const bot = new Telegraf(tokenBot);
 cache.set('bot', bot.telegram);
 
-const verificarSeJaExisteUsuarioComCpf = async (cpf) => {
-  const usuarioComMesmoCpf = await dao.verificarSeJaExisteUsuarioComCpf(cpf, conexaoDb);
-  return usuarioComMesmoCpf.length > 0;
-};
-
-const extrairSinalDeMensagemDeCanal = (mensagemDeCanal) => {
+const extrairSinalDeMensagemDeCanal = (ctx) => {
   try {
-    const mensagem = mensagemDeCanal.match(SINAL);
+    const mensagem = ctx.channelPost.text.match(SINAL);
     console.log('MENSAGEM PARSEADA', mensagem);
-    const par = mensagem[0];
-    const ordem = mensagem[1];
-    const horario = mensagem[2];
-    const expiracao = 5;
+    const asset = mensagem[0];
+    const action = mensagem[1];
+    const time = mensagem[2];
+    const expiration = 5;
+    const telegramMessageId = ctx.channelPost.message_id;
     return {
-      par, ordem, horario, expiracao,
+      asset, action, time, expiration, telegramMessageId
     };
   } catch (err) {
-    throw new Error(`Mensagem não tem padrão de sinal: ${mensagemDeCanal}`);
+    throw new Error(`Mensagem não tem padrão de sinal: ${ctx.channelPost.text}`);
   }
 };
 
@@ -77,13 +69,13 @@ const criarSinalGale = (mensagemDeCanal) => {
   return { ...sinalAnterior, horario: horarioAtual };
 };
 
-let SERVIDOR_IQ = process.env.NODE_ENV === 'production'
-  ? process.env.SERVIDOR_IQ : process.env.SERVIDOR_IQ_TEST;
+let SERVIDOR_TRADING = process.env.NODE_ENV === 'production'
+  ? process.env.SERVIDOR_TRADING : process.env.SERVIDOR_TRADING_TEST;
 
 const enviarSinalParaCompra = async (sinal, ctx) => {
-  SERVIDOR_IQ = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_IQ_TEST : process.env.SERVIDOR_IQ;
+  SERVIDOR_TRADING = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_TRADING_TEST : process.env.SERVIDOR_TRADING;
   try {
-    return await axios.post(`${SERVIDOR_IQ}/buy`, sinal);
+    return await axios.post(`${SERVIDOR_TRADING}/check-signal`, sinal);
   } catch (err) {
     log('Moeda indisponível na binária e na digital');
     log(err);
@@ -92,10 +84,10 @@ const enviarSinalParaCompra = async (sinal, ctx) => {
 };
 
 const checarResultadoCompra = async (responseCompra, ctx) => {
-  SERVIDOR_IQ = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_IQ_TEST : process.env.SERVIDOR_IQ;
+  SERVIDOR_TRADING = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_TRADING_TEST : process.env.SERVIDOR_TRADING;
   try {
     log(`ID ${responseCompra}`);
-    return await axios.post(`${SERVIDOR_IQ}/check_win`, { idCompra: responseCompra.idCompra, isDigital: responseCompra.isDigital });
+    return await axios.post(`${SERVIDOR_TRADING}/check_win`, { idCompra: responseCompra.idCompra, isDigital: responseCompra.isDigital });
   } catch (err) {
     log('Moeda indisponível na binária e na digital');
     log(err);
@@ -145,64 +137,6 @@ bot.command('canais', async (ctx) => {
   }
 });
 
-bot.command('n0t1f1c4c40', async (ctx) => {
-  // const resp = await pegarTransacaoNaMonetizze({email: 'nicoabreubr@gmail.com'});
-  // console.log(resp.dados.map(dado => console.log(dado.venda, dado.assinatura)));
-  // try {
-  //   const usuarios = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexaoDb);
-  //   const usuariosVencidos = await dao.banirUsuariosGratuitosDiasVencidos(usuarios, bot.telegram, conexaoDb);
-  //   await dao.enviarMensagemPrivadaParaUsuariosGratuitosVencidos(usuariosVencidos, bot.telegram);
-  //   log('Fim - DEU TUDO CERTO');
-  // } catch (err) {
-  //   log(`ERRO AO KICKAR USUÁRIOS${err}`);
-  // }
-  // try {
-  //     await Promise.allSettled(mensagensAEnviar)
-  //     .then(res => res.forEach((result) => log(`Mensagem de emergência enviada a todos os usuários com sucesso! ${result.status}`)))
-  //     .catch(err => res.forEach((result) => log(`Erro ao enviar mensagem de emergência pra todos usuários ${result.status}`)))
-  // } catch (err) {
-  //     await enviarEmailDeRelatorioDeErro(err, ctx.chat.id)
-  //     logError('Erro ao enviar notificação pra todos usuários', err)
-  // }
-});
-
-bot.command('3m3rg3nc14', async (ctx) => {
-  const linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS);
-  const linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE);
-  const teclado = Markup.inlineKeyboard([
-    Markup.urlButton('Canal Sinais Ricos', linkCanal1),
-    Markup.urlButton('Canal Rico Vidente', linkCanal2),
-  ]);
-  const idsUsuariosGratuitos = await dao.pegarIdDeTodosUsuariosGratuitos(conexaoDb);
-  const mensagensAEnviar = [];
-  const desbanirDoSinaisRicos = [];
-  const desbanirDoRicoVidente = [];
-  const mensagem = 'Fizemos uma atualização no meu banco de dados hoje que pode ter tido alguns efeitos não esperados... 😵 Caso os canais do Método Sempre Rico não estejam aparecendo mais pra você, estou te enviando de novo os links de acesso a eles!';
-  idsUsuariosGratuitos.map((usuario) => {
-    mensagensAEnviar.push(bot.telegram.sendMessage(usuario.id, mensagem, Extra.markup(teclado)));
-    desbanirDoRicoVidente.push(bot.telegram.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, usuario.id));
-    desbanirDoSinaisRicos.push(bot.telegram.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, usuario.id));
-  });
-
-  try {
-    await Promise.allSettled(mensagensAEnviar)
-      .then((res) => res.forEach((result) => log(`Mensagem de emergência enviada a todos os usuários com sucesso! ${result.status}`)))
-      .catch((err) => res.forEach((result) => log(`Erro ao enviar mensagem de emergência pra todos usuários ${result.status}`)));
-
-    await Promise.allSettled(desbanirDoRicoVidente)
-      .then((res) => res.forEach((result) => log(`Usuário desbanido do RICO VIDENTE! ${result.status}`)))
-      .catch((err) => res.forEach((result) => log(`Erro desbanir usário do RICO VIDENTE ${result.status}`)));
-
-    await Promise.allSettled(desbanirDoSinaisRicos)
-      .then((res) => res.forEach((result) => log(`Usuário desbanido do SINAIS RICOS! ${result.status}`)))
-      .catch((err) => res.forEach((result) => log(`Erro desbanir usário do SINAIS RICOS ${result.status}`)));
-  } catch (err) {
-    await enviarEmailDeRelatorioDeErro(err, ctx.chat.id);
-    log(err);
-    log('Erro ao enviar mensagem de emergência pra todos usuários');
-  }
-});
-
 bot.command('start', async (ctx) => {
   try {
     await bot.telegram.sendMessage(ctx.chat.id, '🦁');
@@ -216,6 +150,93 @@ bot.command('start', async (ctx) => {
   }
 });
 
+// bot.on('channel_post', async (ctx) => {
+//   log(ctx.channelPost.chat.id);
+//   if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE) {
+//     log('CANAL RICO VIDENTE');
+//   }
+//   if (ctx.channelPost.chat.id == process.env.ID_CANAL_SINAIS_RICOS) {
+//     log('CANAL SINAIS RICOS');
+//   }
+//   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
+//   if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
+//     try {
+//       const sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text);
+//       const horaSinal = parseInt(sinal.horario.substring(0, 2));
+//       const minutoSinal = parseInt(sinal.horario.substring(3, 5));
+//       process.env.TZ = 'America/Sao_Paulo';
+//       const agora = new Date();
+//       const agoraStr = new Date().toISOString();
+//       console.log(horaSinal);
+//       console.log(minutoSinal);
+//       const sinalAgora = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), horaSinal, minutoSinal, 0);
+//       const sinalAgoraStr = sinalAgora.toISOString();
+
+//       console.log('AGORA', agoraStr);
+//       console.log('SINALAGORA', sinalAgoraStr);
+//       const diff = Math.abs(differenceInMilliseconds(parseISO(agoraStr), parseISO(sinalAgoraStr)));
+
+//       console.log('DIFF', diff);
+
+//       const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
+//       const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
+//       const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexaoDb);
+//       const [STICKER_LOSS] = await dao.pegarSticker('loss', conexaoDb);
+//       const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexaoDb);
+
+//       let response;
+
+//       setTimeout(async () => {
+//         response = await enviarSinalParaCompra(sinal, ctx);
+//         log(`RESPONSE DA COMPRA, ${response.data}`);
+//         if (!response.data.idCompra) {
+//           log('Moeda indisponível na binária e na digital');
+//           // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
+//           return;
+//         }
+//         let resultado;
+//         setTimeout(async () => {
+//           resultado = await checarResultadoCompra(response.data, ctx);
+//           log(`WIN OU LOSS? ${resultado.data}`);
+//           if (resultado.data > 0) {
+//             log('WIN');
+//             log(resultado.data);
+//             await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//             await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//           } else {
+//             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text), ctx);
+//             setTimeout(async () => {
+//               res = await checarResultadoCompra(resp.data, ctx);
+//               if (res.data > 0) {
+//                 log('WIN');
+//                 log(res.data);
+//                 await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//                 await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//               }
+//               if (res.data === 0) {
+//                 log('DOJI LOSS');
+//                 log(res.data);
+//                 await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//                 await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//                 await ctx.reply(MENSAGEM_DOJI.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//               }
+//               if (res.data < 0) {
+//                 log('LOSS');
+//                 log(res.data);
+//                 await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//                 await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
+//               }
+//             }, 294000);
+//           }
+//         }, 294000);
+//       }, diff);
+//     } catch (err) {
+//       await enviarEmailDeRelatorioDeErro(ctx.channelPost.text, ctx.chat.id);
+//       log(err);
+//     }
+//   }
+// });
+
 bot.on('channel_post', async (ctx) => {
   log(ctx.channelPost.chat.id);
   if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE) {
@@ -227,9 +248,9 @@ bot.on('channel_post', async (ctx) => {
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
   if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
     try {
-      const sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text);
-      const horaSinal = parseInt(sinal.horario.substring(0, 2));
-      const minutoSinal = parseInt(sinal.horario.substring(3, 5));
+      const sinal = extrairSinalDeMensagemDeCanal(ctx);
+      const horaSinal = parseInt(sinal.time.substring(0, 2));
+      const minutoSinal = parseInt(sinal.time.substring(3, 5));
       process.env.TZ = 'America/Sao_Paulo';
       const agora = new Date();
       const agoraStr = new Date().toISOString();
@@ -244,57 +265,17 @@ bot.on('channel_post', async (ctx) => {
 
       console.log('DIFF', diff);
 
-      const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
-      const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
-      const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexaoDb);
-      const [STICKER_LOSS] = await dao.pegarSticker('loss', conexaoDb);
-      const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexaoDb);
-
       let response;
+
+      cache.set('channelMessageId', ctx.channelPost.message_id);
 
       setTimeout(async () => {
         response = await enviarSinalParaCompra(sinal, ctx);
-        log(`RESPONSE DA COMPRA, ${response.data}`);
-        if (!response.data.idCompra) {
-          log('Moeda indisponível na binária e na digital');
-          // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
+        if (response.status === 400) {
+          log('Par indisponível no momento');
           return;
         }
-        let resultado;
-        setTimeout(async () => {
-          resultado = await checarResultadoCompra(response.data, ctx);
-          log(`WIN OU LOSS? ${resultado.data}`);
-          if (resultado.data > 0) {
-            log('WIN');
-            log(resultado.data);
-            await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-            await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-          } else {
-            const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text), ctx);
-            setTimeout(async () => {
-              res = await checarResultadoCompra(resp.data, ctx);
-              if (res.data > 0) {
-                log('WIN');
-                log(res.data);
-                await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-                await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-              }
-              if (res.data === 0) {
-                log('DOJI LOSS');
-                log(res.data);
-                await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-                await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-                await ctx.reply(MENSAGEM_DOJI.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-              }
-              if (res.data < 0) {
-                log('LOSS');
-                log(res.data);
-                await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-                await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-              }
-            }, 294000);
-          }
-        }, 294000);
+        log(`Sinal enviado!`);
       }, diff);
     } catch (err) {
       await enviarEmailDeRelatorioDeErro(ctx.channelPost.text, ctx.chat.id);
@@ -316,6 +297,43 @@ comecarValidacaoDeLinks();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+app.post('/operation-result', async (req, res) => {
+  // const ctxStr = JSON.parse(cache.get('channelCtxStr'));
+  // console.log(ctxStr);
+  const telegramClient = bot.telegram;
+  const channelMessageId = req.body.telegramMessageId
+
+  const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
+  const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
+  const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexaoDb);
+  const [STICKER_LOSS] = await dao.pegarSticker('loss', conexaoDb);
+  const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexaoDb);
+
+  const resultadoOperacao = req.body
+  if (resultadoOperacao.result === 'WIN') {
+    log('WIN');
+    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
+    res.status(200).send();
+    return;
+  }
+  if (resultadoOperacao.result === 'LOSS') {
+    log('LOSS');
+    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    res.status(200).send();
+    return;
+  }
+  if (resultadoOperacao.result === 'DOJI') {
+    log('DOJI LOSS');
+    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendSticker(process.env.ID_CANAL_TESTE, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+    await telegramClient.sendMessage(process.env.ID_CANAL_TESTE, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
+    res.status(200).send();
+    return;
+  }
+});
 
 app.post('/mensagem-win', async (req, res) => {
   log(req.body);
