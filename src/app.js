@@ -55,9 +55,6 @@ const extrairSinalDeMensagemDeCanal = (ctx) => {
   }
 };
 
-let SERVIDOR_TRADING = process.env.NODE_ENV === 'production'
-  ? process.env.SERVIDOR_TRADING : process.env.SERVIDOR_TRADING_TEST;
-
 const enviarSinalParaCompra = async (sinal, ctx) => {
   try {
     return await axios.post(`http://45.93.100.211/nodejs/check-signal`, sinal);
@@ -182,14 +179,17 @@ app.use(bodyParser.json());
 
 app.post('/operation-result', async (req, res) => {
   const telegramClient = bot.telegram;
-  const channelMessageId = req.body.telegramMessageId
-  const channelToSend = channelMessageId.toString().substring(0, 2) === "10" ? process.env.ID_CANAL_RICO_VIDENTE : process.env.ID_CANAL_TESTE;
+  const channelMessageId = parseInt(req.body.telegramMessageId.toString().substring(1), 10)
+  const channelToSend = req.body.telegramMessageId.toString().substring(0, 2) === "10" ? process.env.ID_CANAL_RICO_VIDENTE : process.env.ID_CANAL_TESTE;
 
   const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
   const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
   const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexaoDb);
   const [STICKER_LOSS] = await dao.pegarSticker('loss', conexaoDb);
   const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexaoDb);
+
+  console.log('MESSAGE ID',channelMessageId)
+  console.log('CHANNEL TO SEND', channelToSend)
 
   const resultadoOperacao = req.body
   if (resultadoOperacao.result === 'WIN') {
