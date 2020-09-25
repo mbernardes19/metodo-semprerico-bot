@@ -50,25 +50,6 @@ const extrairSinalDeMensagemDeCanal = (ctx) => {
   }
 };
 
-const criarSinalGale = (mensagemDeCanal) => {
-  const agora = new Date();
-  let horarioAtual;
-  if (agora.getHours() < 10) {
-    horarioAtual = `0${agora.getHours()}:`;
-  } else {
-    horarioAtual = `${agora.getHours()}:`;
-  }
-  if (agora.getMinutes() < 10) {
-    horarioAtual += `0${agora.getMinutes()}:10`;
-  } else {
-    horarioAtual += `${agora.getMinutes()}:10`;
-  }
-  const sinalAnterior = extrairSinalDeMensagemDeCanal(mensagemDeCanal);
-  log('MENSAGEM GALE');
-  log(JSON.stringify({ ...sinalAnterior, horario: horarioAtual }));
-  return { ...sinalAnterior, horario: horarioAtual };
-};
-
 let SERVIDOR_TRADING = process.env.NODE_ENV === 'production'
   ? process.env.SERVIDOR_TRADING : process.env.SERVIDOR_TRADING_TEST;
 
@@ -79,19 +60,6 @@ const enviarSinalParaCompra = async (sinal, ctx) => {
   } catch (err) {
     log('Moeda indisponível na binária e na digital');
     log(err);
-    // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
-  }
-};
-
-const checarResultadoCompra = async (responseCompra, ctx) => {
-  SERVIDOR_TRADING = ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE ? process.env.SERVIDOR_TRADING_TEST : process.env.SERVIDOR_TRADING;
-  try {
-    log(`ID ${responseCompra}`);
-    return await axios.post(`${SERVIDOR_TRADING}/check_win`, { idCompra: responseCompra.idCompra, isDigital: responseCompra.isDigital });
-  } catch (err) {
-    log('Moeda indisponível na binária e na digital');
-    log(err);
-    // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
   }
 };
 
@@ -130,7 +98,6 @@ bot.command('canais', async (ctx) => {
       }
     } else {
       await ctx.reply('Sua assinatura Monetizze não está ativa. Ative-a novamente para ter acesso aos canais exclusivos do Método Sempre Rico!');
-      // await ctx.reply('Seu período gratuito de acesso aos canais do Método Sempre Rico expirou!\n\nCaso queira continuar em nossos canais VIP, faça aqui sua compra:\n\nAcesso somente as Salas Vips (sinais que VOCÊ NÃO PRECISA ENTENDER, basta seguir) + Gerenciamento sempre Rico:\n✅ https://app.monetizze.com.br/checkout/DXD93081\n\nAcesso às Salas Vips + Curso Completo (aprenda de uma vez por todas) + Gerenciamento Sempre Rico:\n✅https://app.monetizze.com.br/checkout/DYX93082.');
     }
   } else {
     await ctx.reply('Você ainda não ativou sua assinatura Monettize comigo. Digite o comando /start para começar!');
@@ -149,93 +116,6 @@ bot.command('start', async (ctx) => {
     log(err);
   }
 });
-
-// bot.on('channel_post', async (ctx) => {
-//   log(ctx.channelPost.chat.id);
-//   if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE) {
-//     log('CANAL RICO VIDENTE');
-//   }
-//   if (ctx.channelPost.chat.id == process.env.ID_CANAL_SINAIS_RICOS) {
-//     log('CANAL SINAIS RICOS');
-//   }
-//   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
-//   if (ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
-//     try {
-//       const sinal = extrairSinalDeMensagemDeCanal(ctx.channelPost.text);
-//       const horaSinal = parseInt(sinal.horario.substring(0, 2));
-//       const minutoSinal = parseInt(sinal.horario.substring(3, 5));
-//       process.env.TZ = 'America/Sao_Paulo';
-//       const agora = new Date();
-//       const agoraStr = new Date().toISOString();
-//       console.log(horaSinal);
-//       console.log(minutoSinal);
-//       const sinalAgora = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), horaSinal, minutoSinal, 0);
-//       const sinalAgoraStr = sinalAgora.toISOString();
-
-//       console.log('AGORA', agoraStr);
-//       console.log('SINALAGORA', sinalAgoraStr);
-//       const diff = Math.abs(differenceInMilliseconds(parseISO(agoraStr), parseISO(sinalAgoraStr)));
-
-//       console.log('DIFF', diff);
-
-//       const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
-//       const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
-//       const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexaoDb);
-//       const [STICKER_LOSS] = await dao.pegarSticker('loss', conexaoDb);
-//       const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexaoDb);
-
-//       let response;
-
-//       setTimeout(async () => {
-//         response = await enviarSinalParaCompra(sinal, ctx);
-//         log(`RESPONSE DA COMPRA, ${response.data}`);
-//         if (!response.data.idCompra) {
-//           log('Moeda indisponível na binária e na digital');
-//           // await ctx.reply('Moeda não disponível pra M5 na Iq agora, galera', Extra.inReplyTo(ctx.channelPost.message_id))
-//           return;
-//         }
-//         let resultado;
-//         setTimeout(async () => {
-//           resultado = await checarResultadoCompra(response.data, ctx);
-//           log(`WIN OU LOSS? ${resultado.data}`);
-//           if (resultado.data > 0) {
-//             log('WIN');
-//             log(resultado.data);
-//             await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//             await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//           } else {
-//             const resp = await enviarSinalParaCompra(criarSinalGale(ctx.channelPost.text), ctx);
-//             setTimeout(async () => {
-//               res = await checarResultadoCompra(resp.data, ctx);
-//               if (res.data > 0) {
-//                 log('WIN');
-//                 log(res.data);
-//                 await ctx.reply(MENSAGEM_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//                 await ctx.replyWithSticker(STICKER_WIN.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//               }
-//               if (res.data === 0) {
-//                 log('DOJI LOSS');
-//                 log(res.data);
-//                 await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//                 await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//                 await ctx.reply(MENSAGEM_DOJI.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//               }
-//               if (res.data < 0) {
-//                 log('LOSS');
-//                 log(res.data);
-//                 await ctx.reply(MENSAGEM_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//                 await ctx.replyWithSticker(STICKER_LOSS.texto, Extra.inReplyTo(ctx.channelPost.message_id));
-//               }
-//             }, 294000);
-//           }
-//         }, 294000);
-//       }, diff);
-//     } catch (err) {
-//       await enviarEmailDeRelatorioDeErro(ctx.channelPost.text, ctx.chat.id);
-//       log(err);
-//     }
-//   }
-// });
 
 bot.on('channel_post', async (ctx) => {
   log(ctx.channelPost.chat.id);
@@ -286,7 +166,7 @@ bot.on('channel_post', async (ctx) => {
 
 bot.on('message', async (ctx) => {
   try {
-    await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
+      await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
   } catch (err) {
 
   }
@@ -299,8 +179,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.post('/operation-result', async (req, res) => {
-  // const ctxStr = JSON.parse(cache.get('channelCtxStr'));
-  // console.log(ctxStr);
   const telegramClient = bot.telegram;
   const channelMessageId = req.body.telegramMessageId
 
