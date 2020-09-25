@@ -1,11 +1,11 @@
 const Composer = require('telegraf/composer');
-const Markup = require('telegraf/markup');
 const Extra = require('telegraf/extra');
 const { log, logError } = require('../../servicos/logger');
 const { confirmado, negado, validar } = require('../../servicos/validacao');
 const { enviarSmsDeValidacao } = require('./validarTelefone');
 const { pegarTodosNumerosBloqueados } = require('../../dao');
 const { conexaoDb } = require('../../db');
+const Teclado = require('../../utils/Teclado');
 
 const confirmacaoPositiva = async (ctx) => {
   const validacao = validar('telefone', ctx.wizard.state.novoUsuario.telefone);
@@ -21,8 +21,7 @@ const confirmacaoPositiva = async (ctx) => {
       await ctx.reply(`Foi enviado agora um SMS com um número de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, diga-me aqui qual foi o número.`);
       setTimeout(async () => {
         if (ctx.wizard.cursor === 8 && !ctx.wizard.state.numeroValidacaoEnviado) {
-          const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')]);
-          await ctx.reply(`O SMS ainda não chegou?? 😱😱 Seu celular tem Whatsapp? Quer que eu envie o número pro ${ctx.wizard.state.novoUsuario.telefone} por ele?`, Extra.markup(confirmacao));
+          await ctx.reply(`O SMS ainda não chegou?? 😱😱 Seu celular tem Whatsapp? Quer que eu envie o número pro ${ctx.wizard.state.novoUsuario.telefone} por ele?`, Extra.markup(Teclado.CONFIRMACAO));
           return ctx.wizard.back();
         }
       }, 30000);
@@ -45,8 +44,7 @@ const pegarTelefone = async (ctx) => {
   try {
     ctx.wizard.state.tentativasSms = 0;
     ctx.wizard.state.tentativasWhatsapp = 0;
-    const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')]);
-    await ctx.reply(`Confirmando, seu telefone é ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao));
+    await ctx.reply(`Confirmando, seu telefone é ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(Teclado.CONFIRMACAO));
     ctx.wizard.state.novoUsuario.telefone = ctx.message.text.replace(/ /g, '');
     log('Telefone definido');
     log(ctx.wizard.state.novoUsuario);

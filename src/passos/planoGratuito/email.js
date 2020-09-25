@@ -1,11 +1,11 @@
 const Composer = require('telegraf/composer')
-const Markup = require('telegraf/markup')
 const Extra = require('telegraf/extra')
 const { log } = require('../../servicos/logger')
 const { confirmado, negado } = require('../../servicos/validacao')
 const dao = require('../../dao')
 const { validar } = require('../../servicos/validacao')
 const { conexaoDb } = require('../../db')
+const Teclado = require('../../utils/Teclado');
 
 const confirmacaoPositiva = async (ctx) => {
     const validacao = validar('email', ctx.wizard.state.novoUsuario.email);
@@ -30,8 +30,7 @@ const pegarEmail = async (ctx) => {
         await ctx.answerCbQuery()
     }
     try {
-        const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')])
-        await ctx.reply(`Confirmando, seu email é ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(confirmacao))
+        await ctx.reply(`Confirmando, seu email é ${ctx.message.text}, certo?`, Extra.inReplyTo(ctx.message.message_id).markup(Teclado.CONFIRMACAO))
         ctx.wizard.state.novoUsuario.email = ctx.message.text
         log(`Email definido`)
         log(ctx.wizard.state.novoUsuario)

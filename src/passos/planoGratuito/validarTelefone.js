@@ -8,6 +8,7 @@ const UsuarioGratuito = require('../../model/usuario_gratuito');
 const { pegarLinkDeChat } = require('../../servicos/chatLink');
 const { enviarSmsDeValidacao, enviarWhatsappValidacao } = require('../../servicos/validarTelefone');
 const { confirmado, negado } = require('../../servicos/validacao');
+const Teclado = require('../../utils/Teclado');
 
 const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
   const data = new Date();
@@ -166,8 +167,7 @@ const validarTelefone = async (ctx) => {
 
   if (ctx.wizard.state.tentativasSms < 2) {
     ctx.wizard.state.numeroValidacaoEnviado = true;
-    const confirmacao = Markup.inlineKeyboard([Markup.callbackButton('👍 Sim', 'sim'), Markup.callbackButton('👎 Não', 'nao')]);
-    ctx.reply(`Esse número não é igual ao enviado no SMS. Quer que eu envie um SMS novamente para ${ctx.wizard.state.novoUsuario.telefone}?`, Extra.markup(confirmacao));
+    ctx.reply(`Esse número não é igual ao enviado no SMS. Quer que eu envie um SMS novamente para ${ctx.wizard.state.novoUsuario.telefone}?`, Extra.markup(Teclado.CONFIRMACAO));
     return ctx.wizard.selectStep(6);
   }
 
