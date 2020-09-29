@@ -127,7 +127,7 @@ bot.on('channel_post', async (ctx) => {
     log('CANAL SINAIS RICOS');
   }
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
-  if (ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
+  if ((ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE) && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
     try {
       const sinal = extrairSinalDeMensagemDeCanal(ctx);
       const horaSinal = parseInt(sinal.time.substring(0, 2));
