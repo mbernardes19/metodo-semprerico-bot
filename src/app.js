@@ -216,6 +216,11 @@ app.post('/operation-result', async (req, res) => {
   }
 });
 
+app.post('/signal-failed', async (req, res) => {
+  await bot.telegram.sendMessage(721557882, req.body.message)
+  res.status(200).send();
+});
+
 app.post('/mensagem-win', async (req, res) => {
   log(req.body);
   const { mensagemWin } = req.body;
