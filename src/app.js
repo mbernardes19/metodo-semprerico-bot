@@ -166,6 +166,7 @@ bot.on('channel_post', async (ctx) => {
 bot.on('message', async (ctx) => {
   try {
       await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
+      log(`${ctx.chat.id}`);
   } catch (err) {
 
   }
