@@ -166,7 +166,6 @@ bot.on('channel_post', async (ctx) => {
 bot.on('message', async (ctx) => {
   try {
       await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
-      log(`${ctx.chat.id}`);
   } catch (err) {
 
   }
@@ -219,6 +218,7 @@ app.post('/operation-result', async (req, res) => {
 
 app.post('/signal-failed', async (req, res) => {
   await bot.telegram.sendMessage(721557882, req.body.message)
+  await bot.telegram.sendMessage(923769783, req.body.message)
   res.status(200).send();
 });
 
