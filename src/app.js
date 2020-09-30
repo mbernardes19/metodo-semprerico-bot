@@ -36,22 +36,22 @@ const tokenBot = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN :
 const bot = new Telegraf(tokenBot);
 cache.set('bot', bot.telegram);
 
-const extrairSinalDeMensagemDeCanal = (ctx) => {
+const extrairSinalDeMensagemDeCanal = (mensagemCanal, chatId) => {
   try {
-    const mensagem = ctx.channelPost.text.match(SINAL);
+    const mensagem = mensagemCanal.texto.match(SINAL);
     console.log('MENSAGEM PARSEADA', mensagem);
     const asset = mensagem[0];
     const action = mensagem[1];
     const time = mensagem[2];
     const expiration = 5;
-    const telegramMessageId = ctx.channelPost.chat.id === process.env.ID_CANAL_RICO_VIDENTE ?
-      parseInt(`10${ctx.channelPost.message_id}`, 10) :
-      parseInt(`20${ctx.channelPost.message_id}`, 10)
+    const telegramMessageId = chatId == process.env.ID_CANAL_RICO_VIDENTE ?
+      parseInt(`10${mensagemCanal.id}`, 10) :
+      parseInt(`20${mensagemCanal.id}`, 10)
     return {
       asset, action, time, expiration, telegramMessageId
     };
   } catch (err) {
-    throw new Error(`Mensagem não tem padrão de sinal: ${ctx.channelPost.text}`);
+    throw new Error(`Mensagem não tem padrão de sinal: ${mensagemCanal.texto}`);
   }
 };
 
@@ -129,7 +129,7 @@ bot.on('channel_post', async (ctx) => {
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
   if ((ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE) && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
     try {
-      const sinal = extrairSinalDeMensagemDeCanal(ctx);
+      const sinal = extrairSinalDeMensagemDeCanal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id}, ctx.channelPost.chat.id);
       const horaSinal = parseInt(sinal.time.substring(0, 2));
       const minutoSinal = parseInt(sinal.time.substring(3, 5));
       process.env.TZ = 'America/Sao_Paulo';
@@ -355,3 +355,5 @@ if (process.env.NODE_ENV === 'production') {
   PORT = 6000;
 }
 app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));
+
+module.exports = { extrairSinalDeMensagemDeCanal }
