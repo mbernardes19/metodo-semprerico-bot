@@ -194,24 +194,24 @@ app.post('/operation-result', async (req, res) => {
   const resultadoOperacao = req.body
   if (resultadoOperacao.result === 'WIN') {
     log('WIN');
+    res.status(200).send();
     await telegramClient.sendMessage(channelToSend, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(channelToSend, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
-    res.status(200).send();
     return;
   }
   if (resultadoOperacao.result === 'LOSS') {
     log('LOSS');
+    res.status(200).send();
     await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
-    res.status(200).send();
     return;
   }
   if (resultadoOperacao.result === 'DOJI') {
     log('DOJI LOSS');
+    res.status(200).send();
     await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
     await telegramClient.sendMessage(channelToSend, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
-    res.status(200).send();
     return;
   }
 });
