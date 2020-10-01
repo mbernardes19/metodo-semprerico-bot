@@ -3,7 +3,11 @@ require('sexy-require');
 const path = require('path');
 const app = require('express')();
 const { Telegraf } = require('telegraf');
-require('dotenv').config({ path: path.join(__dirname, '../', '.env') });
+if (process.env.NODE_ENV === 'production') {
+  require('dotenv').config({ path: path.join(__dirname, '../', '.env') });
+} else {
+  require('dotenv').config({ path: path.join(__dirname, '../', '.env.test') });
+}
 const session = require('telegraf/session');
 const Stage = require('telegraf/stage');
 const Extra = require('telegraf/extra');
@@ -25,18 +29,19 @@ const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLin
 const cenaPlanoPago = require('./cenas/planoPago');
 
 console.log('TRADING', process.env.SERVIDOR_TRADING)
-console.log('TRADING TEST', process.env.SERVIDOR_TRADING_TESTE)
 
 const { conexaoDb } = db;
 conexaoDb.connect((err) => {
   if (err) return log(err);
 });
 
-const tokenBot = process.env.NODE_ENV === 'production' ? process.env.BOT_TOKEN : process.env.BOT_TOKEN_TESTE;
+console.log(process.env.BOT_TOKEN);
+
+const tokenBot = process.env.BOT_TOKEN;
 const bot = new Telegraf(tokenBot);
 cache.set('bot', bot.telegram);
 
-const extrairSinalDeMensagemDeCanal = (mensagemCanal, chatId) => {
+const extrairSinalDeMensagemDeCanal = (mensagemCanal) => {
   try {
     const mensagem = mensagemCanal.texto.match(SINAL);
     console.log('MENSAGEM PARSEADA', mensagem);
@@ -44,9 +49,7 @@ const extrairSinalDeMensagemDeCanal = (mensagemCanal, chatId) => {
     const action = mensagem[1];
     const time = mensagem[2];
     const expiration = 5;
-    const telegramMessageId = chatId == process.env.ID_CANAL_RICO_VIDENTE ?
-      parseInt(`10${mensagemCanal.id}`, 10) :
-      parseInt(`20${mensagemCanal.id}`, 10)
+    const telegramMessageId = mensagemCanal.id
     return {
       asset, action, time, expiration, telegramMessageId
     };
@@ -55,9 +58,9 @@ const extrairSinalDeMensagemDeCanal = (mensagemCanal, chatId) => {
   }
 };
 
-const enviarSinalParaCompra = async (sinal, ctx) => {
+const enviarSinalParaCompra = async (sinal) => {
   try {
-    return await axios.post(`http://45.93.100.211/nodejs/check-signal`, sinal);
+    return await axios.post(`${process.env.SERVIDOR_TRADING}/check-signal`, sinal);
   } catch (err) {
     log('Moeda indisponível na binária e na digital');
     log(err);
@@ -127,9 +130,9 @@ bot.on('channel_post', async (ctx) => {
     log('CANAL SINAIS RICOS');
   }
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
-  if ((ctx.channelPost.chat.id == process.env.ID_CANAL_RICO_VIDENTE || ctx.channelPost.chat.id == process.env.ID_CANAL_TESTE) && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
+  if (ctx.channelPost.chat.id == process.env.CANAL_SINAIS && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
     try {
-      const sinal = extrairSinalDeMensagemDeCanal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id}, ctx.channelPost.chat.id);
+      const sinal = extrairSinalDeMensagemDeCanal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id});
       const horaSinal = parseInt(sinal.time.substring(0, 2));
       const minutoSinal = parseInt(sinal.time.substring(3, 5));
       process.env.TZ = 'America/Sao_Paulo';
@@ -149,7 +152,7 @@ bot.on('channel_post', async (ctx) => {
       let response;
 
       setTimeout(async () => {
-        response = await enviarSinalParaCompra(sinal, ctx);
+        response = await enviarSinalParaCompra(sinal);
         if (response.status === 400) {
           log('Par indisponível no momento');
           return;
@@ -179,8 +182,8 @@ app.use(bodyParser.json());
 
 app.post('/operation-result', async (req, res) => {
   const telegramClient = bot.telegram;
-  const channelMessageId = parseInt(req.body.telegramMessageId.toString().substring(1), 10)
-  const channelToSend = req.body.telegramMessageId.toString().substring(0, 2) === "10" ? process.env.ID_CANAL_RICO_VIDENTE : process.env.ID_CANAL_TESTE;
+  const channelMessageId = req.body.telegramMessageId
+  const channelToSend = process.env.CANAL_SINAIS;
 
   const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
   const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
@@ -352,8 +355,8 @@ let PORT;
 if (process.env.NODE_ENV === 'production') {
   PORT = process.env.PORT_METODO_SEMPRERICO_BOT_SRC_APP || process.env.PORT_APP || 3000;
 } else {
-  PORT = 6000;
+  PORT = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_SRC_APP || 6000;
 }
 app.listen(PORT, () => log(`Servidor rodando na porta ${PORT}`));
 
-module.exports = { extrairSinalDeMensagemDeCanal }
+module.exports = { extrairSinalDeMensagemDeCanal, enviarSinalParaCompra }
