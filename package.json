@@ -25,6 +25,7 @@
     "express": "^4.17.1",
     "moment-timezone": "^0.5.31",
     "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
     "mysqldump": "^3.2.0",
     "node-cache": "^5.1.2",
     "node-cron": "^2.0.3",
@@ -37,10 +38,13 @@
     "twilio": "^3.49.1"
   },
   "devDependencies": {
+    "@types/mysql": "^2.15.15",
     "eslint": "^7.9.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
     "jest": "^26.1.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3"
   }
 }
