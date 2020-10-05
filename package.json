@@ -6,8 +6,9 @@
   "module": "src/app.js",
   "scripts": {
     "test": "jest",
+    "build": "tsc",
     "start": "NODE_ENV=production node src/app.js",
-    "dev": "NODE_ENV=development nodemon node src/app.js",
+    "dev": "NODE_ENV=development ts-node ./src/app.ts",
     "health": "node health-checker.js"
   },
   "keywords": [],
@@ -40,11 +41,13 @@
   "devDependencies": {
     "@types/jest": "^26.0.14",
     "@types/mysql": "^2.15.15",
+    "@types/supertest": "^2.0.10",
     "eslint": "^7.9.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
     "jest": "^26.1.0",
     "nodemon": "^2.0.4",
+    "supertest": "^5.0.0",
     "ts-jest": "^26.4.1",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
