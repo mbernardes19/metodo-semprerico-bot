@@ -23,8 +23,9 @@ const cronjobs = require('./servicos/cronjobs');
 const { log } = require('./servicos/logger');
 const { cache } = require('./servicos/cache');
 const { enviarEmailDeRelatorioDeErro } = require('./email');
-const { SINAL } = require('./utils/regex');
+const { SIGNAL_WITH_GALE } = require('./utils/regex');
 const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLink');
+const MessageMapper = require('./mappers/MessageMapper').default;
 
 const cenaPlanoPago = require('./cenas/planoPago');
 
@@ -43,7 +44,7 @@ cache.set('bot', bot.telegram);
 
 const extrairSinalDeMensagemDeCanal = (mensagemCanal) => {
   try {
-    const mensagem = mensagemCanal.texto.match(SINAL);
+    const mensagem = mensagemCanal.texto.match(SIGNAL_WITH_GALE);
     console.log('MENSAGEM PARSEADA', mensagem);
     const asset = mensagem[0];
     const action = mensagem[1];
@@ -132,7 +133,7 @@ bot.on('channel_post', async (ctx) => {
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
   if (ctx.channelPost.chat.id == process.env.CANAL_SINAIS && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')) {
     try {
-      const sinal = extrairSinalDeMensagemDeCanal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id});
+      const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id});
       const horaSinal = parseInt(sinal.time.substring(0, 2));
       const minutoSinal = parseInt(sinal.time.substring(3, 5));
       process.env.TZ = 'America/Sao_Paulo';
