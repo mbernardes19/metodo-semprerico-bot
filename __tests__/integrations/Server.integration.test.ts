@@ -51,7 +51,7 @@ describe('App Integration', () => {
             expect(response.body.message).toBe(`Operation result sent to channel -100123`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', 'Wiiiiinnnn ', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', '⚡💰⚡', Extra.inReplyTo(123))
         })
     })
 
@@ -83,7 +83,7 @@ describe('App Integration', () => {
             expect(response.body.message).toBe(`Operation result sent to channel -100123`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', 'Loss.', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', '⚡❌⚡', Extra.inReplyTo(123))
         })
     })
 
@@ -115,7 +115,7 @@ describe('App Integration', () => {
             expect(response.body.message).toBe(`Operation result sent to channel -100123`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', '⚡💰⚡', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', 'Wiiiiinnnn ', Extra.inReplyTo(123))
         })
     })
 
@@ -147,7 +147,7 @@ describe('App Integration', () => {
             expect(response.body.message).toBe(`Operation result sent to channel -100123`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', '⚡❌⚡', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', 'Loss.', Extra.inReplyTo(123))
         })
     })
 
