@@ -1,12 +1,12 @@
 import { Connection, RowDataPacket, FieldPacket } from 'mysql2/promise';
 import GenericDao, { Id } from './GenericDao';
-import { UserDataPacket } from '../interfaces/DatabaseQueryResults';
+import { PayingUserDataPacket } from '../interfaces/DatabaseQueryResults';
 
-type QueryFunction<T extends RowDataPacket> = (sql: string) => Promise<[T, FieldPacket[]]>;
+type QueryFunction<T extends RowDataPacket> = (sql: string) => Promise<[T[], FieldPacket[]]>;
 
-export default class UserDao implements GenericDao<UserDataPacket> {
+export default class PayingUserDao implements GenericDao<PayingUserDataPacket> {
     protected _conexao: Connection;
-    protected _query: QueryFunction<UserDataPacket>;
+    protected _query: QueryFunction<PayingUserDataPacket>;
     protected _tableName: string;
   
     constructor(conexao: Connection, tableName: string) {
@@ -15,7 +15,7 @@ export default class UserDao implements GenericDao<UserDataPacket> {
       this._tableName = tableName;
     }
 
-    async save(userDataPacket: UserDataPacket) {
+    async save(userDataPacket: PayingUserDataPacket) {
       const {
         id, nome_completo, forma_de_pagamento, email, telefone, status_assinatura
       } = userDataPacket;
@@ -30,7 +30,7 @@ export default class UserDao implements GenericDao<UserDataPacket> {
     async get(id: Id) {
       try {
         const [userPacket] = await this._query(`select * from ${this._tableName} where id='${id}'`)
-        return userPacket
+        return userPacket[0]
       } catch (err) {
         throw err;
       }
@@ -65,7 +65,25 @@ export default class UserDao implements GenericDao<UserDataPacket> {
       }
     }
 
-    async getActiveUsers() {
+    async getAllUsersInChannels() {
+      try {
+        const [userDataPacket] = await this._query(`select * from ${this._tableName} where aviso_banimeto < 3`)
+        return userDataPacket;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    async getAllKickedUsers() {
+      try {
+        const [userDataPacket] = await this._query(`select * from ${this._tableName} where not status_assinatura='ativo' and aviso_banimento=3`)
+        return userDataPacket;
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    async getAllActiveUsers() {
       try {
         const [userDataPacket] = await this._query(`select * from ${this._tableName} where status_assinatura='ativo'`)
         return userDataPacket;
@@ -74,7 +92,12 @@ export default class UserDao implements GenericDao<UserDataPacket> {
       }
     }
 
-    async getKickedUsers() {
-
+    async getAllInvalidUsers() {
+      try {
+        const [userDataPacket] = await this._query(`select * from ${this._tableName} where not status_assinatura='ativo'`)
+        return userDataPacket;
+      } catch (err) {
+        throw err;
+      }
     }
 }
