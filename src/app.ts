@@ -1,40 +1,38 @@
 import { TelegrafContext } from "telegraf/typings/context";
-
-require('sexy-require');
-
-const path = require('path');
-const app = require('express')();
+import { SceneContextMessageUpdate } from 'telegraf/typings/stage';
+import dotenv from 'dotenv'
+import path from 'path';
+import app from 'express';
 if (process.env.NODE_ENV === 'production') {
-  require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+  dotenv.config({ path: path.join(__dirname, '..', '.env') });
 } else {
-  require('dotenv').config({ path: path.join(__dirname, '..', '.env.test') });
+  dotenv.config({ path: path.join(__dirname, '..', '.env.test') });
 }
-const Extra = require('telegraf/extra');
-const Markup = require('telegraf/markup');
-const axios = require('axios').default;
-const differenceInMilliseconds = require('date-fns/differenceInMilliseconds');
-const { parseISO } = require('date-fns');
-const db = require('./db');
-const dao = require('./dao');
-const cronjobs = require('./servicos/cronjobs');
-const { log } = require('./servicos/logger');
-const { enviarEmailDeRelatorioDeErro } = require('./email');
-const { SIGNAL_WITH_GALE } = require('./utils/regex');
-const { comecarValidacaoDeLinks, pegarLinkDeChat } = require('./servicos/chatLink');
-const MessageMapper = require('./mappers/MessageMapper').default;
-const TelegramBot = require('./model/TelegramBot').default;
-const Server = require('./model/ExpressServer').default;
+import Extra from 'telegraf/extra';
+import Markup from 'telegraf/markup';
+import axios from 'axios';
+import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
+import { parseISO } from 'date-fns';
+import { conexaoDb } from './db';
+import dao from './dao';
+import cronjobs from './servicos/cronjobs';
+import { log } from './servicos/logger';
+import { enviarEmailDeRelatorioDeErro } from './email';
+import { SIGNAL_WITH_GALE } from './utils/regex';
+import { comecarValidacaoDeLinks, pegarLinkDeChat } from './servicos/chatLink';
+import MessageMapper from './mappers/MessageMapper';
+import TelegramBot from './model/TelegramBot';
+// const TelegramBot = require('./model/TelegramBot').default;
+import ExpressServer from './model/ExpressServer';
+import ngrok from 'ngrok';
 
 console.log('TRADING', process.env.SERVIDOR_TRADING)
 
-const { conexaoDb } = db;
 conexaoDb.connect((err) => {
   if (err) return log(err);
 });
 
 const bot = new TelegramBot();
-const server = new Server();
-server.init();
 
 const extrairSinalDeMensagemDeCanal = (mensagemCanal) => {
   try {
@@ -61,6 +59,21 @@ const enviarSinalParaCompra = async (sinal) => {
     log(err);
   }
 };
+
+  try {
+    const server = new ExpressServer(bot);
+    server.init();
+    bot.getBot().on('message', async (ctx) => {
+      try {
+          await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
+      } catch (err) {
+    
+      }
+    });
+    bot.getBot().launch()
+  } catch (err) {
+    log(err)
+  }
 
 bot.getBot().command('canais', async (ctx) => {
   const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
@@ -98,12 +111,12 @@ bot.getBot().command('canais', async (ctx) => {
   }
 });
 
-bot.getBot().command('start', async (ctx) => {
+bot.getBot().command('start', async (ctx: SceneContextMessageUpdate) => {
   try {
     await bot.getTelegramClient().sendMessage(ctx.chat.id, '🦁');
     ctx.scene.enter('planoPago');
   } catch (err) {
-    await enviarEmailDeRelatorioDeErro(err, ctx.chat.id);
+    await enviarEmailDeRelatorioDeErro(err, ctx.chat.id.toString());
     if (err.response && err.response.error_code === 403) {
       log(`Usuário bloqueado ${ctx.chat.id}`);
     }
@@ -119,7 +132,7 @@ bot.getBot().on('channel_post', async (ctx: TelegrafContext) => {
     log('CANAL SINAIS RICOS');
   }
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
-  log(ctx.channelPost.chat.id, process.env.CANAL_SINAIS)
+  console.log(ctx.channelPost.chat.id, process.env.CANAL_SINAIS)
   if (ctx.channelPost.chat.id == parseInt(process.env.CANAL_SINAIS, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.includes('Sinal Flash'))) {
     try {
       const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id});
@@ -150,22 +163,12 @@ bot.getBot().on('channel_post', async (ctx: TelegrafContext) => {
         log(`Sinal enviado!`);
       }, diff);
     } catch (err) {
-      await enviarEmailDeRelatorioDeErro(ctx.channelPost.text, ctx.chat.id);
+      await enviarEmailDeRelatorioDeErro(ctx.channelPost.text, ctx.chat.id.toString());
       log(err);
     }
   }
 });
-
-bot.getBot().on('message', async (ctx) => {
-  try {
-      await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
-  } catch (err) {
-
-  }
-});
-bot.getBot().launch();
 cronjobs.start();
 comecarValidacaoDeLinks();
-
 
 module.exports = { app, extrairSinalDeMensagemDeCanal, enviarSinalParaCompra }

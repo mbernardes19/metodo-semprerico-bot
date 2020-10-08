@@ -51,8 +51,8 @@ export default class ExpressServer {
             const channelToSend = process.env.CANAL_SINAIS;
             const hasGale = req.body.gale;
           
-            if (hasGale) {
-              log('GALE')
+            if (!hasGale) {
+              log('NO GALE')
               const winMessage = '⚡💰⚡';
               const lossMessage = '⚡❌⚡';
           
@@ -80,7 +80,7 @@ export default class ExpressServer {
               }
             }
 
-            log('NO GALE')
+            log('GALE')
           
             const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
             const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
