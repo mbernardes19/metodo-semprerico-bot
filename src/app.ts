@@ -28,10 +28,10 @@ import ngrok from 'ngrok';
 
 console.log('TRADING', process.env.SERVIDOR_TRADING);
 
-(async () => {
-  const conexao = await conexaoDb;
-  await conexao.connect();
-})()
+  conexaoDb.connect((err) => {
+    if (err)
+      console.log(err);
+  });
 
 const bot = new TelegramBot();
 

@@ -1,7 +1,7 @@
 import PayingUser from '../model/PayingUser';
 import UserDao from '../daos/PayingUserDao';
 import UserMapper from '../mappers/UserMapper';
-import { conexaoDb } from '../db';
+import { conexaoDbPromise } from '../db';
 import UserRepository from './UserRepository';
 import { Id } from '../daos/GenericDao';
 
@@ -10,7 +10,7 @@ export default class PayingUserRepository implements UserRepository {
 
     constructor(dao?: UserDao) {
         (async () => {
-            const conexao = await conexaoDb
+            const conexao = await conexaoDbPromise
             this._dao = dao ? dao : new UserDao(conexao, 'Usuario');
         })()
     }
