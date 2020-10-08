@@ -2,7 +2,7 @@ import { Id } from '../daos/GenericDao';
 
 export default interface GenericRepository<T> {
     save(item: T): Promise<Id>
-    delete(item: T): Promise<void>
-    get(item: T): Promise<T>
-    exists(item: T): Promise<boolean>
+    delete(id: Id): Promise<void>
+    get(id: Id): Promise<T>
+    exists(id: Id): Promise<boolean>
 }

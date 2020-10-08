@@ -28,6 +28,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "mysqldump": "^3.2.0",
+    "ngrok": "^3.3.0",
     "node-cache": "^5.1.2",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0",
