@@ -9,7 +9,10 @@ export default class PayingUserRepository implements UserRepository {
     private _dao: UserDao;
 
     constructor(dao?: UserDao) {
-        this._dao = dao ? dao : new UserDao(conexaoDb, 'Usuario');
+        (async () => {
+            const conexao = await conexaoDb
+            this._dao = dao ? dao : new UserDao(conexao, 'Usuario');
+        })()
     }
 
     async save(user: PayingUser) {

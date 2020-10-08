@@ -26,11 +26,12 @@ import TelegramBot from './model/TelegramBot';
 import ExpressServer from './model/ExpressServer';
 import ngrok from 'ngrok';
 
-console.log('TRADING', process.env.SERVIDOR_TRADING)
+console.log('TRADING', process.env.SERVIDOR_TRADING);
 
-conexaoDb.connect((err) => {
-  if (err) return log(err);
-});
+(async () => {
+  const conexao = await conexaoDb;
+  await conexao.connect();
+})()
 
 const bot = new TelegramBot();
 

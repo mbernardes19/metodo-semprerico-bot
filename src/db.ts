@@ -1,4 +1,4 @@
-import mysql from 'mysql2';
+import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import path from 'path';
 if(process.env.NODE_ENV === 'production') {
@@ -6,9 +6,6 @@ if(process.env.NODE_ENV === 'production') {
 } else {
     dotenv.config({path: path.join(__dirname, '..', '.env.test') })
 }
-
-
-console.log('SENHA', process.env.DB_PASSWORD)
 
 const dbConnection = mysql.createConnection({
     host: process.env.DB_HOST,

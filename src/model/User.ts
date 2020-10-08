@@ -30,7 +30,7 @@ export default class User {
     }
 
     setTelegramId(telegramId: Id) {
-        this._telegramId = id;
+        this._telegramId = telegramId;
     }
 
     setFullName(fullName: string) {
