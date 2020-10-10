@@ -301,10 +301,10 @@ const zerarAvisoDeBanimento = async (usuario, conexao) => {
   }
 };
 
-const pegarMensagem = async (tipo, conexao) => {
+const pegarMensagem = async (channelPrefix, tipo, conexao) => {
   const query = util.promisify(conexao.query).bind(conexao);
   try {
-    return await query(`select * from Mensagem where id='mensagem-${tipo}'`);
+    return await query(`select * from Mensagem where id='${channelPrefix}-mensagem-${tipo}'`);
   } catch (err) {
     throw err;
   }
@@ -319,27 +319,27 @@ const pegarIdDeTodosUsuariosGratuitos = async (conexao) => {
   }
 };
 
-const atualizarMensagem = async (tipo, mensagem, conexao) => {
+const atualizarMensagem = async (channelPrefix, tipo, mensagem, conexao) => {
   const query = util.promisify(conexao.query).bind(conexao);
   try {
-    await query(`update Mensagem set texto='${mensagem}' where id='mensagem-${tipo}'`);
+    await query(`update Mensagem set texto='${mensagem}' where id='${channelPrefix}-mensagem-${tipo}'`);
   } catch (err) {
     throw err;
   }
 };
 
-const pegarSticker = async (tipo, conexao) => {
+const pegarSticker = async (channelPrefix, tipo, conexao) => {
   const query = util.promisify(conexao.query).bind(conexao);
   try {
-    return await query(`select * from Mensagem where id='sticker-${tipo}'`);
+    return await query(`select * from Mensagem where id='${channelPrefix}-sticker-${tipo}'`);
   } catch (err) {
     throw err;
   }
 };
-const atualizarSticker = async (tipo, sticker, conexao) => {
+const atualizarSticker = async (channelPrefix, tipo, sticker, conexao) => {
   const query = util.promisify(conexao.query).bind(conexao);
   try {
-    await query(`update Mensagem set texto='${sticker}' where id='sticker-${tipo}'`);
+    await query(`update Mensagem set texto='${sticker}' where id='${channelPrefix}-sticker-${tipo}'`);
   } catch (err) {
     throw err;
   }

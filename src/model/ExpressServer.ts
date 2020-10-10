@@ -33,7 +33,8 @@ export default class ExpressServer {
             res.status(200).send('<h1>Olá!</h1>');
         });
         this.startTradingApiEndpoints()
-        this.startMessageEditingEndpoints(); 
+        this.startMessageEditingEndpointsRicoVidente();
+        this.startMessageEditingEndpointsSinaisRicos();
     }
 
     getExpressServer() {
@@ -123,12 +124,12 @@ export default class ExpressServer {
           });
     }
 
-    private startMessageEditingEndpoints() {
-        this._express.post('/mensagem-win', async (req, res) => {
+    private startMessageEditingEndpointsRicoVidente() {
+        this._express.post('/RV-mensagem-win', async (req, res) => {
             log(req.body);
             const { mensagemWin } = req.body;
             try {
-              await dao.atualizarMensagem('win', mensagemWin, conexaoDb);
+              await dao.atualizarMensagem('RV', 'win', mensagemWin, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -138,10 +139,10 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/sticker-win', async (req, res) => {
+          this._express.post('/RV-sticker-win', async (req, res) => {
             const { stickerWin } = req.body;
             try {
-              await dao.atualizarSticker('win', stickerWin, conexaoDb);
+              await dao.atualizarSticker('RV', 'win', stickerWin, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -151,10 +152,10 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/mensagem-loss', async (req, res) => {
+          this._express.post('/RV-mensagem-loss', async (req, res) => {
             const { mensagemLoss } = req.body;
             try {
-              await dao.atualizarMensagem('loss', mensagemLoss, conexaoDb);
+              await dao.atualizarMensagem('RV', 'loss', mensagemLoss, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -164,10 +165,10 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/sticker-loss', async (req, res) => {
+          this._express.post('/RV-sticker-loss', async (req, res) => {
             const { stickerLoss } = req.body;
             try {
-              await dao.atualizarSticker('loss', stickerLoss, conexaoDb);
+              await dao.atualizarSticker('RV', 'loss', stickerLoss, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -176,10 +177,10 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/mensagem-doji', async (req, res) => {
+          this._express.post('/RV-mensagem-doji', async (req, res) => {
             const { mensagemDoji } = req.body;
             try {
-              await dao.atualizarMensagem('doji', mensagemDoji, conexaoDb);
+              await dao.atualizarMensagem('RV', 'doji', mensagemDoji, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -188,9 +189,9 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/mensagem-win', async (req, res) => {
+          this._express.get('/RV-mensagem-win', async (req, res) => {
             try {
-              const [mensagemWin] = await dao.pegarMensagem('win', conexaoDb);
+              const [mensagemWin] = await dao.pegarMensagem('RV', 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto });
             } catch (err) {
@@ -200,9 +201,9 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/sticker-win', async (req, res) => {
+          this._express.get('/RV-sticker-win', async (req, res) => {
             try {
-              const [stickerWin] = await dao.pegarSticker('win', conexaoDb);
+              const [stickerWin] = await dao.pegarSticker('RV', 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: stickerWin.id, texto: stickerWin.texto });
             } catch (err) {
@@ -212,9 +213,9 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/mensagem-loss', async (req, res) => {
+          this._express.get('/RV-mensagem-loss', async (req, res) => {
             try {
-              const [mensagemLoss] = await dao.pegarMensagem('loss', conexaoDb);
+              const [mensagemLoss] = await dao.pegarMensagem('RV', 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: mensagemLoss.id, texto: mensagemLoss.texto });
             } catch (err) {
@@ -224,9 +225,9 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/sticker-loss', async (req, res) => {
+          this._express.get('/RV-sticker-loss', async (req, res) => {
             try {
-              const [stickerLoss] = await dao.pegarSticker('loss', conexaoDb);
+              const [stickerLoss] = await dao.pegarSticker('RV', 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: stickerLoss.id, texto: stickerLoss.texto });
             } catch (err) {
@@ -235,9 +236,9 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/mensagem-doji', async (req, res) => {
+          this._express.get('/RV-mensagem-doji', async (req, res) => {
             try {
-              const [mensagemDoji] = await dao.pegarMensagem('doji', conexaoDb);
+              const [mensagemDoji] = await dao.pegarMensagem('RV', 'doji', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: mensagemDoji.id, texto: mensagemDoji.texto });
             } catch (err) {
@@ -246,4 +247,128 @@ export default class ExpressServer {
             }
           });
     }
+
+    private startMessageEditingEndpointsSinaisRicos() {
+      this._express.post('/SR-mensagem-win', async (req, res) => {
+          log(req.body);
+          const { mensagemWin } = req.body;
+          try {
+            await dao.atualizarMensagem('SR', 'win', mensagemWin, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            log(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.post('/SR-sticker-win', async (req, res) => {
+          const { stickerWin } = req.body;
+          try {
+            await dao.atualizarSticker('SR', 'win', stickerWin, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            log(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.post('/SR-mensagem-loss', async (req, res) => {
+          const { mensagemLoss } = req.body;
+          try {
+            await dao.atualizarMensagem('SR', 'loss', mensagemLoss, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            log(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.post('/SR-sticker-loss', async (req, res) => {
+          const { stickerLoss } = req.body;
+          try {
+            await dao.atualizarSticker('SR', 'loss', stickerLoss, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.post('/SR-mensagem-doji', async (req, res) => {
+          const { mensagemDoji } = req.body;
+          try {
+            await dao.atualizarMensagem('SR', 'doji', mensagemDoji, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.get('/SR-mensagem-win', async (req, res) => {
+          try {
+            const [mensagemWin] = await dao.pegarMensagem('SR', 'win', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            log(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.get('/SR-sticker-win', async (req, res) => {
+          try {
+            const [stickerWin] = await dao.pegarSticker('SR', 'win', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: stickerWin.id, texto: stickerWin.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            log(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.get('/SR-mensagem-loss', async (req, res) => {
+          try {
+            const [mensagemLoss] = await dao.pegarMensagem('SR', 'loss', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: mensagemLoss.id, texto: mensagemLoss.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            log(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.get('/SR-sticker-loss', async (req, res) => {
+          try {
+            const [stickerLoss] = await dao.pegarSticker('SR', 'loss', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: stickerLoss.id, texto: stickerLoss.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+        
+        this._express.get('/SR-mensagem-doji', async (req, res) => {
+          try {
+            const [mensagemDoji] = await dao.pegarMensagem('SR', 'doji', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: mensagemDoji.id, texto: mensagemDoji.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+  }
 }
