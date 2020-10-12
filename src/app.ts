@@ -133,10 +133,20 @@ bot.getBot().on('channel_post', async (ctx: TelegrafContext) => {
     log('CANAL SINAIS RICOS');
   }
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
-  console.log(ctx.channelPost.chat.id, process.env.CANAL_SINAIS)
-  if (ctx.channelPost.chat.id == parseInt(process.env.CANAL_SINAIS, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.includes('Sinal Flash'))) {
+  let condition;
+  if(process.env.SINAIS_SINAIS_RICOS === 'true' && process.env.SINAIS_RICO_VIDENTE === 'true') {
+    condition = (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) || ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
+  } else {
+    if (process.env.SINAIS_SINAIS_RICOS === 'true') {
+      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) && ctx.channelPost.text && ctx.channelPost.text.includes('Sinal Flash');
+    }
+    if (process.env.SINAIS_RICO_VIDENTE === 'true') {
+      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')
+    }
+  }
+  if (condition) {
     try {
-      const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id});
+      const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id});
       const horaSinal = parseInt(sinal.time.substring(0, 2));
       const minutoSinal = parseInt(sinal.time.substring(3, 5));
       process.env.TZ = 'America/Sao_Paulo';
