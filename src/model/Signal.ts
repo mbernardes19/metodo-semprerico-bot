@@ -4,5 +4,6 @@ export default interface Signal {
     action: string;
     expiration: number;
     telegramMessageId: number;
+    telegramChannelId: number;
     gale: boolean;
 }

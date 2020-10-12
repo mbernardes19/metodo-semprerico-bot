@@ -301,7 +301,16 @@ const zerarAvisoDeBanimento = async (usuario, conexao) => {
   }
 };
 
-const pegarMensagem = async (channelPrefix, tipo, conexao) => {
+const pegarMensagem = async (channelId, tipo, conexao) => {
+  console.log(process.env.ID_CANAL_RICO_VIDENTE)
+  console.log(process.env.ID_CANAL_SINAIS_RICOS)
+  let channelPrefix;
+  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
+    channelPrefix = 'RV'
+  }
+  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
+    channelPrefix = 'SR'
+  }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
     return await query(`select * from Mensagem where id='${channelPrefix}-mensagem-${tipo}'`);
@@ -319,7 +328,14 @@ const pegarIdDeTodosUsuariosGratuitos = async (conexao) => {
   }
 };
 
-const atualizarMensagem = async (channelPrefix, tipo, mensagem, conexao) => {
+const atualizarMensagem = async (channelId, tipo, mensagem, conexao) => {
+  let channelPrefix;
+  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
+    channelPrefix = 'RV'
+  }
+  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
+    channelPrefix = 'SR'
+  }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
     await query(`update Mensagem set texto='${mensagem}' where id='${channelPrefix}-mensagem-${tipo}'`);
@@ -328,7 +344,14 @@ const atualizarMensagem = async (channelPrefix, tipo, mensagem, conexao) => {
   }
 };
 
-const pegarSticker = async (channelPrefix, tipo, conexao) => {
+const pegarSticker = async (channelId, tipo, conexao) => {
+  let channelPrefix;
+  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
+    channelPrefix = 'RV'
+  }
+  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
+    channelPrefix = 'SR'
+  }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
     return await query(`select * from Mensagem where id='${channelPrefix}-sticker-${tipo}'`);
@@ -336,7 +359,14 @@ const pegarSticker = async (channelPrefix, tipo, conexao) => {
     throw err;
   }
 };
-const atualizarSticker = async (channelPrefix, tipo, sticker, conexao) => {
+const atualizarSticker = async (channelId, tipo, sticker, conexao) => {
+  let channelPrefix;
+  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
+    channelPrefix = 'RV'
+  }
+  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
+    channelPrefix = 'SR'
+  }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
     await query(`update Mensagem set texto='${sticker}' where id='${channelPrefix}-sticker-${tipo}'`);

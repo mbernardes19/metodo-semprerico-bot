@@ -34,10 +34,12 @@ describe('App Integration', () => {
                 candleAfter: {},
                 signalAction: 'CALL',
                 telegramMessageId: 123,
+                telegramChannelId: -1001499474166,
                 gale: false
             },
             result: 'WIN',
             telegramMessageId: 123,
+            telegramChannelId: -1001499474166,
             gale: false
         };
 
@@ -48,10 +50,10 @@ describe('App Integration', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .then(response => {
-            expect(response.body.message).toBe(`Operation result sent to channel -100123`);
+            expect(response.body.message).toBe(`Operation result sent to channel -1001499474166`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', '⚡💰⚡', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith(-1001499474166, '⚡💰⚡', Extra.inReplyTo(123))
         })
     })
 
@@ -66,10 +68,12 @@ describe('App Integration', () => {
                 candleAfter: {},
                 signalAction: 'CALL',
                 telegramMessageId: 123,
+                telegramChannelId: -1001460676170,
                 gale: false
             },
             result: 'LOSS',
             telegramMessageId: 123,
+            telegramChannelId: -1001460676170,
             gale: false
         };
 
@@ -80,10 +84,10 @@ describe('App Integration', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .then(response => {
-            expect(response.body.message).toBe(`Operation result sent to channel -100123`);
+            expect(response.body.message).toBe(`Operation result sent to channel -1001460676170`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', '⚡❌⚡', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith(-1001460676170, '⚡❌⚡', Extra.inReplyTo(123))
         })
     })
 
@@ -98,10 +102,12 @@ describe('App Integration', () => {
                 candleAfter: {},
                 signalAction: 'CALL',
                 telegramMessageId: 123,
+                telegramChannelId: -1001499474166,
                 gale: true
             },
             result: 'WIN',
             telegramMessageId: 123,
+            telegramChannelId: -1001499474166,
             gale: true
         };
 
@@ -112,10 +118,10 @@ describe('App Integration', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .then(response => {
-            expect(response.body.message).toBe(`Operation result sent to channel -100123`);
+            expect(response.body.message).toBe(`Operation result sent to channel -1001499474166`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', 'Wiiiiinnnn ', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith(-1001499474166, 'WIN', Extra.inReplyTo(123))
         })
     })
 
@@ -130,10 +136,12 @@ describe('App Integration', () => {
                 candleAfter: {},
                 signalAction: 'CALL',
                 telegramMessageId: 123,
+                telegramChannelId: -1001460676170,
                 gale: true
             },
             result: 'LOSS',
             telegramMessageId: 123,
+            telegramChannelId: -1001460676170,
             gale: true
         };
 
@@ -144,10 +152,10 @@ describe('App Integration', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .then(response => {
-            expect(response.body.message).toBe(`Operation result sent to channel -100123`);
+            expect(response.body.message).toBe(`Operation result sent to channel -1001460676170`);
             expect(response.body.messageToReply).toBe(123);
             expect(sendMessageSpy).toHaveBeenCalledTimes(1)
-            expect(sendMessageSpy).toHaveBeenCalledWith('-100123', 'Loss.', Extra.inReplyTo(123))
+            expect(sendMessageSpy).toHaveBeenCalledWith(-1001460676170, 'Loss.', Extra.inReplyTo(123))
         })
     })
 

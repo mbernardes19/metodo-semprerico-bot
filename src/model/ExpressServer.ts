@@ -49,7 +49,7 @@ export default class ExpressServer {
         this._express.post('/operation-result', async (req, res) => {
             const telegramClient = this._bot.getTelegramClient();
             const channelMessageId = req.body.telegramMessageId
-            const channelToSend = process.env.CANAL_SINAIS;
+            const channelToSend = req.body.telegramChannelId;
             const hasGale = req.body.gale;
           
             if (!hasGale) {
@@ -83,17 +83,13 @@ export default class ExpressServer {
 
             log('GALE')
           
-            const [MENSAGEM_WIN] = await dao.pegarMensagem('win', conexaoDb);
-            const [STICKER_WIN] = await dao.pegarSticker('win', conexaoDb);
-            const [MENSAGEM_LOSS] = await dao.pegarMensagem('loss', conexaoDb);
-            const [STICKER_LOSS] = await dao.pegarSticker('loss', conexaoDb);
-            const [MENSAGEM_DOJI] = await dao.pegarMensagem('doji', conexaoDb);
-          
             console.log('MESSAGE ID',channelMessageId)
             console.log('CHANNEL TO SEND', channelToSend)
           
             const resultadoOperacao = req.body
             if (resultadoOperacao.result === 'WIN') {
+              const [MENSAGEM_WIN] = await dao.pegarMensagem(channelToSend, 'win', conexaoDb);
+              const [STICKER_WIN] = await dao.pegarSticker(channelToSend, 'win', conexaoDb);
               log('WIN');
               res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
               await telegramClient.sendMessage(channelToSend, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
@@ -101,6 +97,8 @@ export default class ExpressServer {
               return;
             }
             if (resultadoOperacao.result === 'LOSS') {
+              const [MENSAGEM_LOSS] = await dao.pegarMensagem(channelToSend, 'loss', conexaoDb);
+              const [STICKER_LOSS] = await dao.pegarSticker(channelToSend, 'loss', conexaoDb);
               log('LOSS');
               res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
               await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
@@ -108,6 +106,9 @@ export default class ExpressServer {
               return;
             }
             if (resultadoOperacao.result === 'DOJI') {
+              const [MENSAGEM_LOSS] = await dao.pegarMensagem(channelToSend, 'loss', conexaoDb);
+              const [STICKER_LOSS] = await dao.pegarSticker(channelToSend, 'loss', conexaoDb);
+              const [MENSAGEM_DOJI] = await dao.pegarMensagem(channelToSend, 'doji', conexaoDb);
               log('DOJI LOSS');
               res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
               await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
@@ -129,7 +130,7 @@ export default class ExpressServer {
             log(req.body);
             const { mensagemWin } = req.body;
             try {
-              await dao.atualizarMensagem('RV', 'win', mensagemWin, conexaoDb);
+              await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'win', mensagemWin, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -142,7 +143,7 @@ export default class ExpressServer {
           this._express.post('/RV-sticker-win', async (req, res) => {
             const { stickerWin } = req.body;
             try {
-              await dao.atualizarSticker('RV', 'win', stickerWin, conexaoDb);
+              await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', stickerWin, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -155,7 +156,7 @@ export default class ExpressServer {
           this._express.post('/RV-mensagem-loss', async (req, res) => {
             const { mensagemLoss } = req.body;
             try {
-              await dao.atualizarMensagem('RV', 'loss', mensagemLoss, conexaoDb);
+              await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', mensagemLoss, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -168,7 +169,7 @@ export default class ExpressServer {
           this._express.post('/RV-sticker-loss', async (req, res) => {
             const { stickerLoss } = req.body;
             try {
-              await dao.atualizarSticker('RV', 'loss', stickerLoss, conexaoDb);
+              await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', stickerLoss, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -180,7 +181,7 @@ export default class ExpressServer {
           this._express.post('/RV-mensagem-doji', async (req, res) => {
             const { mensagemDoji } = req.body;
             try {
-              await dao.atualizarMensagem('RV', 'doji', mensagemDoji, conexaoDb);
+              await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', mensagemDoji, conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.sendStatus(200);
             } catch (err) {
@@ -191,7 +192,7 @@ export default class ExpressServer {
           
           this._express.get('/RV-mensagem-win', async (req, res) => {
             try {
-              const [mensagemWin] = await dao.pegarMensagem('RV', 'win', conexaoDb);
+              const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto });
             } catch (err) {
@@ -203,7 +204,7 @@ export default class ExpressServer {
           
           this._express.get('/RV-sticker-win', async (req, res) => {
             try {
-              const [stickerWin] = await dao.pegarSticker('RV', 'win', conexaoDb);
+              const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: stickerWin.id, texto: stickerWin.texto });
             } catch (err) {
@@ -215,7 +216,7 @@ export default class ExpressServer {
           
           this._express.get('/RV-mensagem-loss', async (req, res) => {
             try {
-              const [mensagemLoss] = await dao.pegarMensagem('RV', 'loss', conexaoDb);
+              const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: mensagemLoss.id, texto: mensagemLoss.texto });
             } catch (err) {
@@ -227,7 +228,7 @@ export default class ExpressServer {
           
           this._express.get('/RV-sticker-loss', async (req, res) => {
             try {
-              const [stickerLoss] = await dao.pegarSticker('RV', 'loss', conexaoDb);
+              const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: stickerLoss.id, texto: stickerLoss.texto });
             } catch (err) {
@@ -238,7 +239,7 @@ export default class ExpressServer {
           
           this._express.get('/RV-mensagem-doji', async (req, res) => {
             try {
-              const [mensagemDoji] = await dao.pegarMensagem('RV', 'doji', conexaoDb);
+              const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
               res.status(200).json({ id: mensagemDoji.id, texto: mensagemDoji.texto });
             } catch (err) {
@@ -253,7 +254,7 @@ export default class ExpressServer {
           log(req.body);
           const { mensagemWin } = req.body;
           try {
-            await dao.atualizarMensagem('SR', 'win', mensagemWin, conexaoDb);
+            await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'win', mensagemWin, conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.sendStatus(200);
           } catch (err) {
@@ -266,7 +267,7 @@ export default class ExpressServer {
         this._express.post('/SR-sticker-win', async (req, res) => {
           const { stickerWin } = req.body;
           try {
-            await dao.atualizarSticker('SR', 'win', stickerWin, conexaoDb);
+            await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', stickerWin, conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.sendStatus(200);
           } catch (err) {
@@ -279,7 +280,7 @@ export default class ExpressServer {
         this._express.post('/SR-mensagem-loss', async (req, res) => {
           const { mensagemLoss } = req.body;
           try {
-            await dao.atualizarMensagem('SR', 'loss', mensagemLoss, conexaoDb);
+            await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', mensagemLoss, conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.sendStatus(200);
           } catch (err) {
@@ -292,7 +293,7 @@ export default class ExpressServer {
         this._express.post('/SR-sticker-loss', async (req, res) => {
           const { stickerLoss } = req.body;
           try {
-            await dao.atualizarSticker('SR', 'loss', stickerLoss, conexaoDb);
+            await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', stickerLoss, conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.sendStatus(200);
           } catch (err) {
@@ -304,7 +305,7 @@ export default class ExpressServer {
         this._express.post('/SR-mensagem-doji', async (req, res) => {
           const { mensagemDoji } = req.body;
           try {
-            await dao.atualizarMensagem('SR', 'doji', mensagemDoji, conexaoDb);
+            await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', mensagemDoji, conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.sendStatus(200);
           } catch (err) {
@@ -315,7 +316,7 @@ export default class ExpressServer {
         
         this._express.get('/SR-mensagem-win', async (req, res) => {
           try {
-            const [mensagemWin] = await dao.pegarMensagem('SR', 'win', conexaoDb);
+            const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.status(200).json({ id: mensagemWin.id, texto: mensagemWin.texto });
           } catch (err) {
@@ -327,7 +328,7 @@ export default class ExpressServer {
         
         this._express.get('/SR-sticker-win', async (req, res) => {
           try {
-            const [stickerWin] = await dao.pegarSticker('SR', 'win', conexaoDb);
+            const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.status(200).json({ id: stickerWin.id, texto: stickerWin.texto });
           } catch (err) {
@@ -339,7 +340,7 @@ export default class ExpressServer {
         
         this._express.get('/SR-mensagem-loss', async (req, res) => {
           try {
-            const [mensagemLoss] = await dao.pegarMensagem('SR', 'loss', conexaoDb);
+            const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.status(200).json({ id: mensagemLoss.id, texto: mensagemLoss.texto });
           } catch (err) {
@@ -351,7 +352,7 @@ export default class ExpressServer {
         
         this._express.get('/SR-sticker-loss', async (req, res) => {
           try {
-            const [stickerLoss] = await dao.pegarSticker('SR', 'loss', conexaoDb);
+            const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.status(200).json({ id: stickerLoss.id, texto: stickerLoss.texto });
           } catch (err) {
@@ -362,7 +363,7 @@ export default class ExpressServer {
         
         this._express.get('/SR-mensagem-doji', async (req, res) => {
           try {
-            const [mensagemDoji] = await dao.pegarMensagem('SR', 'doji', conexaoDb);
+            const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.status(200).json({ id: mensagemDoji.id, texto: mensagemDoji.texto });
           } catch (err) {
