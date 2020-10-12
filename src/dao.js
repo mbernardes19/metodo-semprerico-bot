@@ -302,14 +302,17 @@ const zerarAvisoDeBanimento = async (usuario, conexao) => {
 };
 
 const pegarMensagem = async (channelId, tipo, conexao) => {
-  console.log(process.env.ID_CANAL_RICO_VIDENTE)
-  console.log(process.env.ID_CANAL_SINAIS_RICOS)
   let channelPrefix;
-  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
-    channelPrefix = 'RV'
-  }
-  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
-    channelPrefix = 'SR'
+  switch(channelId.toString()) {
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
+      break;
+    case process.env.ID_CANAL_SINAIS_RICOS:
+      channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_TESTE:
+      channelPrefix = 'RV'
+      break;
   }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
@@ -330,11 +333,16 @@ const pegarIdDeTodosUsuariosGratuitos = async (conexao) => {
 
 const atualizarMensagem = async (channelId, tipo, mensagem, conexao) => {
   let channelPrefix;
-  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
-    channelPrefix = 'RV'
-  }
-  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
-    channelPrefix = 'SR'
+  switch(channelId.toString()) {
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
+      break;
+    case process.env.ID_CANAL_SINAIS_RICOS:
+      channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_TESTE:
+      channelPrefix = 'RV'
+      break;
   }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
@@ -346,11 +354,16 @@ const atualizarMensagem = async (channelId, tipo, mensagem, conexao) => {
 
 const pegarSticker = async (channelId, tipo, conexao) => {
   let channelPrefix;
-  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
-    channelPrefix = 'RV'
-  }
-  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
-    channelPrefix = 'SR'
+  switch(channelId.toString()) {
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
+      break;
+    case process.env.ID_CANAL_SINAIS_RICOS:
+      channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_TESTE:
+      channelPrefix = 'RV'
+      break;
   }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
@@ -361,11 +374,16 @@ const pegarSticker = async (channelId, tipo, conexao) => {
 };
 const atualizarSticker = async (channelId, tipo, sticker, conexao) => {
   let channelPrefix;
-  if (channelId.toString() === process.env.ID_CANAL_RICO_VIDENTE) {
-    channelPrefix = 'RV'
-  }
-  if (channelId.toString() === process.env.ID_CANAL_SINAIS_RICOS) {
-    channelPrefix = 'SR'
+  switch(channelId.toString()) {
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
+      break;
+    case process.env.ID_CANAL_SINAIS_RICOS:
+      channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_TESTE:
+      channelPrefix = 'RV'
+      break;
   }
   const query = util.promisify(conexao.query).bind(conexao);
   try {
