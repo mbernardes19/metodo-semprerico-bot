@@ -304,11 +304,11 @@ const zerarAvisoDeBanimento = async (usuario, conexao) => {
 const pegarMensagem = async (channelId, tipo, conexao) => {
   let channelPrefix;
   switch(channelId.toString()) {
-    case process.env.ID_CANAL_RICO_VIDENTE:
-      channelPrefix = 'RV'
-      break;
     case process.env.ID_CANAL_SINAIS_RICOS:
       channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
       break;
     case process.env.ID_CANAL_TESTE:
       channelPrefix = 'RV'
@@ -334,11 +334,11 @@ const pegarIdDeTodosUsuariosGratuitos = async (conexao) => {
 const atualizarMensagem = async (channelId, tipo, mensagem, conexao) => {
   let channelPrefix;
   switch(channelId.toString()) {
-    case process.env.ID_CANAL_RICO_VIDENTE:
-      channelPrefix = 'RV'
-      break;
     case process.env.ID_CANAL_SINAIS_RICOS:
       channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
       break;
     case process.env.ID_CANAL_TESTE:
       channelPrefix = 'RV'
@@ -355,11 +355,11 @@ const atualizarMensagem = async (channelId, tipo, mensagem, conexao) => {
 const pegarSticker = async (channelId, tipo, conexao) => {
   let channelPrefix;
   switch(channelId.toString()) {
-    case process.env.ID_CANAL_RICO_VIDENTE:
-      channelPrefix = 'RV'
-      break;
     case process.env.ID_CANAL_SINAIS_RICOS:
       channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
       break;
     case process.env.ID_CANAL_TESTE:
       channelPrefix = 'RV'
@@ -375,11 +375,11 @@ const pegarSticker = async (channelId, tipo, conexao) => {
 const atualizarSticker = async (channelId, tipo, sticker, conexao) => {
   let channelPrefix;
   switch(channelId.toString()) {
-    case process.env.ID_CANAL_RICO_VIDENTE:
-      channelPrefix = 'RV'
-      break;
     case process.env.ID_CANAL_SINAIS_RICOS:
       channelPrefix = 'SR'
+      break;
+    case process.env.ID_CANAL_RICO_VIDENTE:
+      channelPrefix = 'RV'
       break;
     case process.env.ID_CANAL_TESTE:
       channelPrefix = 'RV'
