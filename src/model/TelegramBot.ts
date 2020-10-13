@@ -4,6 +4,9 @@ import session from 'telegraf/session';
 import Stage from 'telegraf/stage';
 import cenaPlanoPago from '../cenas/planoPago';
 import { cache } from '../servicos/cache';
+import { SceneContextMessageUpdate } from 'telegraf/typings/stage';
+
+export type ActionFunction = (ctx: TelegrafContext) => Promise<void>
 
 export default class TelegramBot {
     private _botClient: Telegraf<TelegrafContext>
@@ -27,6 +30,10 @@ export default class TelegramBot {
 
     getBot() {
         return this._botClient;
+    }
+
+    onChannelPost(actionFunction: ActionFunction) {
+        this._botClient.on('channel_post', actionFunction)
     }
 
 
