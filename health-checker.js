@@ -4,7 +4,7 @@ const exec = util.promisify(require('child_process').exec);
 
 async function runDeploy() {
     try {
-        const {stdout, stderr} = await exec('pm2 restart app')
+        const {stdout, stderr} = await exec('pm2 restart app && pm2 restart app-teste')
         console.log('stdout', stdout)
         console.log('stderr', stderr)
     } catch (err) {

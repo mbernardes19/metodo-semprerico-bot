@@ -22,6 +22,7 @@ import { SIGNAL_WITH_GALE } from './utils/regex';
 import { comecarValidacaoDeLinks, pegarLinkDeChat } from './servicos/chatLink';
 import MessageMapper from './mappers/MessageMapper';
 import TelegramBot from './model/TelegramBot';
+
 // const TelegramBot = require('./model/TelegramBot').default;
 import ExpressServer from './model/ExpressServer';
 import ngrok from 'ngrok';
@@ -64,19 +65,16 @@ const enviarSinalParaCompra = async (sinal) => {
   try {
     const server = new ExpressServer(bot);
     server.init();
-    bot.getBot().on('message', async (ctx) => {
-      try {
-          await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
-      } catch (err) {
-    
-      }
-    });
     bot.getBot().launch()
   } catch (err) {
     log(err)
   }
 
 bot.getBot().command('canais', async (ctx) => {
+  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, 1224094825)
+  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, 1224094825)
+  log('Usuário desbanido!!!!')
+
   const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
   if (usuarioExiste) {
     const usuarioValido = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb);
@@ -125,7 +123,7 @@ bot.getBot().command('start', async (ctx: SceneContextMessageUpdate) => {
   }
 });
 
-bot.getBot().on('channel_post', async (ctx: TelegrafContext) => {
+bot.onChannelPost(async (ctx: TelegrafContext) => {
   if (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) {
     log('CANAL RICO VIDENTE');
   }
@@ -179,7 +177,15 @@ bot.getBot().on('channel_post', async (ctx: TelegrafContext) => {
     }
   }
 });
+
+bot.getBot().on('message', async (ctx) => {
+  try {
+      await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
+  } catch (err) {
+
+  }
+});
 cronjobs.start();
 comecarValidacaoDeLinks();
 
-module.exports = { app, extrairSinalDeMensagemDeCanal, enviarSinalParaCompra }
+export { app, enviarSinalParaCompra, extrairSinalDeMensagemDeCanal };
