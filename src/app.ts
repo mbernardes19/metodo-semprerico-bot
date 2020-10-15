@@ -22,6 +22,7 @@ import { SIGNAL_WITH_GALE } from './utils/regex';
 import { comecarValidacaoDeLinks, pegarLinkDeChat } from './servicos/chatLink';
 import MessageMapper from './mappers/MessageMapper';
 import TelegramBot from './model/TelegramBot';
+import { utcToZonedTime } from 'date-fns-tz'
 
 // const TelegramBot = require('./model/TelegramBot').default;
 import ExpressServer from './model/ExpressServer';
@@ -71,10 +72,6 @@ const enviarSinalParaCompra = async (sinal) => {
   }
 
 bot.getBot().command('canais', async (ctx) => {
-  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, 1224094825)
-  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, 1224094825)
-  log('Usuário desbanido!!!!')
-
   const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
   if (usuarioExiste) {
     const usuarioValido = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb);
@@ -147,17 +144,14 @@ bot.onChannelPost(async (ctx: TelegrafContext) => {
       const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id});
       const horaSinal = parseInt(sinal.time.substring(0, 2));
       const minutoSinal = parseInt(sinal.time.substring(3, 5));
-      process.env.TZ = 'America/Sao_Paulo';
-      const agora = new Date();
-      const agoraStr = new Date().toISOString();
+      const agora = utcToZonedTime(new Date(), 'America/Sao_Paulo');
       console.log(horaSinal);
       console.log(minutoSinal);
-      const sinalAgora = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), horaSinal, minutoSinal, 0);
-      const sinalAgoraStr = sinalAgora.toISOString();
+      const sinalAgora = utcToZonedTime(new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), horaSinal, minutoSinal, 0), 'America/Sao_Paulo')
 
-      console.log('AGORA', agoraStr);
-      console.log('SINALAGORA', sinalAgoraStr);
-      const diff = Math.abs(differenceInMilliseconds(parseISO(agoraStr), parseISO(sinalAgoraStr)));
+      console.log('AGORA', agora.toString());
+      console.log('SINALAGORA', sinalAgora.toString());
+      const diff = Math.abs(differenceInMilliseconds(agora, sinalAgora));
 
       console.log('DIFF', diff);
 

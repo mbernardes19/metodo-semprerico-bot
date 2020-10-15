@@ -94,11 +94,25 @@ const criaBackUpDoBancoDeDados = () => {
   });
 };
 
+const recurringMessage = () => {
+  // cron.schedule('* * * * *', async () => {
+  //   const telegramClient = cache.get('bot');
+  //   const message = 'Mensagem teste';
+  //   try {
+  //     telegramClient.sendMessage(process.env.ID_CANAL_SINAIS_RICOS, message)
+  //     telegramClient.sendSticker(process.env.ID_CANAL_SINAIS_RICOS, 'CAACAgIAAxkBAAEBdCRfh55vJqgsgAABQM1j7QABOOkupcK5AAIVAAPANk8TzVamO2GeZOcbBA');
+  //   } catch (err) {
+  //     log(err);
+  //   }
+  // })
+}
+
 const start = () => {
   atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia();
   enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha();
   atualizarPeriodoDeTesteGratuito();
   criaBackUpDoBancoDeDados();
+  recurringMessage();
 };
 
 module.exports = { start };
