@@ -2,7 +2,7 @@ import { TelegrafContext } from "telegraf/typings/context";
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage';
 import dotenv from 'dotenv'
 import path from 'path';
-import app from 'express';
+import express from 'express';
 if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: path.join(__dirname, '..', '.env') });
 } else {
@@ -27,6 +27,7 @@ import { utcToZonedTime } from 'date-fns-tz'
 // const TelegramBot = require('./model/TelegramBot').default;
 import ExpressServer from './model/ExpressServer';
 import ngrok from 'ngrok';
+import Telegraf from "telegraf";
 
 console.log('TRADING', process.env.SERVIDOR_TRADING);
 
@@ -34,6 +35,8 @@ console.log('TRADING', process.env.SERVIDOR_TRADING);
     if (err)
       console.log(err);
   });
+
+const botClient = new Telegraf(process.env.BOT_TOKEN)
 
 const bot = new TelegramBot();
 
@@ -63,13 +66,25 @@ const enviarSinalParaCompra = async (sinal) => {
   }
 };
 
+(async () => {
   try {
-    const server = new ExpressServer(bot);
-    server.init();
+    const app = express()
+    app.use(botClient.webhookCallback('/App'))
+    botClient.telegram.setWebhook('https://bot.sosvestibular.com/App')
+    const info1 = await botClient.telegram.getWebhookInfo()
+    log(info1)
+    app.listen(3000, () => log('Rodando na 3000'))
+    const info2 = await botClient.telegram.getWebhookInfo()
+    log(info2)
+    // this._express.use(this._bot.getBot().webhookCallback('/secret'))
+    // this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));   
+    // const server = new ExpressServer(bot);
+    // server.init();
     // bot.getBot().launch({ webhook: {domain: 'https://bot.sosvestibular.com', port: 3000}})
   } catch (err) {
     log(err)
   }
+})()
 
 bot.getBot().command('canais', async (ctx) => {
   const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
@@ -179,7 +194,15 @@ bot.getBot().on('message', async (ctx) => {
 
   }
 });
+
+botClient.on('message', async (ctx) => {
+  try {
+      await ctx.reply('Olá, sou o Bot do Método Sempre Rico 🤖💵! Segue abaixo meus comandos:\n\n/start - Começar nossa conversa\n/stop - Parar nossa conversa\n');
+  } catch (err) {
+
+  }
+});
 cronjobs.start();
 comecarValidacaoDeLinks();
 
-export { app, enviarSinalParaCompra, extrairSinalDeMensagemDeCanal };
+export { express, enviarSinalParaCompra, extrairSinalDeMensagemDeCanal };
