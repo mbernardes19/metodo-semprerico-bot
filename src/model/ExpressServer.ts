@@ -26,8 +26,8 @@ export default class ExpressServer {
         this._express = ExpressApp();
         if (process.env.NODE_ENV === 'production') {
           (async () => {
-            this._express.use(this._bot.getBot().webhookCallback('/App/secret'))
-            this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App/secret')
+            this._express.use(this._bot.getBot().webhookCallback('/App'))
+            this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App')
             this._express.use(cors());
             this._express.use(bodyParser.json());
             const info1 = await bot.getBot().telegram.getWebhookInfo()
