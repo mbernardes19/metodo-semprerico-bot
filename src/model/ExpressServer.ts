@@ -8,6 +8,7 @@ import { conexaoDb } from '../db';
 import dao from '../dao';
 import { enviarEmailDeRelatorioDeErro } from '../email'
 import { Server } from 'http';
+import ngrok from 'ngrok';
 
 export default class ExpressServer {
     private _express: Express;
@@ -22,12 +23,34 @@ export default class ExpressServer {
         } else {
             this._port = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_DIST_APP || 6001;
         }
-        this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/secret')
         this._express = ExpressApp();
-        this._express.use(cors());
-        this._express.use(bodyParser.json());
-        this._express.use(this._bot.getBot().webhookCallback('/secret'))
-        this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));         
+        if (process.env.NODE_ENV === 'production') {
+          (async () => {
+            this._express.use(this._bot.getBot().webhookCallback('/App'))
+            this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App')
+            this._express.use(cors());
+            this._express.use(bodyParser.json());
+            const info1 = await bot.getBot().telegram.getWebhookInfo()
+            log(info1)
+            this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));    
+            const info2 = await bot.getBot().telegram.getWebhookInfo()
+            log(info2)
+          })()
+        } else {
+          (async () => {
+            const url = await ngrok.connect(6001)
+            log(url)
+            this._express.use(this._bot.getBot().webhookCallback('/secret'))
+            this._bot.getBot().telegram.setWebhook(url + '/secret')
+            this._express.use(cors());
+            this._express.use(bodyParser.json());
+            const info1 = await bot.getBot().telegram.getWebhookInfo()
+            log(info1)
+            this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));    
+            const info2 = await bot.getBot().telegram.getWebhookInfo()
+            log(info2)
+          })()
+        }
     }
 
     init() {
