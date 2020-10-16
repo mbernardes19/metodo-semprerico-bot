@@ -18,14 +18,16 @@ export default class ExpressServer {
     constructor(bot?: TelegramBot) {
         this._bot = bot ? bot : new TelegramBot();
         if (process.env.NODE_ENV === 'production') {
-            this._port = process.env.PORT_METODO_SEMPRERICO_BOT_SRC_APP || process.env.PORT_APP || 3000;
+            this._port = process.env.PORT_METODO_SEMPRERICO_BOT_DIST_APP || process.env.PORT_APP || 3000;
         } else {
-            this._port = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_SRC_APP || 6001;
+            this._port = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_DIST_APP || 6001;
         }
+        this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/secret')
         this._express = ExpressApp();
         this._express.use(cors());
         this._express.use(bodyParser.json());
-        this._server = this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));         
+        this._express.use(this._bot.getBot().webhookCallback('/secret'))
+        this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));         
     }
 
     init() {

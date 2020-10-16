@@ -66,7 +66,7 @@ const enviarSinalParaCompra = async (sinal) => {
   try {
     const server = new ExpressServer(bot);
     server.init();
-    bot.getBot().launch()
+    // bot.getBot().launch({ webhook: {domain: 'https://bot.sosvestibular.com', port: 3000}})
   } catch (err) {
     log(err)
   }
@@ -107,18 +107,18 @@ bot.getBot().command('canais', async (ctx) => {
   }
 });
 
-bot.getBot().command('start', async (ctx: SceneContextMessageUpdate) => {
-  try {
-    await bot.getTelegramClient().sendMessage(ctx.chat.id, '🦁');
-    ctx.scene.enter('planoPago');
-  } catch (err) {
-    await enviarEmailDeRelatorioDeErro(err, ctx.chat.id.toString());
-    if (err.response && err.response.error_code === 403) {
-      log(`Usuário bloqueado ${ctx.chat.id}`);
-    }
-    log(err);
-  }
-});
+// bot.getBot().command('start', async (ctx: SceneContextMessageUpdate) => {
+//   try {
+//     await bot.getTelegramClient().sendMessage(ctx.chat.id, '🦁');
+//     ctx.scene.enter('planoPago');
+//   } catch (err) {
+//     // await enviarEmailDeRelatorioDeErro(err, ctx.chat.id.toString());
+//     if (err.response && err.response.error_code === 403) {
+//       log(`Usuário bloqueado ${ctx.chat.id}`);
+//     }
+//     log(err);
+//   }
+// });
 
 bot.onChannelPost(async (ctx: TelegrafContext) => {
   if (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) {
