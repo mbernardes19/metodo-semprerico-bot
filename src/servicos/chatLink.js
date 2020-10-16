@@ -36,7 +36,7 @@ const exportarLinksDosChats = async () => {
 const comecarValidacaoDeLinks = async () => {
     log(`VALIDAÇÃO DE LINKS INICIADA!`);
     await exportarLinksDosChats();
-    setInterval(async () => await exportarLinksDosChats(), 300000)
+    // setInterval(async () => await exportarLinksDosChats(), 300000)
 }
 
 const pegarLinkDeChat = (chatId) => {
