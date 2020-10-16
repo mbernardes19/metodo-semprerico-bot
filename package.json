@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "start": "NODE_ENV=production node dist/app.js",
+    "start": "tsc && NODE_ENV=production node dist/app.js",
     "dev": "NODE_ENV=development ts-node ./src/app.ts",
     "health": "node health-checker.js"
   },
