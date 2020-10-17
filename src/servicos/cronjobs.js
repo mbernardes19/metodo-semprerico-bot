@@ -7,6 +7,7 @@ const { log } = require('./logger');
 const { cache } = require('./cache');
 const csv = require('./csv');
 const mysqldump = require('mysqldump').default;
+const { exportarLinksDosChats } = require('./chatLink');
 
 const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
   cron.schedule('30 9 * * *', async () => {
@@ -107,12 +108,19 @@ const recurringMessage = () => {
   // })
 }
 
+const linkValidation = () => {
+  cron.schedule('*/5 * * * *', async () => {
+    await exportarLinksDosChats()
+  })
+}
+
 const start = () => {
   atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia();
   enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha();
   atualizarPeriodoDeTesteGratuito();
   criaBackUpDoBancoDeDados();
   recurringMessage();
+  linkValidation();
 };
 
 module.exports = { start };

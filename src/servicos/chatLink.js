@@ -53,8 +53,4 @@ const pegarLinkDeChat = (chatId) => {
     }
 }
 
-const pegarIdChat = () => {
-
-}
-
-module.exports = { pegarLinkDeChat, comecarValidacaoDeLinks }
+module.exports = { pegarLinkDeChat, comecarValidacaoDeLinks, exportarLinksDosChats }
