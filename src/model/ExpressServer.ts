@@ -27,14 +27,14 @@ export default class ExpressServer {
         if (process.env.NODE_ENV === 'production') {
           (async () => {
             // await this._bot.getBot().telegram.deleteWebhook()
+            this._express.use(cors());
+            this._express.use(bodyParser.json());
+
             this._express.post('/App/secret', (req, res) => {
               return this._bot.getBot().handleUpdate(req.body, res)
             });
             this._express.use(this._bot.getBot().webhookCallback('/App/secret'))
             await this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App/secret')
-
-            this._express.use(cors());
-            this._express.use(bodyParser.json());
             const info1 = await bot.getBot().telegram.getWebhookInfo()
             log(info1)
             this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));
