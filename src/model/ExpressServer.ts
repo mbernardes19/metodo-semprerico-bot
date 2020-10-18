@@ -337,6 +337,30 @@ export default class ExpressServer {
             res.sendStatus(500);
           }
         });
+
+        this._express.post('/SR-mensagem-automatica', async (req, res) => {
+          const { mensagemAutomatica } = req.body;
+          try {
+            await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', mensagemAutomatica, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+
+        this._express.post('/SR-sticker-automatico', async (req, res) => {
+          const { stickerAutomatico } = req.body;
+          try {
+            await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', stickerAutomatico, conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.sendStatus(200);
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
         
         this._express.get('/App/SR-mensagem-win', async (req, res) => {
           try {
