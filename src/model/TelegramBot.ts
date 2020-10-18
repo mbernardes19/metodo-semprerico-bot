@@ -20,7 +20,7 @@ export default class TelegramBot {
 
         this._botClient.use(session());
         this._botClient.use(stage.middleware());
-        this._botClient.telegram.webhookReply = false;
+        this._botClient.telegram.webhookReply = true;
         this._telegramClient = this._botClient.telegram;
         cache.set('bot', this._telegramClient);
     }
