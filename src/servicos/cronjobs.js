@@ -111,6 +111,9 @@ const recurringMessage = () => {
 const linkValidation = () => {
   cron.schedule('*/5 * * * *', async () => {
     await exportarLinksDosChats()
+    const telegramClient = cache.get('bot');
+    const info = await telegramClient.getWebhookInfo()
+    log(info)
   })
 }
 
