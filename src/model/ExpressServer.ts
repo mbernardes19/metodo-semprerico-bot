@@ -26,15 +26,13 @@ export default class ExpressServer {
         this._express = ExpressApp();
         if (process.env.NODE_ENV === 'production') {
           (async () => {
-            this._express.use(this._bot.getBot().webhookCallback('/App'))
-            this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App')
+            this._express.use(this._bot.getBot().webhookCallback('/App/secret'))
+            this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App/secret')
             this._express.use(cors());
             this._express.use(bodyParser.json());
             const info1 = await bot.getBot().telegram.getWebhookInfo()
             log(info1)
-            this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));    
-            const info2 = await bot.getBot().telegram.getWebhookInfo()
-            log(info2)
+            this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));
           })()
         } else {
           (async () => {
@@ -47,8 +45,6 @@ export default class ExpressServer {
             const info1 = await bot.getBot().telegram.getWebhookInfo()
             log(info1)
             this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));    
-            const info2 = await bot.getBot().telegram.getWebhookInfo()
-            log(info2)
           })()
         }
     }
@@ -394,6 +390,28 @@ export default class ExpressServer {
             const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
             res.status(200).json({ id: mensagemDoji.id, texto: mensagemDoji.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+
+        this._express.get('/App/SR-mensagem-automatica', async (req, res) => {
+          try {
+            const [mensagemAutomatica] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: mensagemAutomatica.id, texto: mensagemAutomatica.texto });
+          } catch (err) {
+            await enviarEmailDeRelatorioDeErro(err);
+            res.sendStatus(500);
+          }
+        });
+
+        this._express.get('/App/SR-sticker-automatico', async (req, res) => {
+          try {
+            const [stickerAutomatico] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', conexaoDb);
+            res.set('Access-Control-Allow-Origin', '*');
+            res.status(200).json({ id: stickerAutomatico.id, texto: stickerAutomatico.texto });
           } catch (err) {
             await enviarEmailDeRelatorioDeErro(err);
             res.sendStatus(500);
