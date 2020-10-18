@@ -142,7 +142,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/signal-failed', async (req, res) => {
+          this._express.post('/App/signal-failed', async (req, res) => {
             await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
             await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
             res.status(200).send();
@@ -150,7 +150,7 @@ export default class ExpressServer {
     }
 
     private startMessageEditingEndpointsRicoVidente() {
-        this._express.post('/RV-mensagem-win', async (req, res) => {
+        this._express.post('/App/RV-mensagem-win', async (req, res) => {
             log(req.body);
             const { mensagemWin } = req.body;
             try {
@@ -164,7 +164,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/RV-sticker-win', async (req, res) => {
+          this._express.post('/App/RV-sticker-win', async (req, res) => {
             const { stickerWin } = req.body;
             try {
               await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', stickerWin, conexaoDb);
@@ -177,7 +177,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/RV-mensagem-loss', async (req, res) => {
+          this._express.post('/App/RV-mensagem-loss', async (req, res) => {
             const { mensagemLoss } = req.body;
             try {
               await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', mensagemLoss, conexaoDb);
@@ -190,7 +190,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/RV-sticker-loss', async (req, res) => {
+          this._express.post('/App/RV-sticker-loss', async (req, res) => {
             const { stickerLoss } = req.body;
             try {
               await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', stickerLoss, conexaoDb);
@@ -202,7 +202,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/RV-mensagem-doji', async (req, res) => {
+          this._express.post('/App/RV-mensagem-doji', async (req, res) => {
             const { mensagemDoji } = req.body;
             try {
               await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', mensagemDoji, conexaoDb);
@@ -274,7 +274,7 @@ export default class ExpressServer {
     }
 
     private startMessageEditingEndpointsSinaisRicos() {
-      this._express.post('/SR-mensagem-win', async (req, res) => {
+      this._express.post('/App/SR-mensagem-win', async (req, res) => {
           log(req.body);
           const { mensagemWin } = req.body;
           try {
@@ -288,7 +288,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/SR-sticker-win', async (req, res) => {
+        this._express.post('/App/SR-sticker-win', async (req, res) => {
           const { stickerWin } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', stickerWin, conexaoDb);
@@ -301,7 +301,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/SR-mensagem-loss', async (req, res) => {
+        this._express.post('/App/SR-mensagem-loss', async (req, res) => {
           const { mensagemLoss } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', mensagemLoss, conexaoDb);
@@ -314,7 +314,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/SR-sticker-loss', async (req, res) => {
+        this._express.post('/App/SR-sticker-loss', async (req, res) => {
           const { stickerLoss } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', stickerLoss, conexaoDb);
@@ -326,7 +326,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/SR-mensagem-doji', async (req, res) => {
+        this._express.post('/App/SR-mensagem-doji', async (req, res) => {
           const { mensagemDoji } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', mensagemDoji, conexaoDb);
@@ -338,7 +338,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.post('/SR-mensagem-automatica', async (req, res) => {
+        this._express.post('/App/SR-mensagem-automatica', async (req, res) => {
           const { mensagemAutomatica } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', mensagemAutomatica, conexaoDb);
@@ -350,7 +350,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.post('/SR-sticker-automatico', async (req, res) => {
+        this._express.post('/App/SR-sticker-automatico', async (req, res) => {
           const { stickerAutomatico } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', stickerAutomatico, conexaoDb);
