@@ -26,7 +26,7 @@ export default class ExpressServer {
         this._express = ExpressApp();
         if (process.env.NODE_ENV === 'production') {
           (async () => {
-            // await this._bot.getBot().telegram.deleteWebhook()
+            const url = await ngrok.connect({ authtoken: '1bZwtwe9g8AI8iq74rFXyC0jVMV_5DoFRUPRT76UKzvWhqV6d', addr: this._port })
             this._express.use(cors());
             this._express.use(bodyParser.json());
 
@@ -34,7 +34,7 @@ export default class ExpressServer {
               return this._bot.getBot().handleUpdate(req.body, res)
             });
             this._express.use(this._bot.getBot().webhookCallback('/App/secret'))
-            await this._bot.getBot().telegram.setWebhook('https://bot.sosvestibular.com/App/secret')
+            await this._bot.getBot().telegram.setWebhook(url + '/App/secret')
             const info1 = await bot.getBot().telegram.getWebhookInfo()
             log(info1)
             this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));
