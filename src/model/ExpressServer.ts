@@ -26,15 +26,19 @@ export default class ExpressServer {
         this._express = ExpressApp();
         if (process.env.NODE_ENV === 'production') {
           (async () => {
-            const url = await ngrok.connect({ authtoken: '1bZwtwe9g8AI8iq74rFXyC0jVMV_5DoFRUPRT76UKzvWhqV6d', addr: this._port })
-            log(url)
-            this._express.use(cors());
-            this._express.use(bodyParser.json());
-            this._express.use(this._bot.getBot().webhookCallback('/secret'))
-            await this._bot.getBot().telegram.setWebhook(url + '/secret')
-            const info1 = await bot.getBot().telegram.getWebhookInfo()
-            log(info1)
-            this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));
+            try {
+              const url = await ngrok.connect({ authtoken: '1bZwtwe9g8AI8iq74rFXyC0jVMV_5DoFRUPRT76UKzvWhqV6d', addr: this._port })
+              log(url)
+              this._express.use(cors());
+              this._express.use(bodyParser.json());
+              this._express.use(this._bot.getBot().webhookCallback('/secret'))
+              await this._bot.getBot().telegram.setWebhook(url + '/secret')
+              const info1 = await bot.getBot().telegram.getWebhookInfo()
+              log(info1)
+              this._express.listen(this._port, () => log(`Servidor rodando na porta ${this._port}`));
+            } catch (err) {
+              log(err);
+            }
           })()
         } else {
           (async () => {
