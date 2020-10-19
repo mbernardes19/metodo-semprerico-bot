@@ -96,16 +96,25 @@ const criaBackUpDoBancoDeDados = () => {
 };
 
 const recurringMessage = () => {
-  // cron.schedule('* * * * *', async () => {
-  //   const telegramClient = cache.get('bot');
-  //   const message = 'Mensagem teste';
-  //   try {
-  //     telegramClient.sendMessage(process.env.ID_CANAL_SINAIS_RICOS, message)
-  //     telegramClient.sendSticker(process.env.ID_CANAL_SINAIS_RICOS, 'CAACAgIAAxkBAAEBdCRfh55vJqgsgAABQM1j7QABOOkupcK5AAIVAAPANk8TzVamO2GeZOcbBA');
-  //   } catch (err) {
-  //     log(err);
-  //   }
-  // })
+  cron.schedule('58 7 * * 1-5', async () => {
+    const telegramClient = cache.get('bot');
+    try {
+      const [message] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', conexaoDb);
+      await telegramClient.sendMessage(process.env.ID_CANAL_SINAIS_RICOS, message.texto)
+    } catch (err) {
+      log(err);
+    }
+  })
+
+  cron.schedule('59 7 * * 1-5', async () => {
+    const telegramClient = cache.get('bot');
+    try {
+      const [sticker] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', conexaoDb);
+      await telegramClient.sendSticker(process.env.ID_CANAL_SINAIS_RICOS, sticker.texto);
+    } catch (err) {
+      log(err);
+    }
+  })
 }
 
 const linkValidation = () => {
