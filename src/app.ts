@@ -74,6 +74,9 @@ const enviarSinalParaCompra = async (sinal) => {
 })()
 
 bot.getBot().command('canais', async (ctx) => {
+  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, 1224094825)
+  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, 1224094825)
+  log(`DESBLOQUEADO`)
   const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
   if (usuarioExiste) {
     const usuarioValido = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb);
