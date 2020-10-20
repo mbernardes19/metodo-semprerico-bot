@@ -74,9 +74,6 @@ const enviarSinalParaCompra = async (sinal) => {
 })()
 
 bot.getBot().command('canais', async (ctx) => {
-  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, 1224094825)
-  await bot.getBot().telegram.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, 1224094825)
-  log(`DESBLOQUEADO`)
   const usuarioExiste = await dao.usuarioExiste(ctx.chat.id, conexaoDb);
   if (usuarioExiste) {
     const usuarioValido = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb);
@@ -138,10 +135,10 @@ bot.onChannelPost(async (ctx: TelegrafContext) => {
     condition = (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) || ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
   } else {
     if (process.env.SINAIS_SINAIS_RICOS === 'true') {
-      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) && ctx.channelPost.text && ctx.channelPost.text.includes('Sinal Flash');
+      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
     }
     if (process.env.SINAIS_RICO_VIDENTE === 'true') {
-      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) && ctx.channelPost.text && ctx.channelPost.text.includes('Par - ')
+      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
     }
   }
   if (condition) {
