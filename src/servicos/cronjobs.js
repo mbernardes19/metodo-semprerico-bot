@@ -115,6 +115,16 @@ const recurringMessage = () => {
       log(err);
     }
   })
+
+  cron.schedule('30 23 * * 0-4', async () => {
+    const telegramClient = cache.get('bot');
+    try {
+      const [message] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'instrucoes', conexaoDb);
+      await telegramClient.sendMessage(process.env.ID_CANAL_RICO_VIDENTE, message.texto)
+    } catch (err) {
+      log(err);
+    }
+  })
 }
 
 const linkValidation = () => {

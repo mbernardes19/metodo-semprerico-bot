@@ -1,5 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-useless-catch */
 const { pegarTransacaoNaMonetizze } = require('./request');
-const regex = require('../utils/regex');
 const dao = require('../dao');
 const { conexaoDb } = require('../db');
 const { log } = require('./logger');
@@ -76,7 +77,7 @@ const banirUsuariosSeStatusNaoForAtivo = async (usuarios, telegramClient) => {
 
   usuarios.forEach((usuario) => {
     if (usuario.status_assinatura !== 'ativa') {
-      if (usuario.aviso_banimento > 2) {
+      if (usuario.aviso_banimento > 2) { 
         if (process.env.NODE_ENV === 'development') {
           usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_TESTE, usuario.id));
           usuariosASeremBanidos.push(telegramClient.kickChatMember(process.env.ID_CANAL_TESTE, usuario.id));
