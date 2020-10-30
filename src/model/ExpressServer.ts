@@ -52,6 +52,9 @@ export default class ExpressServer {
         this._express.get('/App', (req, res) => {
           res.status(200).send('<h1>Olá App!</h1>');
         })
+        this._express.get('/Teste', (req, res) => {
+          res.status(200).send('<h1>Olá App Teste!</h1>');
+        })
         this.startTradingApiEndpoints()
         this.startMessageEditingEndpointsRicoVidente();
         this.startMessageEditingEndpointsSinaisRicos();
