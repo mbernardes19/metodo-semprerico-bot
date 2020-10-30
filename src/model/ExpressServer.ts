@@ -74,31 +74,46 @@ export default class ExpressServer {
           
             if (!hasGale) {
               log('NO GALE')
-              const winMessage = '⚡💰⚡';
-              const lossMessage = '⚡❌⚡';
+              const winMessage = '✅\n';
+              const lossMessage = '❎\n';
+              const closedMessage = '🔒\n';
+              const notInStrategyMessage = '💥\n';
           
               console.log('MESSAGE ID', channelMessageId)
               console.log('CHANNEL TO SEND', channelToSend)
             
               const resultadoOperacao = req.body
-              if (resultadoOperacao.result === 'WIN') {
-                log('WIN');
-                res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
-                await telegramClient.sendMessage(channelToSend, winMessage, Extra.inReplyTo(channelMessageId));
-                return;
-              }
-              if (resultadoOperacao.result === 'LOSS') {
-                log('LOSS');
-                res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
-                await telegramClient.sendMessage(channelToSend, lossMessage, Extra.inReplyTo(channelMessageId));
-                return;
-              }
-              if (resultadoOperacao.result === 'DOJI') {
-                log('DOJI LOSS');
-                res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
-                await telegramClient.sendMessage(channelToSend, lossMessage, Extra.inReplyTo(channelMessageId));
-                return;
-              }
+              let mensagem = '⚡💰⚡\n';
+              resultadoOperacao.results.forEach(r => {
+                if (r.result === 'WIN') {
+                  log('WIN');
+                  mensagem += winMessage;
+                  return;
+                }
+                if (r.result === 'LOSS') {
+                  log('LOSS');
+                  mensagem += lossMessage;
+                  return;
+                }
+                if (r.result === 'DOJI') {
+                  log('DOJI LOSS');
+                  mensagem += lossMessage;
+                  return;
+                }
+                if (r.result === '') {
+                  log('DOJI LOSS');
+                  mensagem += closedMessage;
+                  return;
+                }
+                if (r.result === 'NOT IN STRATEGY') {
+                  log('DOJI LOSS');
+                  mensagem += notInStrategyMessage;
+                  return;
+                }
+              })
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, mensagem, Extra.inReplyTo(channelMessageId));
+              return;
             }
 
             log('GALE')
@@ -107,7 +122,7 @@ export default class ExpressServer {
             console.log('CHANNEL TO SEND', channelToSend)
           
             const resultadoOperacao = req.body
-            if (resultadoOperacao.result === 'WIN') {
+            if (resultadoOperacao.results[0].result === 'WIN') {
               const [MENSAGEM_WIN] = await dao.pegarMensagem(channelToSend, 'win', conexaoDb);
               const [STICKER_WIN] = await dao.pegarSticker(channelToSend, 'win', conexaoDb);
               log('WIN');
@@ -116,7 +131,7 @@ export default class ExpressServer {
               await telegramClient.sendSticker(channelToSend, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
               return;
             }
-            if (resultadoOperacao.result === 'LOSS') {
+            if (resultadoOperacao.results[0].result === 'LOSS') {
               const [MENSAGEM_LOSS] = await dao.pegarMensagem(channelToSend, 'loss', conexaoDb);
               const [STICKER_LOSS] = await dao.pegarSticker(channelToSend, 'loss', conexaoDb);
               log('LOSS');
@@ -125,7 +140,7 @@ export default class ExpressServer {
               await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
               return;
             }
-            if (resultadoOperacao.result === 'DOJI') {
+            if (resultadoOperacao.result[0].result === 'DOJI') {
               const [MENSAGEM_LOSS] = await dao.pegarMensagem(channelToSend, 'loss', conexaoDb);
               const [STICKER_LOSS] = await dao.pegarSticker(channelToSend, 'loss', conexaoDb);
               const [MENSAGEM_DOJI] = await dao.pegarMensagem(channelToSend, 'doji', conexaoDb);
