@@ -23,5 +23,5 @@ app.get('/HealthTeste/revive', async (req, res) => {
     res.sendStatus(200);
 })
 
-const PORT = process.env.PORT_METODO_SEMPRERICO_BOT_HEALTH_CHECKER_TESTE || process.env.PORT_APP || 21539 || 3000
+const PORT = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_HEALTH_CHECKER_TEST || process.env.PORT_APP || 21379 || 3000
 app.listen(PORT, () => console.log(`Health checker rodando na porta ${PORT}`));
