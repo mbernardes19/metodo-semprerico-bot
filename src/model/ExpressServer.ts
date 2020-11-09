@@ -245,8 +245,32 @@ export default class ExpressServer {
         
           console.log('MESSAGE ID',channelMessageId)
           console.log('CHANNEL TO SEND', channelToSend)
-        
           const resultadoOperacao = req.body
+
+          if (req.body.type === 'filtering' && channelToSend === parseInt(process.env.ID_CANAL_RICO_VIDENTE)) {
+            const winMessage = '✅ : win';
+            const lossMessage = '❎ : loss';
+
+            if (resultadoOperacao.results[0].result === 'WIN') {
+              log('WIN');
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, winMessage, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+            if (resultadoOperacao.results[0].result === 'LOSS') {
+              log('LOSS');
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, lossMessage, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+            if (resultadoOperacao.result[0].result === 'DOJI') {
+              log('DOJI LOSS');
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, lossMessage, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+          }
+        
           if (resultadoOperacao.results[0].result === 'WIN') {
             const [MENSAGEM_WIN] = await dao.pegarMensagem(channelToSend, 'win', conexaoDb);
             const [STICKER_WIN] = await dao.pegarSticker(channelToSend, 'win', conexaoDb);
@@ -283,7 +307,7 @@ export default class ExpressServer {
           await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
           res.status(200).send();
         });
-  }
+    }
 
     private startMessageEditingEndpointsRicoVidente() {
         this._express.post('/App/RV-mensagem-win', async (req, res) => {
