@@ -129,8 +129,8 @@ export default class ExpressServer {
             const resultadoOperacao = req.body
 
             if (req.body.type === 'filtering' && channelToSend === parseInt(process.env.ID_CANAL_RICO_VIDENTE)) {
-              const winMessage = '✅ : win';
-              const lossMessage = '❎ : loss';
+              const winMessage = '✅';
+              const lossMessage = '❎';
 
               if (resultadoOperacao.results[0].result === 'WIN') {
                 log('WIN');
