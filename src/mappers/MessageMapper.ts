@@ -21,7 +21,7 @@ export default class MessageMapper {
               const telegramChannelId = message.channelId
               const gale = false;
               return {assetList, time, type: 'withoutGale', expiration, telegramMessageId, telegramChannelId, gale}
-            } else if (mensagemFiltering[0].includes('filtragem')) {
+            } else if (mensagemFiltering[0].toLowerCase().includes('filtragem')) {
               console.log('MENSAGEM PARSEADA', mensagemFiltering);
               const pair = mensagemFiltering[1];
               const action = mensagemFiltering[2];
