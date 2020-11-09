@@ -135,13 +135,13 @@ bot.onChannelPost(async (ctx: TelegrafContext) => {
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
   let condition;
   if(process.env.SINAIS_SINAIS_RICOS === 'true' && process.env.SINAIS_RICO_VIDENTE === 'true') {
-    condition = (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) || ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
+    condition = (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) || ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.toLowerCase().includes('filtragem'));
   } else {
     if (process.env.SINAIS_SINAIS_RICOS === 'true') {
-      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
+      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.toLowerCase().includes('filtragem'));
     }
     if (process.env.SINAIS_RICO_VIDENTE === 'true') {
-      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - '));
+      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.toLowerCase().includes('filtragem'));
     }
   }
   if (condition) {

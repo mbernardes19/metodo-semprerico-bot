@@ -11,4 +11,5 @@ export default interface Signal {
     telegramMessageId: number;
     telegramChannelId: number;
     gale: boolean;
+    type: string;
 }
