@@ -13,14 +13,17 @@ export default class MessageMapper {
             const mensagemWithGale = message.texto.match(SIGNAL_WITH_GALE);
             const mensagemFiltering = message.texto.match(FILTERING_SIGNAL);
             if (mensagemWithoutGale[0].toLowerCase() === 'sinal flash' || mensagemWithoutGale[0].toLowerCase() === 'sinalflash') {
-              console.log('MENSAGEM PARSEADA', mensagemWithoutGale);
-              const assetList = this.getAssetList(mensagemWithoutGale);
-              const time = mensagemWithoutGale[1];
-              const expiration = 5;
-              const telegramMessageId = message.id
-              const telegramChannelId = message.channelId
-              const gale = false;
-              return {assetList, time, type: 'withoutGale', expiration, telegramMessageId, telegramChannelId, gale}
+              if (process.env.SINAIS_SEM_GALE === 'true') {
+                console.log('MENSAGEM PARSEADA', mensagemWithoutGale);
+                const assetList = this.getAssetList(mensagemWithoutGale);
+                const time = mensagemWithoutGale[1];
+                const expiration = 5;
+                const telegramMessageId = message.id
+                const telegramChannelId = message.channelId
+                const gale = false;
+                return {assetList, time, type: 'withoutGale', expiration, telegramMessageId, telegramChannelId, gale}
+              }
+              return;
             } else if (mensagemFiltering[0].toLowerCase().includes('filtragem')) {
               console.log('MENSAGEM PARSEADA', mensagemFiltering);
               const pair = mensagemFiltering[1];

@@ -78,48 +78,50 @@ export default class ExpressServer {
             const channelToSend = req.body.telegramChannelId;
             const hasGale = req.body.gale;
           
-            if (!hasGale) {
-              log('NO GALE')
-              const winMessage = '✅\n';
-              const lossMessage = '❎\n';
-              const closedMessage = '🔒\n';
-              const notInStrategyMessage = '💥\n';
-          
-              console.log('MESSAGE ID', channelMessageId)
-              console.log('CHANNEL TO SEND', channelToSend)
+            if (process.env.SINAIS_SEM_GALE === 'true') {
+              if (!hasGale) {
+                log('NO GALE')
+                const winMessage = '✅\n';
+                const lossMessage = '❎\n';
+                const closedMessage = '🔒\n';
+                const notInStrategyMessage = '💥\n';
             
-              const resultadoOperacao = req.body
-              let mensagem = '⚡💰⚡\n';
-              resultadoOperacao.results.forEach(r => {
-                if (r.result === 'WIN') {
-                  log('WIN');
-                  mensagem += winMessage;
-                  return;
-                }
-                if (r.result === 'LOSS') {
-                  log('LOSS');
-                  mensagem += lossMessage;
-                  return;
-                }
-                if (r.result === 'DOJI') {
-                  log('DOJI LOSS');
-                  mensagem += lossMessage;
-                  return;
-                }
-                if (r.result === '') {
-                  log('DOJI LOSS');
-                  mensagem += closedMessage;
-                  return;
-                }
-                if (r.result === 'NOT IN STRATEGY') {
-                  log('DOJI LOSS');
-                  mensagem += notInStrategyMessage;
-                  return;
-                }
-              })
-              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
-              await telegramClient.sendMessage(channelToSend, mensagem, Extra.inReplyTo(channelMessageId));
-              return;
+                console.log('MESSAGE ID', channelMessageId)
+                console.log('CHANNEL TO SEND', channelToSend)
+              
+                const resultadoOperacao = req.body
+                let mensagem = '⚡💰⚡\n';
+                resultadoOperacao.results.forEach(r => {
+                  if (r.result === 'WIN') {
+                    log('WIN');
+                    mensagem += winMessage;
+                    return;
+                  }
+                  if (r.result === 'LOSS') {
+                    log('LOSS');
+                    mensagem += lossMessage;
+                    return;
+                  }
+                  if (r.result === 'DOJI') {
+                    log('DOJI LOSS');
+                    mensagem += lossMessage;
+                    return;
+                  }
+                  if (r.result === '') {
+                    log('DOJI LOSS');
+                    mensagem += closedMessage;
+                    return;
+                  }
+                  if (r.result === 'NOT IN STRATEGY') {
+                    log('DOJI LOSS');
+                    mensagem += notInStrategyMessage;
+                    return;
+                  }
+                })
+                res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+                await telegramClient.sendMessage(channelToSend, mensagem, Extra.inReplyTo(channelMessageId));
+                return;
+              }
             }
 
             log('GALE')
@@ -197,48 +199,50 @@ export default class ExpressServer {
           const channelToSend = req.body.telegramChannelId;
           const hasGale = req.body.gale;
         
-          if (!hasGale) {
-            log('NO GALE')
-            const winMessage = '✅\n';
-            const lossMessage = '❎\n';
-            const closedMessage = '🔒\n';
-            const notInStrategyMessage = '💥\n';
-        
-            console.log('MESSAGE ID', channelMessageId)
-            console.log('CHANNEL TO SEND', channelToSend)
+          if (process.env.SINAIS_SEM_GALE === 'true') {
+            if (!hasGale) {
+              log('NO GALE')
+              const winMessage = '✅\n';
+              const lossMessage = '❎\n';
+              const closedMessage = '🔒\n';
+              const notInStrategyMessage = '💥\n';
           
-            const resultadoOperacao = req.body
-            let mensagem = '⚡💰⚡\n';
-            resultadoOperacao.results.forEach(r => {
-              if (r.result === 'WIN') {
-                log('WIN');
-                mensagem += winMessage;
-                return;
-              }
-              if (r.result === 'LOSS') {
-                log('LOSS');
-                mensagem += lossMessage;
-                return;
-              }
-              if (r.result === 'DOJI') {
-                log('DOJI LOSS');
-                mensagem += lossMessage;
-                return;
-              }
-              if (r.result === '') {
-                log('DOJI LOSS');
-                mensagem += closedMessage;
-                return;
-              }
-              if (r.result === 'NOT IN STRATEGY') {
-                log('DOJI LOSS');
-                mensagem += notInStrategyMessage;
-                return;
-              }
-            })
-            res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
-            await telegramClient.sendMessage(channelToSend, mensagem, Extra.inReplyTo(channelMessageId));
-            return;
+              console.log('MESSAGE ID', channelMessageId)
+              console.log('CHANNEL TO SEND', channelToSend)
+            
+              const resultadoOperacao = req.body
+              let mensagem = '⚡💰⚡\n';
+              resultadoOperacao.results.forEach(r => {
+                if (r.result === 'WIN') {
+                  log('WIN');
+                  mensagem += winMessage;
+                  return;
+                }
+                if (r.result === 'LOSS') {
+                  log('LOSS');
+                  mensagem += lossMessage;
+                  return;
+                }
+                if (r.result === 'DOJI') {
+                  log('DOJI LOSS');
+                  mensagem += lossMessage;
+                  return;
+                }
+                if (r.result === '') {
+                  log('DOJI LOSS');
+                  mensagem += closedMessage;
+                  return;
+                }
+                if (r.result === 'NOT IN STRATEGY') {
+                  log('DOJI LOSS');
+                  mensagem += notInStrategyMessage;
+                  return;
+                }
+              })
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, mensagem, Extra.inReplyTo(channelMessageId));
+              return;
+            }
           }
 
           log('GALE')
