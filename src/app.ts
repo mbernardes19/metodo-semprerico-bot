@@ -115,9 +115,12 @@ bot.getBot().command('canais', async (ctx) => {
 bot.getBot().command('start', async (ctx: SceneContextMessageUpdate) => {
   try {
     await bot.getTelegramClient().sendMessage(ctx.chat.id, '🦁');
-    ctx.scene.enter('planoPago');
+    if (process.env.PLANO_GRATUITO === 'true') {
+      ctx.scene.enter('planoGratuito')
+    } else {
+      ctx.scene.enter('planoPago');
+    }
   } catch (err) {
-    // await enviarEmailDeRelatorioDeErro(err, ctx.chat.id.toString());
     if (err.response && err.response.error_code === 403) {
       log(`Usuário bloqueado ${ctx.chat.id}`);
     }

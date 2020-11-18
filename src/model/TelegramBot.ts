@@ -3,6 +3,7 @@ import { TelegrafContext } from "telegraf/typings/context";
 import session from 'telegraf/session';
 import Stage from 'telegraf/stage';
 import cenaPlanoPago from '../cenas/planoPago';
+import cenaPlanoGratuito from '../cenas/planoGratuito';
 import { cache } from '../servicos/cache';
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage';
 
@@ -16,7 +17,7 @@ export default class TelegramBot {
         console.log('TOKEN', process.env.BOT_TOKEN);
         this._botClient = botClient ? botClient : new Telegraf(process.env.BOT_TOKEN)
 
-        const stage = new Stage([cenaPlanoPago], { ttl: 1500 });
+        const stage = new Stage([cenaPlanoPago, cenaPlanoGratuito], { ttl: 1500 });
 
         this._botClient.use(session());
         this._botClient.use(stage.middleware());
