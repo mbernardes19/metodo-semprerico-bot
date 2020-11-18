@@ -84,7 +84,7 @@ const enviarCanaisTelegram = async (ctx) => {
   } catch (err) {
     if (err.errno === 1062) {
       log('ERRO: Usuário já existe no banco de dados');
-      await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`);
+      await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes.`);
       const usuarioValidoEExiste = await dao.usuarioExisteEValido(ctx.chat.id, conexaoDb);
       if (usuarioValidoEExiste) {
         await ctx.reply('Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:');

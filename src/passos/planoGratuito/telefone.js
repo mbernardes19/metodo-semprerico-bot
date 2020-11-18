@@ -19,13 +19,14 @@ const confirmacaoPositiva = async (ctx) => {
       }
         await enviarSmsDeValidacao(ctx, ctx.wizard.state.novoUsuario.telefone);
       await ctx.reply(`Foi enviado agora um SMS com um número de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, diga-me aqui qual foi o número.`);
+      ctx.wizard.state.numeroValidacaoEnviado = false;
+      ctx.wizard.state.tentativasSms += 1;
       setTimeout(async () => {
-        if (ctx.wizard.cursor === 8 && !ctx.wizard.state.numeroValidacaoEnviado) {
-          await ctx.reply(`O SMS ainda não chegou?? 😱😱 Seu celular tem Whatsapp? Quer que eu envie o número pro ${ctx.wizard.state.novoUsuario.telefone} por ele?`, Extra.markup(Teclado.CONFIRMACAO));
-          return ctx.wizard.back();
+        if (ctx.wizard.cursor === 7 && !ctx.wizard.state.numeroValidacaoEnviado) {
+          await ctx.reply(`Caso esteja o SMS ainda não tenha chegado, posso enviá-lo novamente pro seu celular ${ctx.wizard.state.novoUsuario.telefone}. O que acha?`, Extra.markup(Teclado.CONFIRMACAO));
         }
       }, 30000);
-      return ctx.wizard.selectStep(8);
+      return ctx.wizard.next()
     } catch (err) {
       logError('ERRO AO ENVIAR SMS DE VERIFICAÇÃO', err);
       await ctx.reply(`Ocorreu um erro ao enviar o SMS de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, inicie uma conversa comigo novamente com o comando /start`);

@@ -2,7 +2,7 @@ const WizardScene = require('telegraf/scenes/wizard');
 const { pegarNome, confirmarNome } = require('../passos/planoGratuito/nomeCompleto');
 const { pegarEmail, confirmarEmail } = require('../passos/planoGratuito/email');
 const { pegarTelefone, confirmarTelefone } = require('../passos/planoGratuito/telefone');
-const { validarTelefone, validarTelefoneWhatsapp } = require('../passos/planoGratuito/validarTelefone');
+const { validarTelefone } = require('../passos/planoGratuito/validarTelefone');
 
 const cenaPlanoGratuito = new WizardScene(
   'planoGratuito',
@@ -13,8 +13,7 @@ const cenaPlanoGratuito = new WizardScene(
   confirmarEmail,
   async (ctx) => pegarTelefone(ctx),
   confirmarTelefone,
-  validarTelefoneWhatsapp,
-  async (ctx) => validarTelefone(ctx),
+  validarTelefone
 );
 
 const darBoasVindas = async (ctx) => {

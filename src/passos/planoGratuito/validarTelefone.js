@@ -43,7 +43,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
   } catch (err) {
     if (err.errno === 1062) {
       log('ERRO: Usuário já existe no banco de dados');
-      await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes. Seu email registrado é: ${email}.`);
+      await ctx.reply(`Você já ativou sua assinatura Monettize comigo antes.`);
       const usuarioValidoEExiste = await dao.usuarioGratuitoExisteEValido(ctx.chat.id, conexaoDb);
       if (usuarioValidoEExiste) {
         await ctx.reply('Vou te enviar novamente nossos canais caso não tenha conseguido acessar antes:');
@@ -60,9 +60,13 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
           Markup.urlButton('Canal Sinais Ricos', linkCanal1),
           Markup.urlButton('Canal Rico Vidente', linkCanal2),
         ]);
-        await ctx.reply('Aqui:', Extra.markup(teclado));
+        try {
+          await ctx.reply('Aqui:', Extra.markup(teclado));
+          return ctx.scene.leave();
+        } catch (err) {
+          return ctx.scene.leave();
+        }
       }
-      return ctx.scene.leave();
     }
     log('ERRO: Genérico');
     logError('ERRO AO SALVAR USUÁRIO NO BD', err);
@@ -93,10 +97,15 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
       Markup.urlButton('Canal Teste', linkCanal1),
     ]);
   }
-  await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado));
-  log('Canais de Telegram enviados');
-  await ctx.reply('Caso ocorra algum erro ao acessá-los, digite o comando /canais para recebê-los novamente');
-  return ctx.scene.leave();
+  try {
+    await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado));
+    log('Canais de Telegram enviados');
+    await ctx.reply('Caso ocorra algum erro ao acessá-los, digite o comando /canais para recebê-los novamente');
+    return ctx.scene.leave();
+  } catch (err) {
+    return ctx.scene.leave();
+  }
+  
 };
 
 const validarTelefoneWhatsapp = new Composer();
@@ -130,9 +139,41 @@ validarTelefoneWhatsapp.use(async (ctx) => {
   await ctx.reply('Por favor, escolha uma das opções.');
 });
 
-const validarTelefone = async (ctx) => {
-  ctx.wizard.state.numeroValidacaoEnviado = false;
+const validarTelefone = new Composer();
+
+validarTelefone.action('sim', async (ctx) => {
+  await ctx.answerCbQuery();
+  if (ctx.wizard.state.tentativasSms >= 2) {
+    await ctx.reply('Infelizmente não foi possível confirmar seu número de celular 😕\nMas você pode tentar de novo com outro número começando uma nova conversa comigo usando o comando /start');
+    return ctx.scene.leave();
+  }
   ctx.wizard.state.tentativasSms += 1;
+  await enviarSmsDeValidacao(ctx, ctx.wizard.state.novoUsuario.telefone);
+  await ctx.reply(`Foi enviado agora um SMS com um número de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, diga-me aqui qual foi o número.`);
+  setTimeout(async () => {
+    if (ctx.wizard.cursor === 7 && !ctx.wizard.state.numeroValidacaoEnviado) {
+      await ctx.reply(`Caso esteja o SMS ainda não tenha chegado, posso enviá-lo novamente pro seu celular ${ctx.wizard.state.novoUsuario.telefone}. O que acha?`, Extra.markup(Teclado.CONFIRMACAO));
+    }
+  }, 30000);
+});
+
+validarTelefone.action('nao', async (ctx) => {
+  await ctx.answerCbQuery();
+});
+
+validarTelefone.use(async (ctx) => {
+  if (confirmado(ctx)) {
+    if (ctx.wizard.state.tentativasSms >= 2) {
+      await ctx.reply('Infelizmente não foi possível confirmar seu número de celular 😕.\nMas você pode tentar de novo com outro número começando uma nova conversa comigo usando o comando /start');
+      return ctx.scene.leave();
+    }
+    ctx.wizard.state.tentativasSms += 1;
+    await enviarSmsDeValidacao(ctx, ctx.wizard.state.novoUsuario.telefone);
+    await ctx.reply(`Foi enviado agora um SMS com um número de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, diga-me aqui qual foi o número.`);
+  }
+  if (negado(ctx)) {
+    return;
+  }
 
   console.log('MESSAGE', ctx.message.text);
   console.log('NUMERO VALIDACAO', ctx.wizard.state.numeroValidacao);
@@ -168,7 +209,7 @@ const validarTelefone = async (ctx) => {
   if (ctx.wizard.state.tentativasSms < 2) {
     ctx.wizard.state.numeroValidacaoEnviado = true;
     ctx.reply(`Esse número não é igual ao enviado no SMS. Quer que eu envie um SMS novamente para ${ctx.wizard.state.novoUsuario.telefone}?`, Extra.markup(Teclado.CONFIRMACAO));
-    return ctx.wizard.selectStep(6);
+    return;
   }
 
   try {
@@ -179,7 +220,6 @@ const validarTelefone = async (ctx) => {
     await ctx.scene.leave();
   } catch (err) {
     logError(`ERRO AO ADICIONAR NÚMERO E EMAIL DO USUÁRIO AOS BLOQUEADOS ${ctx.wizard.state.novoUsuario.telefone} ${ctx.wizard.state.novoUsuario.email}`, err);
-  }
-};
+  }});
 
 module.exports = { enviarSmsDeValidacao, validarTelefone, validarTelefoneWhatsapp };
