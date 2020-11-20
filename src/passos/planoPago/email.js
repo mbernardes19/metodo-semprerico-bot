@@ -60,6 +60,7 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
 
 const atribuirIdTelegramAoNovoUsuario = (ctx) => {
   log('ID Telegram atribuido');
+  log(ctx.chat.id);
   ctx.wizard.state.novoUsuario.idTelegram = ctx.chat.id;
 };
 
