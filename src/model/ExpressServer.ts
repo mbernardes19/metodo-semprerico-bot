@@ -59,6 +59,9 @@ export default class ExpressServer {
         this._express.get('/Teste', (req, res) => {
           res.status(200).send('<h1>Olá App Teste!</h1>');
         })
+        this._express.get('/AppGratuito', (req, res) => {
+          res.status(200).send('<h1>Olá App Gratuito!</h1>');
+        })
         this.startTradingApiEndpoints();
         this.startTradingApiEndpointsTest();
         this.startMessageEditingEndpointsRicoVidente();
@@ -187,13 +190,129 @@ export default class ExpressServer {
               await telegramClient.sendMessage(channelToSend, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
               return;
             }
-          });
+        });
+        this._express.post('/AppGratuito/operation-result', async (req, res) => {
+          const telegramClient = this._bot.getTelegramClient();
+          const channelMessageId = req.body.telegramMessageId
+          const channelToSend = req.body.telegramChannelId;
+          const hasGale = req.body.gale;
+        
+          if (process.env.SINAIS_SEM_GALE === 'true') {
+            if (!hasGale) {
+              log('NO GALE')
+              const winMessage = '✅\n';
+              const lossMessage = '❎\n';
+              const closedMessage = '🔒\n';
+              const notInStrategyMessage = '💥\n';
           
-          this._express.post('/App/signal-failed', async (req, res) => {
-            await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
-            await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
-            res.status(200).send();
-          });
+              console.log('MESSAGE ID', channelMessageId)
+              console.log('CHANNEL TO SEND', channelToSend)
+            
+              const resultadoOperacao = req.body
+              let mensagem = '⚡💰⚡\n';
+              resultadoOperacao.results.forEach(r => {
+                if (r.result === 'WIN') {
+                  log('WIN');
+                  mensagem += winMessage;
+                  return;
+                }
+                if (r.result === 'LOSS') {
+                  log('LOSS');
+                  mensagem += lossMessage;
+                  return;
+                }
+                if (r.result === 'DOJI') {
+                  log('DOJI LOSS');
+                  mensagem += lossMessage;
+                  return;
+                }
+                if (r.result === '') {
+                  log('DOJI LOSS');
+                  mensagem += closedMessage;
+                  return;
+                }
+                if (r.result === 'NOT IN STRATEGY') {
+                  log('DOJI LOSS');
+                  mensagem += notInStrategyMessage;
+                  return;
+                }
+              })
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, mensagem, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+          }
+
+          log('GALE')
+        
+          console.log('MESSAGE ID',channelMessageId)
+          console.log('CHANNEL TO SEND', channelToSend)
+          const resultadoOperacao = req.body
+
+          if (req.body.type === 'filtering' && channelToSend === parseInt(process.env.ID_CANAL_RICO_VIDENTE)) {
+            const winMessage = '✅';
+            const lossMessage = '❎';
+
+            if (resultadoOperacao.results[0].result === 'WIN') {
+              log('WIN');
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, winMessage, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+            if (resultadoOperacao.results[0].result === 'LOSS') {
+              log('LOSS');
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, lossMessage, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+            if (resultadoOperacao.result[0].result === 'DOJI') {
+              log('DOJI LOSS');
+              res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+              await telegramClient.sendMessage(channelToSend, lossMessage, Extra.inReplyTo(channelMessageId));
+              return;
+            }
+          }
+        
+          if (resultadoOperacao.results[0].result === 'WIN') {
+            const [MENSAGEM_WIN] = await dao.pegarMensagem(channelToSend, 'win', conexaoDb);
+            const [STICKER_WIN] = await dao.pegarSticker(channelToSend, 'win', conexaoDb);
+            log('WIN');
+            res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+            await telegramClient.sendMessage(channelToSend, MENSAGEM_WIN.texto, Extra.inReplyTo(channelMessageId));
+            await telegramClient.sendSticker(channelToSend, STICKER_WIN.texto, Extra.inReplyTo(channelMessageId));
+            return;
+          }
+          if (resultadoOperacao.results[0].result === 'LOSS') {
+            const [MENSAGEM_LOSS] = await dao.pegarMensagem(channelToSend, 'loss', conexaoDb);
+            const [STICKER_LOSS] = await dao.pegarSticker(channelToSend, 'loss', conexaoDb);
+            log('LOSS');
+            res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+            await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+            await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+            return;
+          }
+          if (resultadoOperacao.result[0].result === 'DOJI') {
+            const [MENSAGEM_LOSS] = await dao.pegarMensagem(channelToSend, 'loss', conexaoDb);
+            const [STICKER_LOSS] = await dao.pegarSticker(channelToSend, 'loss', conexaoDb);
+            const [MENSAGEM_DOJI] = await dao.pegarMensagem(channelToSend, 'doji', conexaoDb);
+            log('DOJI LOSS');
+            res.status(200).send({message: `Operation result sent to channel ${channelToSend}`, messageToReply: channelMessageId});
+            await telegramClient.sendMessage(channelToSend, MENSAGEM_LOSS.texto, Extra.inReplyTo(channelMessageId));
+            await telegramClient.sendSticker(channelToSend, STICKER_LOSS.texto, Extra.inReplyTo(channelMessageId));
+            await telegramClient.sendMessage(channelToSend, MENSAGEM_DOJI.texto, Extra.inReplyTo(channelMessageId));
+            return;
+          }
+        });
+        this._express.post('/App/signal-failed', async (req, res) => {
+          await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
+          await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
+          res.status(200).send();
+        });
+        this._express.post('/AppGratuito/signal-failed', async (req, res) => {
+          await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
+          await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
+          res.status(200).send();
+        });
     }
 
     private startTradingApiEndpointsTest() {
@@ -382,7 +501,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/App/RV-mensagem-win', async (req, res) => {
+          this._express.get('/AppGratuito/RV-mensagem-win', async (req, res) => {
             try {
               const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -394,7 +513,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/App/RV-sticker-win', async (req, res) => {
+          this._express.get('/AppGratuito/RV-sticker-win', async (req, res) => {
             try {
               const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -406,7 +525,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/App/RV-mensagem-loss', async (req, res) => {
+          this._express.get('/AppGratuito/RV-mensagem-loss', async (req, res) => {
             try {
               const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -418,7 +537,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/App/RV-sticker-loss', async (req, res) => {
+          this._express.get('/AppGratuito/RV-sticker-loss', async (req, res) => {
             try {
               const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -429,7 +548,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/App/RV-mensagem-doji', async (req, res) => {
+          this._express.get('/AppGratuito/RV-mensagem-doji', async (req, res) => {
             try {
               const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -439,6 +558,7 @@ export default class ExpressServer {
               res.sendStatus(500);
             }
           });
+          
     }
 
     private startMessageEditingEndpointsSinaisRicos() {
@@ -530,7 +650,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/App/SR-mensagem-win', async (req, res) => {
+        this._express.get('/AppGratuito/SR-mensagem-win', async (req, res) => {
           try {
             const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -542,7 +662,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/App/SR-sticker-win', async (req, res) => {
+        this._express.get('/AppGratuito/SR-sticker-win', async (req, res) => {
           try {
             const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -554,7 +674,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/App/SR-mensagem-loss', async (req, res) => {
+        this._express.get('/AppGratuito/SR-mensagem-loss', async (req, res) => {
           try {
             const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -566,7 +686,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/App/SR-sticker-loss', async (req, res) => {
+        this._express.get('/AppGratuito/SR-sticker-loss', async (req, res) => {
           try {
             const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -577,7 +697,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/App/SR-mensagem-doji', async (req, res) => {
+        this._express.get('/AppGratuito/SR-mensagem-doji', async (req, res) => {
           try {
             const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -588,7 +708,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.get('/App/SR-mensagem-automatica', async (req, res) => {
+        this._express.get('/AppGratuito/SR-mensagem-automatica', async (req, res) => {
           try {
             const [mensagemAutomatica] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -599,7 +719,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.get('/App/SR-sticker-automatico', async (req, res) => {
+        this._express.get('/AppGratuito/SR-sticker-automatico', async (req, res) => {
           try {
             const [stickerAutomatico] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
