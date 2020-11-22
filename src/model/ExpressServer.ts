@@ -19,7 +19,11 @@ export default class ExpressServer {
     constructor(bot?: TelegramBot) {
         this._bot = bot ? bot : new TelegramBot();
         if (process.env.NODE_ENV === 'production') {
-            this._port = process.env.PORT_METODO_SEMPRERICO_BOT_DIST_APP || process.env.PORT_APP || 3000;
+          if (process.env.PLANO_GRATUITO === 'true') {
+            this._port = process.env.PORT_GRATUITO_METODO_SEMPRERICO_BOT_DIST_APP || process.env.PORT_APP || 3000;
+          } else {
+            this._port = process.env.PORT_PAGO_METODO_SEMPRERICO_BOT_DIST_APP || process.env.PORT_APP || 3000;
+          }
         } else {
             this._port = process.env.PORT_TESTE_METODO_SEMPRERICO_BOT_DIST_APP || 6001;
         }
