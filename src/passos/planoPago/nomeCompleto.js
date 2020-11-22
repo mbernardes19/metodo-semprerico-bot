@@ -33,7 +33,7 @@ const confirmarNome = new Composer();
 confirmarNome.action('sim', async (ctx) => {
   try {
     await ctx.answerCbQuery();
-    await ctx.reply('Qual é o seu telefone?');
+    await ctx.reply('Qual é o seu telefone com DDD?');
     return ctx.wizard.next();
   } catch (err) {
     log(err);
@@ -52,7 +52,7 @@ confirmarNome.use(async (ctx) => {
   log('Sim/Não');
   if (confirmado(ctx)) {
     try {
-      await ctx.reply('Qual é o seu telefone?');
+      await ctx.reply('Qual é o seu telefone com DDD?');
       return ctx.wizard.next();
     } catch (err) {
       log(err);

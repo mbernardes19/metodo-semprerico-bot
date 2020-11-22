@@ -36,7 +36,6 @@ const atribuirIdTelegramAoNovoUsuario = (ctx) => {
 
 const enviarCanaisTelegramGratuito = async (ctx) => {
   log('Seu período de 1 mês de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉');
-  const { email } = ctx.wizard.state.novoUsuario;
   try {
     atribuirIdTelegramAoNovoUsuario(ctx);
     await adicionarUsuarioGratuitoAoBancoDeDados(ctx);
@@ -159,9 +158,13 @@ validarTelefone.action('sim', async (ctx) => {
 
 validarTelefone.action('nao', async (ctx) => {
   await ctx.answerCbQuery();
+  if (ctx.wizard.state.numeroValidacaoEnviado) {
+    await ctx.reply('Seu cadastro não foi validado. Por favor, inicie novamente uma conversa comigo usando o comando /start')
+    return ctx.scene.leave();
+  }
 });
 
-validarTelefone.use(async (ctx) => {
+validarTelefone.use(async (ctx) => { 
   if (confirmado(ctx)) {
     if (ctx.wizard.state.tentativasSms >= 2) {
       await ctx.reply('Infelizmente não foi possível confirmar seu número de celular 😕.\nMas você pode tentar de novo com outro número começando uma nova conversa comigo usando o comando /start');

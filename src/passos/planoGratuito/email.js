@@ -17,7 +17,7 @@ const confirmacaoPositiva = async (ctx) => {
             return ctx.scene.leave()
         }
         await ctx.reply('Ok!')
-        await ctx.reply('Qual é o seu telefone?')
+        await ctx.reply('Qual é o seu telefone com DDD?')
         return ctx.wizard.next()
     }
     await ctx.reply(`${validacao.mensagemDeErro}`)
