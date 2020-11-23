@@ -23,7 +23,7 @@ const confirmacaoPositiva = async (ctx) => {
       ctx.wizard.state.tentativasSms += 1;
       setTimeout(async () => {
         if (ctx.wizard.cursor === 7 && !ctx.wizard.state.numeroValidacaoEnviado) {
-          await ctx.reply(`Caso esteja o SMS ainda não tenha chegado, posso enviá-lo novamente pro seu celular ${ctx.wizard.state.novoUsuario.telefone}. O que acha?`, Extra.markup(Teclado.CONFIRMACAO));
+          await ctx.reply(`Caso o SMS ainda não tenha chegado, posso enviá-lo novamente pro seu celular ${ctx.wizard.state.novoUsuario.telefone}. O que acha?`, Extra.markup(Teclado.CONFIRMACAO));
         }
       }, 30000);
       return ctx.wizard.next()

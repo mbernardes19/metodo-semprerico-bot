@@ -151,7 +151,7 @@ validarTelefone.action('sim', async (ctx) => {
   await ctx.reply(`Foi enviado agora um SMS com um número de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, diga-me aqui qual foi o número.`);
   setTimeout(async () => {
     if (ctx.wizard.cursor === 7 && !ctx.wizard.state.numeroValidacaoEnviado) {
-      await ctx.reply(`Caso esteja o SMS ainda não tenha chegado, posso enviá-lo novamente pro seu celular ${ctx.wizard.state.novoUsuario.telefone}. O que acha?`, Extra.markup(Teclado.CONFIRMACAO));
+      await ctx.reply(`Caso o SMS ainda não tenha chegado, posso enviá-lo novamente pro seu celular ${ctx.wizard.state.novoUsuario.telefone}. O que acha?`, Extra.markup(Teclado.CONFIRMACAO));
     }
   }, 30000);
 });
