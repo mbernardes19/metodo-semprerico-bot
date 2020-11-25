@@ -31,7 +31,7 @@ const verificarCompraDeUsuarioNaMonetizze = async (ctx) => {
 
 const atualizarStatusDeAssinaturaDeUsuarios = async (usuarios) => {
   const novosStatusAsync = [];
-  usuarios.forEach((usuario) => usuario.id === 1224094825 ? novosStatusAsync.push('ativa') : novosStatusAsync.push(pegarNovoStatusDeAssinaturaDeUsuario(usuario)));
+  usuarios.forEach((usuario) => novosStatusAsync.push(pegarNovoStatusDeAssinaturaDeUsuario(usuario)));
   try {
     const novosStatus = await Promise.all(novosStatusAsync);
     await dao.atualizarStatusDeAssinaturaDeUsuarios(usuarios, novosStatus, conexaoDb);
