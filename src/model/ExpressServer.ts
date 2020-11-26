@@ -53,13 +53,13 @@ export default class ExpressServer {
         this._express.get('/', (req, res) => {
             res.status(200).send('<h1>Olá!</h1>');
         });
-        this._express.get('/App/App', (req, res) => {
+        this._express.get('//App', (req, res) => {
           res.status(200).send('<h1>Olá App!</h1>');
         })
-        this._express.get('/Teste/Teste', (req, res) => {
+        this._express.get('//Teste', (req, res) => {
           res.status(200).send('<h1>Olá App Teste!</h1>');
         })
-        this._express.get('/AppGratuito/AppGratuito', (req, res) => {
+        this._express.get('//AppGratuito', (req, res) => {
           res.status(200).send('<h1>Olá App Gratuito!</h1>');
         })
         this.startTradingApiEndpoints();
@@ -79,7 +79,7 @@ export default class ExpressServer {
   }
     
     private startTradingApiEndpoints() {
-        this._express.post('/App/App/operation-result', async (req, res) => {
+        this._express.post('//App/operation-result', async (req, res) => {
             const telegramClient = this._bot.getTelegramClient();
             const channelMessageId = req.body.telegramMessageId
             const channelToSend = req.body.telegramChannelId;
@@ -191,7 +191,7 @@ export default class ExpressServer {
               return;
             }
         });
-        this._express.post('/AppGratuito/AppGratuito/operation-result', async (req, res) => {
+        this._express.post('//AppGratuito/operation-result', async (req, res) => {
           const telegramClient = this._bot.getTelegramClient();
           const channelMessageId = req.body.telegramMessageId
           const channelToSend = req.body.telegramChannelId;
@@ -303,12 +303,12 @@ export default class ExpressServer {
             return;
           }
         });
-        this._express.post('/App/App/signal-failed', async (req, res) => {
+        this._express.post('//App/signal-failed', async (req, res) => {
           await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
           await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
           res.status(200).send();
         });
-        this._express.post('/AppGratuito/AppGratuito/signal-failed', async (req, res) => {
+        this._express.post('//AppGratuito/signal-failed', async (req, res) => {
           await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
           await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
           res.status(200).send();
@@ -316,7 +316,7 @@ export default class ExpressServer {
     }
 
     private startTradingApiEndpointsTest() {
-      this._express.post('/Teste/Teste/operation-result', async (req, res) => {
+      this._express.post('//Teste/operation-result', async (req, res) => {
           const telegramClient = this._bot.getTelegramClient();
           const channelMessageId = req.body.telegramMessageId
           const channelToSend = req.body.telegramChannelId;
@@ -429,7 +429,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/Teste/Teste/signal-failed', async (req, res) => {
+        this._express.post('//Teste/signal-failed', async (req, res) => {
           await this._bot.getTelegramClient().sendMessage(721557882, req.body.message)
           await this._bot.getTelegramClient().sendMessage(923769783, req.body.message)
           res.status(200).send();
@@ -437,7 +437,7 @@ export default class ExpressServer {
     }
 
     private startMessageEditingEndpointsRicoVidente() {
-        this._express.post('/App/App/RV-mensagem-win', async (req, res) => {
+        this._express.post('//App/RV-mensagem-win', async (req, res) => {
             log(req.body);
             const { mensagemWin } = req.body;
             try {
@@ -451,7 +451,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/App/App/RV-sticker-win', async (req, res) => {
+          this._express.post('//App/RV-sticker-win', async (req, res) => {
             const { stickerWin } = req.body;
             try {
               await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', stickerWin, conexaoDb);
@@ -464,7 +464,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/App/App/RV-mensagem-loss', async (req, res) => {
+          this._express.post('//App/RV-mensagem-loss', async (req, res) => {
             const { mensagemLoss } = req.body;
             try {
               await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', mensagemLoss, conexaoDb);
@@ -477,7 +477,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/App/App/RV-sticker-loss', async (req, res) => {
+          this._express.post('//App/RV-sticker-loss', async (req, res) => {
             const { stickerLoss } = req.body;
             try {
               await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', stickerLoss, conexaoDb);
@@ -489,7 +489,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.post('/App/App/RV-mensagem-doji', async (req, res) => {
+          this._express.post('//App/RV-mensagem-doji', async (req, res) => {
             const { mensagemDoji } = req.body;
             try {
               await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', mensagemDoji, conexaoDb);
@@ -501,7 +501,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/AppGratuito/AppGratuito/RV-mensagem-win', async (req, res) => {
+          this._express.get('//AppGratuito/RV-mensagem-win', async (req, res) => {
             try {
               const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -513,7 +513,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/AppGratuito/AppGratuito/RV-sticker-win', async (req, res) => {
+          this._express.get('//AppGratuito/RV-sticker-win', async (req, res) => {
             try {
               const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -525,7 +525,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/AppGratuito/AppGratuito/RV-mensagem-loss', async (req, res) => {
+          this._express.get('//AppGratuito/RV-mensagem-loss', async (req, res) => {
             try {
               const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -537,7 +537,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/AppGratuito/AppGratuito/RV-sticker-loss', async (req, res) => {
+          this._express.get('//AppGratuito/RV-sticker-loss', async (req, res) => {
             try {
               const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -548,7 +548,7 @@ export default class ExpressServer {
             }
           });
           
-          this._express.get('/AppGratuito/AppGratuito/RV-mensagem-doji', async (req, res) => {
+          this._express.get('//AppGratuito/RV-mensagem-doji', async (req, res) => {
             try {
               const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', conexaoDb);
               res.set('Access-Control-Allow-Origin', '*');
@@ -562,7 +562,7 @@ export default class ExpressServer {
     }
 
     private startMessageEditingEndpointsSinaisRicos() {
-      this._express.post('/App/App/SR-mensagem-win', async (req, res) => {
+      this._express.post('//App/SR-mensagem-win', async (req, res) => {
           log(req.body);
           const { mensagemWin } = req.body;
           try {
@@ -576,7 +576,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/App/App/SR-sticker-win', async (req, res) => {
+        this._express.post('//App/SR-sticker-win', async (req, res) => {
           const { stickerWin } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', stickerWin, conexaoDb);
@@ -589,7 +589,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/App/App/SR-mensagem-loss', async (req, res) => {
+        this._express.post('//App/SR-mensagem-loss', async (req, res) => {
           const { mensagemLoss } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', mensagemLoss, conexaoDb);
@@ -602,7 +602,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/App/App/SR-sticker-loss', async (req, res) => {
+        this._express.post('//App/SR-sticker-loss', async (req, res) => {
           const { stickerLoss } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', stickerLoss, conexaoDb);
@@ -614,7 +614,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/App/App/SR-mensagem-doji', async (req, res) => {
+        this._express.post('//App/SR-mensagem-doji', async (req, res) => {
           const { mensagemDoji } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', mensagemDoji, conexaoDb);
@@ -626,7 +626,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.post('/App/App/SR-mensagem-automatica', async (req, res) => {
+        this._express.post('//App/SR-mensagem-automatica', async (req, res) => {
           const { mensagemAutomatica } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', mensagemAutomatica, conexaoDb);
@@ -638,7 +638,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.post('/App/App/SR-sticker-automatico', async (req, res) => {
+        this._express.post('//App/SR-sticker-automatico', async (req, res) => {
           const { stickerAutomatico } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', stickerAutomatico, conexaoDb);
@@ -650,7 +650,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/AppGratuito/AppGratuito/SR-mensagem-win', async (req, res) => {
+        this._express.get('//AppGratuito/SR-mensagem-win', async (req, res) => {
           try {
             const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -662,7 +662,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/AppGratuito/AppGratuito/SR-sticker-win', async (req, res) => {
+        this._express.get('//AppGratuito/SR-sticker-win', async (req, res) => {
           try {
             const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -674,7 +674,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/AppGratuito/AppGratuito/SR-mensagem-loss', async (req, res) => {
+        this._express.get('//AppGratuito/SR-mensagem-loss', async (req, res) => {
           try {
             const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -686,7 +686,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/AppGratuito/AppGratuito/SR-sticker-loss', async (req, res) => {
+        this._express.get('//AppGratuito/SR-sticker-loss', async (req, res) => {
           try {
             const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -697,7 +697,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/AppGratuito/AppGratuito/SR-mensagem-doji', async (req, res) => {
+        this._express.get('//AppGratuito/SR-mensagem-doji', async (req, res) => {
           try {
             const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -708,7 +708,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.get('/AppGratuito/AppGratuito/SR-mensagem-automatica', async (req, res) => {
+        this._express.get('//AppGratuito/SR-mensagem-automatica', async (req, res) => {
           try {
             const [mensagemAutomatica] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -719,7 +719,7 @@ export default class ExpressServer {
           }
         });
 
-        this._express.get('/AppGratuito/AppGratuito/SR-sticker-automatico', async (req, res) => {
+        this._express.get('//AppGratuito/SR-sticker-automatico', async (req, res) => {
           try {
             const [stickerAutomatico] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -732,7 +732,7 @@ export default class ExpressServer {
   }
 
     private startMessageEditingEndpointsRicoVidenteTest() {
-      this._express.post('/Teste/Teste/RV-mensagem-win', async (req, res) => {
+      this._express.post('//Teste/RV-mensagem-win', async (req, res) => {
           log(req.body);
           const { mensagemWin } = req.body;
           try {
@@ -746,7 +746,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/Teste/Teste/RV-sticker-win', async (req, res) => {
+        this._express.post('//Teste/RV-sticker-win', async (req, res) => {
           const { stickerWin } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', stickerWin, conexaoDb);
@@ -759,7 +759,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/Teste/Teste/RV-mensagem-loss', async (req, res) => {
+        this._express.post('//Teste/RV-mensagem-loss', async (req, res) => {
           const { mensagemLoss } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', mensagemLoss, conexaoDb);
@@ -772,7 +772,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/Teste/Teste/RV-sticker-loss', async (req, res) => {
+        this._express.post('//Teste/RV-sticker-loss', async (req, res) => {
           const { stickerLoss } = req.body;
           try {
             await dao.atualizarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', stickerLoss, conexaoDb);
@@ -784,7 +784,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.post('/Teste/RV-mensagem-doji', async (req, res) => {
+        this._express.post('//RV-mensagem-doji', async (req, res) => {
           const { mensagemDoji } = req.body;
           try {
             await dao.atualizarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', mensagemDoji, conexaoDb);
@@ -796,7 +796,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/Teste/Teste/RV-mensagem-win', async (req, res) => {
+        this._express.get('//Teste/RV-mensagem-win', async (req, res) => {
           try {
             const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -808,7 +808,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/Teste/Teste/RV-sticker-win', async (req, res) => {
+        this._express.get('//Teste/RV-sticker-win', async (req, res) => {
           try {
             const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'win', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -820,7 +820,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/Teste/Teste/RV-mensagem-loss', async (req, res) => {
+        this._express.get('//Teste/RV-mensagem-loss', async (req, res) => {
           try {
             const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -832,7 +832,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/Teste/Teste/RV-sticker-loss', async (req, res) => {
+        this._express.get('//Teste/RV-sticker-loss', async (req, res) => {
           try {
             const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_RICO_VIDENTE, 'loss', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -843,7 +843,7 @@ export default class ExpressServer {
           }
         });
         
-        this._express.get('/Teste/Teste/RV-mensagem-doji', async (req, res) => {
+        this._express.get('//Teste/RV-mensagem-doji', async (req, res) => {
           try {
             const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_RICO_VIDENTE, 'doji', conexaoDb);
             res.set('Access-Control-Allow-Origin', '*');
@@ -856,7 +856,7 @@ export default class ExpressServer {
   }
 
     private startMessageEditingEndpointsSinaisRicosTest() {
-    this._express.post('/Teste/Teste/SR-mensagem-win', async (req, res) => {
+    this._express.post('//Teste/SR-mensagem-win', async (req, res) => {
         log(req.body);
         const { mensagemWin } = req.body;
         try {
@@ -870,7 +870,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.post('/Teste/Teste/SR-sticker-win', async (req, res) => {
+      this._express.post('//Teste/SR-sticker-win', async (req, res) => {
         const { stickerWin } = req.body;
         try {
           await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', stickerWin, conexaoDb);
@@ -883,7 +883,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.post('/Teste/Teste/SR-mensagem-loss', async (req, res) => {
+      this._express.post('//Teste/SR-mensagem-loss', async (req, res) => {
         const { mensagemLoss } = req.body;
         try {
           await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', mensagemLoss, conexaoDb);
@@ -896,7 +896,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.post('/Teste/Teste/SR-sticker-loss', async (req, res) => {
+      this._express.post('//Teste/SR-sticker-loss', async (req, res) => {
         const { stickerLoss } = req.body;
         try {
           await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', stickerLoss, conexaoDb);
@@ -908,7 +908,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.post('/Teste/Teste/SR-mensagem-doji', async (req, res) => {
+      this._express.post('//Teste/SR-mensagem-doji', async (req, res) => {
         const { mensagemDoji } = req.body;
         try {
           await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', mensagemDoji, conexaoDb);
@@ -920,7 +920,7 @@ export default class ExpressServer {
         }
       });
 
-      this._express.post('/Teste/Teste/SR-mensagem-automatica', async (req, res) => {
+      this._express.post('//Teste/SR-mensagem-automatica', async (req, res) => {
         const { mensagemAutomatica } = req.body;
         try {
           await dao.atualizarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', mensagemAutomatica, conexaoDb);
@@ -932,7 +932,7 @@ export default class ExpressServer {
         }
       });
 
-      this._express.post('/Teste/Teste/SR-sticker-automatico', async (req, res) => {
+      this._express.post('//Teste/SR-sticker-automatico', async (req, res) => {
         const { stickerAutomatico } = req.body;
         try {
           await dao.atualizarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', stickerAutomatico, conexaoDb);
@@ -944,7 +944,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.get('/Teste/Teste/SR-mensagem-win', async (req, res) => {
+      this._express.get('//Teste/SR-mensagem-win', async (req, res) => {
         try {
           const [mensagemWin] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
@@ -956,7 +956,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.get('/Teste/Teste/SR-sticker-win', async (req, res) => {
+      this._express.get('//Teste/SR-sticker-win', async (req, res) => {
         try {
           const [stickerWin] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'win', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
@@ -968,7 +968,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.get('/Teste/Teste/SR-mensagem-loss', async (req, res) => {
+      this._express.get('//Teste/SR-mensagem-loss', async (req, res) => {
         try {
           const [mensagemLoss] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
@@ -980,7 +980,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.get('/Teste/Teste/SR-sticker-loss', async (req, res) => {
+      this._express.get('//Teste/SR-sticker-loss', async (req, res) => {
         try {
           const [stickerLoss] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'loss', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
@@ -991,7 +991,7 @@ export default class ExpressServer {
         }
       });
       
-      this._express.get('/Teste/Teste/SR-mensagem-doji', async (req, res) => {
+      this._express.get('//Teste/SR-mensagem-doji', async (req, res) => {
         try {
           const [mensagemDoji] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'doji', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
@@ -1002,7 +1002,7 @@ export default class ExpressServer {
         }
       });
 
-      this._express.get('/Teste/Teste/SR-mensagem-automatica', async (req, res) => {
+      this._express.get('//Teste/SR-mensagem-automatica', async (req, res) => {
         try {
           const [mensagemAutomatica] = await dao.pegarMensagem(process.env.ID_CANAL_SINAIS_RICOS, 'automatica', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
@@ -1013,7 +1013,7 @@ export default class ExpressServer {
         }
       });
 
-      this._express.get('/Teste/Teste/SR-sticker-automatico', async (req, res) => {
+      this._express.get('//Teste/SR-sticker-automatico', async (req, res) => {
         try {
           const [stickerAutomatico] = await dao.pegarSticker(process.env.ID_CANAL_SINAIS_RICOS, 'automatico', conexaoDb);
           res.set('Access-Control-Allow-Origin', '*');
