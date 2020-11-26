@@ -12,13 +12,13 @@ async function runDeploy() {
     }
 }
 
-app.get('/', (req, res) => {
+app.get('/HealthTeste', (req, res) => {
     res.send('Hello SEMPRE RICO TESTE').status(200)
 })
-app.get('//HealthTeste', (req, res) => {
+app.get('/HealthTeste/HealthTeste', (req, res) => {
     res.send('Hello SEMPRE RICO TESTE').status(200)
 })
-app.get('//HealthTeste/revive', async (req, res) => {
+app.get('/HealthTeste/HealthTeste/revive', async (req, res) => {
     await runDeploy()
     res.sendStatus(200);
 })
