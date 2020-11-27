@@ -31,7 +31,7 @@ const darBoasVindas = async (ctx) => {
   ctx.wizard.state.novoUsuario = {};
 
   if (process.env.PLANO_GRATUITO === 'true') {
-    await ctx.reply('Você pagou em cartão de crédito, boleto ou contratou o plano gratuito de 1 mês?', Extra.markup(Teclado.FORMAS_DE_PAGAMENTO_GRATUITO))
+    await ctx.reply('Você pagou em cartão de crédito, boleto ou contratou o plano gratuito de 7 dias?', Extra.markup(Teclado.FORMAS_DE_PAGAMENTO_GRATUITO))
   } else {
     await ctx.reply('Você pagou em cartão de crédito ou boleto?', Extra.markup(Teclado.FORMAS_DE_PAGAMENTO));
   }
