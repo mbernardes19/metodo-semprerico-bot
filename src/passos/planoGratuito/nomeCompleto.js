@@ -3,6 +3,7 @@ const Extra = require('telegraf/extra')
 const { log } = require('../../servicos/logger')
 const { confirmado, negado } = require('../../servicos/validacao')
 const Teclado = require('../../utils/Teclado');
+const {endConversation, Reason} = require('../../utils/telegraf');
 
 const receberNome = async (ctx) => {
     if (!ctx.message) {
@@ -10,7 +11,7 @@ const receberNome = async (ctx) => {
     }
     ctx.wizard.state.novoUsuario = {};
     ctx.wizard.state.novoUsuario.formaDePagamento = 'plano_gratuito';
-    await ctx.reply('Vou precisar de alguns dados para liberar seu período gratuito de 1 mês nos nossos canais VIPs do Método Sempre Rico!')
+    await ctx.reply('Vou precisar de alguns dados para liberar seu período gratuito de 7 dias nos nossos canais VIPs do Método Sempre Rico!')
     await ctx.reply('Qual é o seu nome completo?');
     return ctx.wizard.next();
 }
@@ -27,7 +28,7 @@ const pegarNome = async (ctx) => {
         return ctx.wizard.next()
     } catch (err) {
         log(err)
-        ctx.scene.leave()
+        await endConversation({ctx, isFinished: false, reason: Reason.ERROR})
     }
 }
 

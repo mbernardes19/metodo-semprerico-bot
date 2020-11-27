@@ -6,6 +6,7 @@ const { enviarSmsDeValidacao } = require('./validarTelefone');
 const { pegarTodosNumerosBloqueados } = require('../../dao');
 const { conexaoDb } = require('../../db');
 const Teclado = require('../../utils/Teclado');
+const {endConversation, Reason} = require('../../utils/telegraf');
 
 const confirmacaoPositiva = async (ctx) => {
   const validacao = validar('telefone', ctx.wizard.state.novoUsuario.telefone);
@@ -15,7 +16,7 @@ const confirmacaoPositiva = async (ctx) => {
       console.log(numeros);
       if (numeros.includes(ctx.wizard.state.novoUsuario.telefone)) {
         await ctx.reply(`Seu número de telefone está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email explicando sua situação com seus dados (nome completo, email e telefone) para ${process.env.EMAIL_PARA}`);
-        return ctx.scene.leave();
+        return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
       }
         await enviarSmsDeValidacao(ctx, ctx.wizard.state.novoUsuario.telefone);
       await ctx.reply(`Foi enviado agora um SMS com um número de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, diga-me aqui qual foi o número.`);
@@ -30,7 +31,7 @@ const confirmacaoPositiva = async (ctx) => {
     } catch (err) {
       logError('ERRO AO ENVIAR SMS DE VERIFICAÇÃO', err);
       await ctx.reply(`Ocorreu um erro ao enviar o SMS de verificação para o número ${ctx.wizard.state.novoUsuario.telefone}. Por favor, inicie uma conversa comigo novamente com o comando /start`);
-      return ctx.scene.leave();
+      return await endConversation({ctx, isFinished: false, reason: Reason.ERROR})
     }
   }
   await ctx.reply(`${validacao.mensagemDeErro}`);
@@ -51,7 +52,7 @@ const pegarTelefone = async (ctx) => {
     log(ctx.wizard.state.novoUsuario);
     ctx.wizard.next();
   } catch (err) {
-    ctx.scene.leave();
+    await endConversation({ctx, isFinished: false, reason: Reason.ERROR});
   }
 };
 

@@ -9,6 +9,7 @@ const { pegarLinkDeChat } = require('../../servicos/chatLink');
 const { enviarSmsDeValidacao, enviarWhatsappValidacao } = require('../../servicos/validarTelefone');
 const { confirmado, negado } = require('../../servicos/validacao');
 const Teclado = require('../../utils/Teclado');
+const {endConversation, Reason} = require('../../utils/telegraf');
 
 const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
   const data = new Date();
@@ -19,7 +20,7 @@ const adicionarUsuarioGratuitoAoBancoDeDados = async (ctx) => {
   const {
     idTelegram, nomeCompleto, cpf, email, telefone,
   } = ctx.wizard.state.novoUsuario;
-  const novoUsuario = new UsuarioGratuito(idTelegram, nomeCompleto, cpf, email, telefone, hoje, 30);
+  const novoUsuario = new UsuarioGratuito(idTelegram, nomeCompleto, cpf, email, telefone, hoje, 7);
   try {
     await dao.adicionarUsuarioGratuitoAoBancoDeDados(novoUsuario, conexaoDb);
   } catch (err) {
@@ -35,7 +36,7 @@ const atribuirIdTelegramAoNovoUsuario = (ctx) => {
 };
 
 const enviarCanaisTelegramGratuito = async (ctx) => {
-  log('Seu período de 1 mês de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉');
+  log('Seu período de 7 dias de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉');
   try {
     atribuirIdTelegramAoNovoUsuario(ctx);
     await adicionarUsuarioGratuitoAoBancoDeDados(ctx);
@@ -70,10 +71,10 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
     log('ERRO: Genérico');
     logError('ERRO AO SALVAR USUÁRIO NO BD', err);
     await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`);
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: false, reason: Reason.ERROR})
   }
   log('Usuário adicionado ao BD');
-  await ctx.reply('Seu período de 1 mês de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉');
+  await ctx.reply('Seu período de 7 dias de acesso grauito aos canais VIP do Método Sempre Rico foi ativado! 🎉');
   await ctx.reply('Seja bem-vindo!');
   let teclado;
   try {
@@ -100,9 +101,9 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
     await ctx.reply('Acesse nossos canais aqui:', Extra.markup(teclado));
     log('Canais de Telegram enviados');
     await ctx.reply('Caso ocorra algum erro ao acessá-los, digite o comando /canais para recebê-los novamente');
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: true, reason: Reason.SUCCESS})
   } catch (err) {
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: false, reason: Reason.ERROR})
   }
   
 };
@@ -133,7 +134,7 @@ validarTelefoneWhatsapp.use(async (ctx) => {
   }
   if (negado(ctx)) {
     await ctx.reply('Infelizmente não foi possível confirmar seu número de celular 😕.\nMas você pode tentar de novo com outro número começando uma nova conversa comigo usando o comando /start');
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
   }
   await ctx.reply('Por favor, escolha uma das opções.');
 });
@@ -144,7 +145,7 @@ validarTelefone.action('sim', async (ctx) => {
   await ctx.answerCbQuery();
   if (ctx.wizard.state.tentativasSms >= 2) {
     await ctx.reply('Infelizmente não foi possível confirmar seu número de celular 😕\nMas você pode tentar de novo com outro número começando uma nova conversa comigo usando o comando /start');
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
   }
   ctx.wizard.state.tentativasSms += 1;
   await enviarSmsDeValidacao(ctx, ctx.wizard.state.novoUsuario.telefone);
@@ -160,7 +161,7 @@ validarTelefone.action('nao', async (ctx) => {
   await ctx.answerCbQuery();
   if (ctx.wizard.state.numeroValidacaoEnviado) {
     await ctx.reply('Seu cadastro não foi validado. Por favor, inicie novamente uma conversa comigo usando o comando /start')
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
   }
 });
 
@@ -168,7 +169,7 @@ validarTelefone.use(async (ctx) => {
   if (confirmado(ctx)) {
     if (ctx.wizard.state.tentativasSms >= 2) {
       await ctx.reply('Infelizmente não foi possível confirmar seu número de celular 😕.\nMas você pode tentar de novo com outro número começando uma nova conversa comigo usando o comando /start');
-      return ctx.scene.leave();
+      return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
     }
     ctx.wizard.state.tentativasSms += 1;
     await enviarSmsDeValidacao(ctx, ctx.wizard.state.novoUsuario.telefone);
@@ -188,13 +189,13 @@ validarTelefone.use(async (ctx) => {
       ctx.wizard.state.numeroValidacaoEnviado = true;
       await ctx.reply('Confirmado!');
       await enviarCanaisTelegramGratuito(ctx);
-      return ctx.scene.leave();
+      return await endConversation({ctx, isFinished: true, reason: Reason.SUCCESS})
     }
   } else if (ctx.message.text == ctx.wizard.state.numeroValidacao) {
     ctx.wizard.state.numeroValidacaoEnviado = true;
     await ctx.reply('Confirmado!');
     await enviarCanaisTelegramGratuito(ctx);
-    return ctx.scene.leave();
+    return await endConversation({ctx, isFinished: true, reason: Reason.SUCCESS})
   }
 
   if (ctx.wizard.state.tentativasWhatsapp === 1) {
@@ -203,7 +204,7 @@ validarTelefone.use(async (ctx) => {
       await dao.adicionarEmEmailsBloqueados(ctx.wizard.state.novoUsuario.email, conexaoDb);
       await ctx.reply('O número que você passou não confere com o que foi enviado pelo Whatsapp.');
       await ctx.reply(`Por isso, vou deixar seu número de telefone e email registrados como bloqueados. Para desbloqueá-los, envie um email para ${process.env.EMAIL_PARA} com seu nome completo, email e telefone solicitando o desbloqueamento.`);
-      return await ctx.scene.leave();
+      return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
     } catch (err) {
       logError(`ERRO AO ADICIONAR NÚMERO E EMAIL DO USUÁRIO AOS BLOQUEADOS ${ctx.wizard.state.novoUsuario.telefone} ${ctx.wizard.state.novoUsuario.email}`, err);
     }
@@ -220,7 +221,7 @@ validarTelefone.use(async (ctx) => {
     await dao.adicionarEmEmailsBloqueados(ctx.wizard.state.novoUsuario.email, conexaoDb);
     await ctx.reply('O número que você passou não confere com o que foi enviado pelo SMS novamente.');
     await ctx.reply(`Por isso, vou deixar seu número de telefone e email registrados como bloqueados. Para desbloqueá-los, envie um email para ${process.env.EMAIL_PARA} com seu nome completo, email e telefone solicitando o desbloqueamento.`);
-    await ctx.scene.leave();
+    return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION})
   } catch (err) {
     logError(`ERRO AO ADICIONAR NÚMERO E EMAIL DO USUÁRIO AOS BLOQUEADOS ${ctx.wizard.state.novoUsuario.telefone} ${ctx.wizard.state.novoUsuario.email}`, err);
   }});

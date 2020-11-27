@@ -6,6 +6,7 @@ const dao = require('../../dao')
 const { validar } = require('../../servicos/validacao')
 const { conexaoDb } = require('../../db')
 const Teclado = require('../../utils/Teclado');
+const {endConversation, Reason} = require('../../utils/telegraf');
 
 const confirmacaoPositiva = async (ctx) => {
     const validacao = validar('email', ctx.wizard.state.novoUsuario.email);
@@ -14,7 +15,7 @@ const confirmacaoPositiva = async (ctx) => {
         const emailBloqueado = emailsBloqueados.filter(emailBloqueado => emailBloqueado.email === ctx.wizard.state.novoUsuario.email)
         if (emailBloqueado.length > 0) {
             await ctx.reply(`Seu email está registrado como bloqueado. Caso tenha ocorrido um engano, envie um email explicando sua situação para ${process.env.EMAIL_PARA}`)
-            return ctx.scene.leave()
+            return await endConversation({ctx, isFinished: false, reason: Reason.INVALID_ACTION});
         }
         await ctx.reply('Ok!')
         await ctx.reply('Qual é o seu telefone com DDD?')
@@ -36,7 +37,7 @@ const pegarEmail = async (ctx) => {
         log(ctx.wizard.state.novoUsuario)
         ctx.wizard.next()
     } catch (err) {
-        ctx.scene.leave()
+        await endConversation({ctx, isFinished: false, reason: Reason.ERROR})
     }
 }
 
