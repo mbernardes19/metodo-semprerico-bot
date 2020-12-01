@@ -130,19 +130,20 @@ const recurringMessage = () => {
 const linkValidation = () => {
   cron.schedule('*/5 * * * *', async () => {
     await exportarLinksDosChats()
-    const telegramClient = cache.get('bot');
-    const info = await telegramClient.getWebhookInfo()
-    log(info)
   })
 }
 
 const start = () => {
-  atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia();
-  enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha();
-  atualizarPeriodoDeTesteGratuito();
-  criaBackUpDoBancoDeDados();
-  recurringMessage();
-  linkValidation();
+  if (process.env.PLANO_GRATUITO === 'true') {
+    atualizarPeriodoDeTesteGratuito();
+    linkValidation();
+  } else {
+    atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia();
+    enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha();
+    criaBackUpDoBancoDeDados();
+    recurringMessage();
+    linkValidation();
+  }
 };
 
 module.exports = { start };
