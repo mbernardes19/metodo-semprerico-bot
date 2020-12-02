@@ -9,7 +9,9 @@ const Reason = {
 
 const endConversation = async ({ctx, isFinished, reason}) => {
     try {
-        await axios.post('http://localhost:3030/bot', {chatId: ctx.chat.id, finished: isFinished, reason})
+        if (process.env.PLANO_GRATUITO === 'true') {
+            await axios.post(`${process.env.SERVIDOR_STATS}/bot`, {chatId: ctx.chat.id, finished: isFinished, reason})
+        }
         await ctx.scene.leave();
     } catch (err) {
         console.log(err)
