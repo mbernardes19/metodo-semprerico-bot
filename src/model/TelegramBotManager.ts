@@ -1,11 +1,12 @@
 import TelegramBot from "./TelegramBot";
 import { SceneContextMessageUpdate } from 'telegraf/typings/stage';
-import MessageMapper from '../mappers/MessageMapper';
 import { log } from '../servicos/logger';
 import { enviarSinalParaCompra } from '../app';
 import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 import parseISO from 'date-fns/parseISO';
 import {enviarEmailDeRelatorioDeErro } from '../email'
+import SignalValidator from "./SignalValidator";
+import Signal from "./Signal";
 
 export default class TelegramBotManager {
     private _bot: TelegramBot;
@@ -36,9 +37,10 @@ export default class TelegramBotManager {
             }
             if (condition) {
               try {
-                const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id});
-                const horaSinal = parseInt(sinal.time.substring(0, 2));
-                const minutoSinal = parseInt(sinal.time.substring(3, 5));
+                const signalData = SignalValidator.validate({text: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id})
+                const signal = Signal.create(signalData)
+                const horaSinal = parseInt(signal.getTime().substring(0, 2));
+                const minutoSinal = parseInt(signal.getTime().substring(3, 5));
                 process.env.TZ = 'America/Sao_Paulo';
                 const agora = new Date();
                 const agoraStr = new Date().toISOString();
@@ -56,7 +58,7 @@ export default class TelegramBotManager {
                 let response;
           
                 setTimeout(async () => {
-                  response = await enviarSinalParaCompra(sinal);
+                  response = await enviarSinalParaCompra(signal);
                   if (response.status === 400) {
                     log('Par indisponível no momento');
                     return;
