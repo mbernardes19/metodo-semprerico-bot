@@ -57,7 +57,7 @@ const enviarSinalParaCompra = async (signal: Signal) => {
     return await axios.post(`${process.env.SERVIDOR_TRADING}/check-signal`, { 
       time: signal.getTime(),
       assetList: signal.getAssetList(),
-      expiration: signal.getAssetList(),
+      expiration: signal.getExpiration(),
       telegramMessageId: signal.getTelegramMessageId(),
       telegramChannelId: signal.getTelegramChannelId(),
       gale: signal.getGale(),
