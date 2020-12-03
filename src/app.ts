@@ -20,14 +20,11 @@ import { log } from './servicos/logger';
 import { enviarEmailDeRelatorioDeErro } from './email';
 import { SIGNAL_WITH_GALE } from './utils/regex';
 import { comecarValidacaoDeLinks, pegarLinkDeChat } from './servicos/chatLink';
-import MessageMapper from './mappers/MessageMapper';
 import TelegramBot from './model/TelegramBot';
 import { utcToZonedTime } from 'date-fns-tz'
-
-// const TelegramBot = require('./model/TelegramBot').default;
 import ExpressServer from './model/ExpressServer';
-import ngrok from 'ngrok';
-import Telegraf from "telegraf";
+import SignalValidator from "./model/SignalValidator";
+import Signal from "./model/Signal";
 
 console.log('TRADING', process.env.SERVIDOR_TRADING);
 
@@ -55,9 +52,17 @@ const extrairSinalDeMensagemDeCanal = (mensagemCanal) => {
   }
 };
 
-const enviarSinalParaCompra = async (sinal) => {
+const enviarSinalParaCompra = async (signal: Signal) => {
   try {
-    return await axios.post(`${process.env.SERVIDOR_TRADING}/check-signal`, sinal);
+    return await axios.post(`${process.env.SERVIDOR_TRADING}/check-signal`, { 
+      time: signal.getTime(),
+      assetList: signal.getAssetList(),
+      expiration: signal.getAssetList(),
+      telegramMessageId: signal.getTelegramMessageId(),
+      telegramChannelId: signal.getTelegramChannelId(),
+      gale: signal.getGale(),
+      type: signal.getType()
+    });
   } catch (err) {
     log('Moeda indisponível na binária e na digital');
     log(err);
@@ -147,9 +152,10 @@ bot.onChannelPost(async (ctx: TelegrafContext) => {
   }
   if (condition) {
     try {
-      const sinal = MessageMapper.toSignal({texto: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id});
-      const horaSinal = parseInt(sinal.time.substring(0, 2));
-      const minutoSinal = parseInt(sinal.time.substring(3, 5));
+      const signalData = SignalValidator.validate({text: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id})
+      const signal = Signal.create(signalData)
+      const horaSinal = parseInt(signal.getTime().substring(0, 2));
+      const minutoSinal = parseInt(signal.getTime().substring(3, 5));
       const agora = utcToZonedTime(new Date(), 'America/Sao_Paulo');
       console.log(horaSinal);
       console.log(minutoSinal);
@@ -164,7 +170,7 @@ bot.onChannelPost(async (ctx: TelegrafContext) => {
       let response;
 
       setTimeout(async () => {
-        response = await enviarSinalParaCompra(sinal);
+        response = await enviarSinalParaCompra(signal);
         if (response.status === 400) {
           log('Par indisponível no momento');
           return;
