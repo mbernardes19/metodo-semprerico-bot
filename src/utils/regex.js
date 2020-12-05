@@ -8,8 +8,9 @@ const EMAIL = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\
 const SIGNAL_WITH_GALE = /(Rico Baladeiro|Sinais Ricos)|((?<=Par - )[A-Z]{6}\W[A-Z]{3}|[A-Z]{6})|((?<=Ordem - )\w*)|((?<=Horário - )\d{2}:\d{2})/gm
 const SIGNAL_WITHOUT_GALE = /(sinal.+flash)|(.+CALL$|.+PUT$)|((?<=Horário.+)\d{2}:\d{2}$)/gmi
 const FILTERING_SIGNAL = /(filtragem.+lista)|((?<=Par.+ )[A-Z]{6})|((?<=Ordem.+ )\w*)|((?<=Horário.+)\d{2}:\d{2})/gmi
+const EXTRA_ANALYSIS = /(an[á|a]lise extra)|(.+CALL$|.+PUT$)|((?<=Horário.+)\d{2}:\d{2}$)/gmi
 const PLANO_GRATUITO = /(^plano gratuito|plano|gratuito|planogratuito|p$)/i
 
 module.exports = {
-    CARTAO, BOLETO, SIM, NAO, TELEFONE, EMAIL, SIGNAL_WITH_GALE, SIGNAL_WITHOUT_GALE, PLANO_GRATUITO, FILTERING_SIGNAL
+    CARTAO, BOLETO, SIM, NAO, TELEFONE, EMAIL, SIGNAL_WITH_GALE, SIGNAL_WITHOUT_GALE, PLANO_GRATUITO, FILTERING_SIGNAL, EXTRA_ANALYSIS
 }

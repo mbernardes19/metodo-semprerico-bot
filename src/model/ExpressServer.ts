@@ -9,6 +9,7 @@ import dao from '../dao';
 import { enviarEmailDeRelatorioDeErro } from '../email'
 import { Server } from 'http';
 import ngrok from 'ngrok';
+import { format } from 'date-fns';
 
 export default class ExpressServer {
     private _express: Express;
@@ -81,6 +82,39 @@ export default class ExpressServer {
     private startTradingApiEndpoints() {
         this._express.post('//App/operation-result', async (req, res) => {
             const telegramClient = this._bot.getTelegramClient();
+
+            if (Array.isArray(req.body) && req.body[0].type === 'extraAnalysis') {
+              log('EXTRA ANALYSIS')
+              const winMessage = '✅ Win de Primeira\n';
+              const winGaleMessage = '✅ Win Gale 1\n';
+              const lossMessage = '❌ Loss\n';
+
+              let message = `✅Resultado análises extras ${format(new Date(), 'dd/MM')}`
+
+              req.body.map(operationResult => {
+                operationResult.results.map(r => {
+                  if (r.result === 'WIN' && !r.galeNumber) {
+                    log('WIN');
+                    message += winMessage;
+                    return;
+                  }
+                  if (r.result === 'WIN' && r.galeNumber && r.galeNumber === 1) {
+                    log('WIN GALE 1');
+                    message += winGaleMessage;
+                    return;
+                  }
+                  if (r.result === 'LOSS') {
+                    log('LOSS');
+                    message += lossMessage;
+                    return;
+                  }
+                })
+              })
+              res.status(200).send({message: `Operation result sent to channel ${req.body[0].telegramChannelId}`});
+              await telegramClient.sendMessage(req.body[0].telegramChannelId, message);
+              return;
+            }
+
             const channelMessageId = req.body.telegramMessageId
             const channelToSend = req.body.telegramChannelId;
             const hasGale = req.body.gale;
@@ -160,7 +194,7 @@ export default class ExpressServer {
                 return;
               }
             }
-          
+
             if (resultadoOperacao.results[0].result === 'WIN') {
               const [MENSAGEM_WIN] = await dao.pegarMensagem(channelToSend, 'win', conexaoDb);
               const [STICKER_WIN] = await dao.pegarSticker(channelToSend, 'win', conexaoDb);
@@ -318,6 +352,39 @@ export default class ExpressServer {
     private startTradingApiEndpointsTest() {
       this._express.post('//Teste/operation-result', async (req, res) => {
           const telegramClient = this._bot.getTelegramClient();
+
+          if (Array.isArray(req.body) && req.body[0].type === 'extraAnalysis') {
+            log('EXTRA ANALYSIS')
+            const winMessage = '✅ Win de Primeira\n';
+            const winGaleMessage = '✅ Win Gale 1\n';
+            const lossMessage = '❌ Loss\n';
+
+            let message = `✅Resultado análises extras ${format(new Date(), 'dd/MM')}`
+
+            req.body.map(operationResult => {
+              operationResult.results.map(r => {
+                if (r.result === 'WIN' && !r.galeNumber) {
+                  log('WIN');
+                  message += winMessage;
+                  return;
+                }
+                if (r.result === 'WIN' && r.galeNumber && r.galeNumber === 1) {
+                  log('WIN GALE 1');
+                  message += winGaleMessage;
+                  return;
+                }
+                if (r.result === 'LOSS') {
+                  log('LOSS');
+                  message += lossMessage;
+                  return;
+                }
+              })
+            })
+            res.status(200).send({message: `Operation result sent to channel ${req.body[0].telegramChannelId}`});
+            await telegramClient.sendMessage(req.body[0].telegramChannelId, message);
+            return;
+          }
+
           const channelMessageId = req.body.telegramMessageId
           const channelToSend = req.body.telegramChannelId;
           const hasGale = req.body.gale;

@@ -24,7 +24,8 @@ import TelegramBot from './model/TelegramBot';
 import { utcToZonedTime } from 'date-fns-tz'
 import ExpressServer from './model/ExpressServer';
 import SignalValidator from "./model/SignalValidator";
-import Signal from "./model/Signal";
+import Signal from "./model/Signals/Signal";
+import SignalBuilder from "./model/Signals/SignalBuilder";
 
 console.log('TRADING', process.env.SERVIDOR_TRADING);
 
@@ -141,19 +142,44 @@ bot.onChannelPost(async (ctx: TelegrafContext) => {
   log(`CTX MESSAGE, ${ctx.channelPost.text}`);
   let condition;
   if(process.env.SINAIS_SINAIS_RICOS === 'true' && process.env.SINAIS_RICO_VIDENTE === 'true') {
-    condition = (ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) || ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.toLowerCase().includes('filtragem'));
+    condition =
+    (
+      ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) ||
+      ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10)
+    ) &&
+      ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') ||
+      ctx.channelPost.text.includes('Par - ') ||
+      ctx.channelPost.text.toLowerCase().includes('filtragem') ||
+      ctx.channelPost.text.toLowerCase().includes('análise extra')
+    );
   } else {
     if (process.env.SINAIS_SINAIS_RICOS === 'true') {
-      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.toLowerCase().includes('filtragem'));
+      condition =
+        ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_SINAIS_RICOS, 10) &&
+        ctx.channelPost.text &&
+        (
+          ctx.channelPost.text.includes('Sinal Flash') ||
+          ctx.channelPost.text.includes('Par - ') ||
+          ctx.channelPost.text.toLowerCase().includes('filtragem') ||
+          ctx.channelPost.text.toLowerCase().includes('análise extra')
+        );
     }
     if (process.env.SINAIS_RICO_VIDENTE === 'true') {
-      condition = ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) && ctx.channelPost.text && (ctx.channelPost.text.includes('Sinal Flash') || ctx.channelPost.text.includes('Par - ') || ctx.channelPost.text.toLowerCase().includes('filtragem'));
+      condition =
+        ctx.channelPost.chat.id === parseInt(process.env.ID_CANAL_RICO_VIDENTE, 10) &&
+        ctx.channelPost.text &&
+        (
+          ctx.channelPost.text.includes('Sinal Flash') ||
+          ctx.channelPost.text.includes('Par - ') ||
+          ctx.channelPost.text.toLowerCase().includes('filtragem') ||
+          ctx.channelPost.text.toLowerCase().includes('análise extra')
+        );
     }
   }
   if (condition) {
     try {
       const signalData = SignalValidator.validate({text: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id})
-      const signal = Signal.create(signalData)
+      const signal = SignalBuilder.create(signalData)
       const horaSinal = parseInt(signal.getTime().substring(0, 2));
       const minutoSinal = parseInt(signal.getTime().substring(3, 5));
       const agora = utcToZonedTime(new Date(), 'America/Sao_Paulo');

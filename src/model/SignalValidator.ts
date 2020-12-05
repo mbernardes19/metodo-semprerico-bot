@@ -1,6 +1,6 @@
 import Message from "./Message";
-import { SIGNAL_WITHOUT_GALE, SIGNAL_WITH_GALE, FILTERING_SIGNAL } from "../utils/regex";
-import { SignalData } from "./Signal";
+import { SIGNAL_WITHOUT_GALE, SIGNAL_WITH_GALE, FILTERING_SIGNAL, EXTRA_ANALYSIS } from "../utils/regex";
+import { SignalData } from "./Signals/Signal";
 
 export default class SignalValidator {
     private static isSignalWithoutGale(message: Message) {
@@ -10,11 +10,14 @@ export default class SignalValidator {
     private static isSignalWithGale(message: Message) {
         const result = message.text.match(SIGNAL_WITH_GALE)
         return result[0].toLowerCase() === 'rico baladeiro' || result[0].toLowerCase() === 'sinais ricos' ? true : false
-        
     }
     private static isFilteringSignal(message: Message) {
         const result = message.text.match(FILTERING_SIGNAL)
         return result[0].toLowerCase().includes('filtragem') ? true : false
+    }
+    private static isExtraAnalysisSignal(message: Message) {
+        const result = message.text.match(EXTRA_ANALYSIS)
+        return result[0].toLowerCase().includes('análise extra') || result[0].toLowerCase().includes('analise extra')
     }
 
     static validate(message: Message): SignalData {
@@ -42,6 +45,15 @@ export default class SignalValidator {
                 return {
                     type: 'filtering',
                     data: message.text.match(FILTERING_SIGNAL),
+                    telegramMessageId: message.id,
+                    telegramChannelId: message.channelId
+                }
+            }
+            if (this.isExtraAnalysisSignal(message)) {
+                console.log('PARSED MESSAGE', message.text.match(EXTRA_ANALYSIS))
+                return {
+                    type: 'extraAnalysis',
+                    data: message.text.match(EXTRA_ANALYSIS),
                     telegramMessageId: message.id,
                     telegramChannelId: message.channelId
                 }

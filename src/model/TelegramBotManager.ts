@@ -6,7 +6,7 @@ import differenceInMilliseconds from 'date-fns/differenceInMilliseconds'
 import parseISO from 'date-fns/parseISO';
 import {enviarEmailDeRelatorioDeErro } from '../email'
 import SignalValidator from "./SignalValidator";
-import Signal from "./Signal";
+import SignalBuilder from "./Signals/SignalBuilder";
 
 export default class TelegramBotManager {
     private _bot: TelegramBot;
@@ -38,7 +38,7 @@ export default class TelegramBotManager {
             if (condition) {
               try {
                 const signalData = SignalValidator.validate({text: ctx.channelPost.text, id: ctx.channelPost.message_id, channelId: ctx.channelPost.chat.id})
-                const signal = Signal.create(signalData)
+                const signal = SignalBuilder.create(signalData)
                 const horaSinal = parseInt(signal.getTime().substring(0, 2));
                 const minutoSinal = parseInt(signal.getTime().substring(3, 5));
                 process.env.TZ = 'America/Sao_Paulo';
