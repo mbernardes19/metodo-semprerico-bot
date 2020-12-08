@@ -353,29 +353,30 @@ export default class ExpressServer {
       this._express.post('//Teste/operation-result', async (req, res) => {
           const telegramClient = this._bot.getTelegramClient();
 
-          if (Array.isArray(req.body) && req.body[0].type === 'extraAnalysis') {
+          if (Array.isArray(req.body) && req.body[0] && req.body[0].type === 'extraAnalysis') {
             log('EXTRA ANALYSIS')
             const winMessage = '✅ Win de Primeira\n';
             const winGaleMessage = '✅ Win Gale 1\n';
             const lossMessage = '❌ Loss\n';
 
-            let message = `✅Resultado análises extras ${format(new Date(), 'dd/MM')}`
+            let message = `✅Resultado análises extras ${format(new Date(), 'dd/MM')}
+`
 
             req.body.map(operationResult => {
               operationResult.results.map(r => {
                 if (r.result === 'WIN' && !r.galeNumber) {
                   log('WIN');
-                  message += winMessage;
+                  message += `${operationResult.time} (${r.operation.asset.pair}) ${winMessage}`;
                   return;
                 }
                 if (r.result === 'WIN' && r.galeNumber && r.galeNumber === 1) {
                   log('WIN GALE 1');
-                  message += winGaleMessage;
+                  message += `${operationResult.time} (${r.operation.asset.pair}) ${winGaleMessage}`;
                   return;
                 }
                 if (r.result === 'LOSS') {
                   log('LOSS');
-                  message += lossMessage;
+                  message += `${operationResult.time} (${r.operation.asset.pair}) ${lossMessage}`;
                   return;
                 }
               })
