@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 app.get('//HealthGratuito', (req, res) => {
     res.send('Hello SEMPRE RICO GRATUITO').status(200)
 })
-app.get('//revive', async (req, res) => {
+app.get('//HealthGratuito/revive', async (req, res) => {
     await runDeploy()
     res.sendStatus(200);
 })
