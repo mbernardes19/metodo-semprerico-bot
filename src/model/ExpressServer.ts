@@ -120,7 +120,7 @@ export default class ExpressServer {
             const hasGale = req.body.gale;
           
             if (process.env.SINAIS_SEM_GALE === 'true') {
-              if (!hasGale) {
+              if (!hasGale && req.body.type === 'withoutGale') {
                 log('NO GALE')
                 const winMessage = '✅\n';
                 const lossMessage = '❎\n';
@@ -172,6 +172,8 @@ export default class ExpressServer {
             const resultadoOperacao = req.body
 
             if (req.body.type === 'filtering' && channelToSend === parseInt(process.env.ID_CANAL_RICO_VIDENTE)) {
+              log('NO GALE FILTERING')
+
               const winMessage = '✅';
               const lossMessage = '❎';
 
@@ -232,7 +234,7 @@ export default class ExpressServer {
           const hasGale = req.body.gale;
         
           if (process.env.SINAIS_SEM_GALE === 'true') {
-            if (!hasGale) {
+            if (!hasGale && req.body.type === 'withoutGale') {
               log('NO GALE')
               const winMessage = '✅\n';
               const lossMessage = '❎\n';
@@ -284,6 +286,8 @@ export default class ExpressServer {
           const resultadoOperacao = req.body
 
           if (req.body.type === 'filtering' && channelToSend === parseInt(process.env.ID_CANAL_RICO_VIDENTE)) {
+            log('NO GALE FILTERING')
+
             const winMessage = '✅';
             const lossMessage = '❎';
 
@@ -391,7 +395,7 @@ export default class ExpressServer {
           const hasGale = req.body.gale;
         
           if (process.env.SINAIS_SEM_GALE === 'true') {
-            if (!hasGale) {
+            if (!hasGale && req.body.type === 'withoutGale') {
               log('NO GALE')
               const winMessage = '✅\n';
               const lossMessage = '❎\n';
@@ -443,6 +447,8 @@ export default class ExpressServer {
           const resultadoOperacao = req.body
 
           if (req.body.type === 'filtering' && channelToSend === parseInt(process.env.ID_CANAL_RICO_VIDENTE)) {
+            log('NO GALE FILTERING')
+
             const winMessage = '✅';
             const lossMessage = '❎';
 
