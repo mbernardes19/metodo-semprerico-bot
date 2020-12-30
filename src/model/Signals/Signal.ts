@@ -9,7 +9,7 @@ export interface Asset {
     inStrategy?: boolean;
 }
 
-export type SignalType = 'withGale' | 'withoutGale' | 'filtering' | 'extraAnalysis';
+export type SignalType = 'withGale' | 'withoutGale' | 'filtering' | 'extraAnalysis' | 'sinaisRicos';
 
 export interface SignalData {
     type: SignalType,
