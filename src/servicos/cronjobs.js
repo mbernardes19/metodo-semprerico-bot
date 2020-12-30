@@ -141,7 +141,7 @@ const start = () => {
     atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia();
     enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha();
     criaBackUpDoBancoDeDados();
-    recurringMessage();
+    // recurringMessage();
     linkValidation();
   }
 };
