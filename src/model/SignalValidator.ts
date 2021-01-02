@@ -1,5 +1,5 @@
 import Message from "./Message";
-import { SIGNAL_WITHOUT_GALE, SIGNAL_WITH_GALE, FILTERING_SIGNAL, EXTRA_ANALYSIS, SINAIS_RICOS_SIGNAL } from "../utils/regex";
+import { SIGNAL_WITHOUT_GALE, SIGNAL_WITH_GALE, FILTERING_SIGNAL, EXTRA_ANALYSIS } from "../utils/regex";
 import { SignalData } from "./Signals/Signal";
 
 export default class SignalValidator {
@@ -9,11 +9,7 @@ export default class SignalValidator {
     }
     private static isSignalWithGale(message: Message) {
         const result = message.text.match(SIGNAL_WITH_GALE)
-        return result[0].toLowerCase() === 'rico baladeiro' ? true : false
-    }
-    private static isSinaisRicosSignal(message: Message) {
-        const result = message.text.match(SINAIS_RICOS_SIGNAL)
-        return result[0].toLowerCase() === 'sinais ricos' ? true : false
+        return result[0].toLowerCase() === 'rico baladeiro' || result[0].toLowerCase() === 'sinais ricos' ? true : false
     }
     private static isFilteringSignal(message: Message) {
         const result = message.text.match(FILTERING_SIGNAL)
@@ -40,15 +36,6 @@ export default class SignalValidator {
                 return {
                     type: 'withGale',
                     data: message.text.match(SIGNAL_WITH_GALE),
-                    telegramMessageId: message.id,
-                    telegramChannelId: message.channelId
-                }
-            }
-            if (this.isSinaisRicosSignal(message)) {
-                console.log('PARSED MESSAGE', message.text.match(SINAIS_RICOS_SIGNAL))
-                return {
-                    type: 'sinaisRicos',
-                    data: message.text.match(SINAIS_RICOS_SIGNAL),
                     telegramMessageId: message.id,
                     telegramChannelId: message.channelId
                 }
