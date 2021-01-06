@@ -9,7 +9,7 @@ export default class FilteringSignal extends Signal {
         this.expiration = 5;
         this.telegramMessageId = telegramMessageId;
         this.telegramChannelId = telegramChannelId;
-        this.gale = true;
+        this.gale = false;
         this.type = 'filtering';
     }
 }
