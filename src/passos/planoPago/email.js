@@ -74,11 +74,39 @@ const enviarCanaisTelegram = async (ctx) => {
     if (idsTelegram.includes(ctx.wizard.state.novoUsuario.idTelegram)) {
       const telegramClient = cache.get('bot');
       if (process.env.NODE_ENV === 'production') {
-        await telegramClient.unbanChatMember(process.env.ID_CANAL_RICO_VIDENTE, ctx.wizard.state.novoUsuario.idTelegram);
-        await telegramClient.unbanChatMember(process.env.ID_CANAL_SINAIS_RICOS, ctx.wizard.state.novoUsuario.idTelegram);
+        await telegramClient.callApi(
+          'unbanChatMember', 
+          {
+            chat_id: process.env.ID_CANAL_RICO_VIDENTE,
+            user_id: ctx.wizard.state.novoUsuario.idTelegram,
+            only_if_banned: true
+          }
+        )
+        await telegramClient.callApi(
+          'unbanChatMember', 
+          {
+            chat_id: process.env.ID_CANAL_SINAIS_RICOS,
+            user_id: ctx.wizard.state.novoUsuario.idTelegram,
+            only_if_banned: true
+          }
+        )
       } else {
-        await telegramClient.unbanChatMember(process.env.ID_CANAL_TESTE, ctx.wizard.state.novoUsuario.idTelegram);
-        await telegramClient.unbanChatMember(process.env.ID_CANAL_TESTE, ctx.wizard.state.novoUsuario.idTelegram);
+        await telegramClient.callApi(
+          'unbanChatMember', 
+          {
+            chat_id: process.env.ID_CANAL_RICO_VIDENTE,
+            user_id: ctx.wizard.state.novoUsuario.idTelegram,
+            only_if_banned: true
+          }
+        )
+        await telegramClient.callApi(
+          'unbanChatMember', 
+          {
+            chat_id: process.env.ID_CANAL_SINAIS_RICOS,
+            user_id: ctx.wizard.state.novoUsuario.idTelegram,
+            only_if_banned: true
+          }
+        )
       }
     }
     await adicionarUsuarioAoBancoDeDados(ctx);

@@ -88,6 +88,22 @@ bot.getBot().command('canais', async (ctx) => {
       let linkCanal1;
       let linkCanal2;
       if (process.env.NODE_ENV === 'production') {
+        await bot.getBot().telegram.callApi(
+          'unbanChatMember', 
+          {
+            chat_id: process.env.ID_CANAL_RICO_VIDENTE,
+            user_id: ctx.chat.id,
+            only_if_banned: true
+          }
+        )
+        await bot.getBot().telegram.callApi(
+          'unbanChatMember', 
+          {
+            chat_id: process.env.ID_CANAL_SINAIS_RICOS,
+            user_id: ctx.chat.id,
+            only_if_banned: true
+          }
+        )
         linkCanal1 = pegarLinkDeChat(process.env.ID_CANAL_SINAIS_RICOS);
         linkCanal2 = pegarLinkDeChat(process.env.ID_CANAL_RICO_VIDENTE);
       } else {
