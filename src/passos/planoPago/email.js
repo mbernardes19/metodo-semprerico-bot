@@ -4,7 +4,7 @@ const Extra = require('telegraf/extra');
 const { log, logError } = require('../../servicos/logger');
 const { confirmado, negado } = require('../../servicos/validacao');
 const dao = require('../../dao');
-const monetizze = require('../../servicos/monetizze');
+const hotmart = require('../../servicos/hotmart');
 const { enviarEmailDeRelatorioDeErro } = require('../../email');
 const { pegarLinkDeChat } = require('../../servicos/chatLink');
 const { validar } = require('../../servicos/validacao');
@@ -52,11 +52,17 @@ const adicionarEmailAosEmailsBloqueados = async (ctx) => {
     await enviarEmailDeRelatorioDeErro(err, ctx.chat.id);
     log(`Ocorreu um erro ao inserir o email ${email} como email bloqueado: ${JSON.stringify(err)}`);
   } finally {
-    await ctx.reply(`O usuário do email ${email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Monetizze.`);
-    await ctx.reply(`Caso houve algum engano, verifique se o status da sua compra na Monetizze está como finalizada e inicie novamente sua conversa comigo usando o comando /start, ou envie um email para ${process.env.EMAIL_PARA} para pedir a liberação do seu acesso.`);
+    await ctx.reply(`O usuário do email ${email} foi bloqueado pois não consta nenhuma compra finalizada por ele na Hotmart.`);
+    await ctx.reply(`Caso houve algum engano, verifique se o status da sua compra na Hotmart está como finalizada e inicie novamente sua conversa comigo usando o comando /start, ou envie um email para ${process.env.EMAIL_PARA} para pedir a liberação do seu acesso.`);
     return ctx.scene.leave();
   }
 };
+
+const enviarMensagemCompraBoleto = async (ctx) => {
+  await ctx.reply('O pagamento da sua assinatura ainda não foi compensado. Pagamentos feitos em boleto podem levar até 3 dias úteis para compensarem.')
+  await ctx.reply('Fique de olho no status da sua assinatura na Hotmart. Assim que o pagamento compensar, ele mudará para Ativo.');
+  await ctx.reply('Após isso, inicie uma conversa comigo novamente usando o comando /start e então te darei acesso aos canais VIP do Método Sempre Rico!');
+}
 
 const atribuirIdTelegramAoNovoUsuario = (ctx) => {
   log('ID Telegram atribuido');
@@ -65,7 +71,7 @@ const atribuirIdTelegramAoNovoUsuario = (ctx) => {
 };
 
 const enviarCanaisTelegram = async (ctx) => {
-  log('Sua assinatura Monetizze foi ativada! 🎉');
+  log('Sua assinatura Hotmart foi ativada! 🎉');
   const { email } = ctx.wizard.state.novoUsuario;
   try {
     const usuariosGratuitos = await dao.pegarTodosUsuariosGratuitosDoBancoDeDados(conexaoDb);
@@ -140,11 +146,11 @@ const enviarCanaisTelegram = async (ctx) => {
     log('ERRO: Genérico');
     log(err);
     await enviarEmailDeRelatorioDeErro(err, ctx.chat.id);
-    await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`);
+    await ctx.reply(`Sua compra na Hotmart foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Hotmart. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`);
     return ctx.scene.leave();
   }
   log('Usuário adicionado ao BD');
-  await ctx.reply('Sua assinatura Monetizze foi ativada! 🎉');
+  await ctx.reply('Sua assinatura Hotmart foi ativada! 🎉');
   await ctx.reply('Seja bem-vindo!');
   let linkCanal1;
   let linkCanal2;
@@ -165,6 +171,8 @@ const enviarCanaisTelegram = async (ctx) => {
 };
 
 const confirmacaoPositiva = async (ctx) => {
+  const Hotmart = new hotmart.default(true);
+  await Hotmart.authenticate();
   const validacao = validar('email', ctx.wizard.state.novoUsuario.email);
   if (!validacao.temErro) {
     try {
@@ -178,13 +186,15 @@ const confirmacaoPositiva = async (ctx) => {
       logError(`ERRO AO VERIFICAR SE EMAIL JÁ ESTÁ BLOQUEADO, ${ctx.wizard.state.novoUsuario.email}`, err);
       await enviarEmailDeRelatorioDeErro(err, ctx.chat.id);
     }
-    await ctx.reply('Estou verificando no servidor da Monetizze a sua compra, só um momento...');
+    await ctx.reply('Estou verificando no servidor da Hotmart a sua compra, só um momento...');
     try {
-      return await monetizze.verificarCompraDeUsuarioNaMonetizze(ctx)
-        ? await enviarCanaisTelegram(ctx) : await adicionarEmailAosEmailsBloqueados(ctx);
+      return await Hotmart.verifyUserPurchase(ctx.wizard.state.novoUsuario.email)
+        ? await enviarCanaisTelegram(ctx) :
+          await Hotmart.wasPurchasedByBoleto(ctx.wizard.state.novoUsuario.email) ?
+           await enviarMensagemCompraBoleto(ctx) : await adicionarEmailAosEmailsBloqueados(ctx);
     } catch (err) {
-      await ctx.reply(`Erro ao acessar Monetizze para verificação de dados. Tente iniciar uma conversa comigo novamente mais tarde usando o comando /start. Caso este erro persista, envie um email para ${process.env.EMAIL_PARA} com o print desta conversa`);
-      log(`ERRO AO VERIFICAR COMPRA DE USUÁRIO NA MONETIZZE, ${err}`);
+      await ctx.reply(`Erro ao acessar Hotmart para verificação de dados. Tente iniciar uma conversa comigo novamente mais tarde usando o comando /start. Caso este erro persista, envie um email para ${process.env.EMAIL_PARA} com o print desta conversa`);
+      log(`ERRO AO VERIFICAR COMPRA DE USUÁRIO NA HOTMART, ${err}`);
       await enviarEmailDeRelatorioDeErro(err, ctx.chat.id);
       return ctx.scene.leave();
     }

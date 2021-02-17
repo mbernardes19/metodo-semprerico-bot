@@ -21,7 +21,7 @@ const darBoasVindas = async (ctx) => {
   try {
     await ctx.reply('Olá, eu sou o Bot do Método Sempre Rico 🤖💵 Estou aqui para te dar acesso aos nossos canais de Telegram para que você possa começar a trilhar seu caminho rumo à riqueza!');
   } catch (err) {
-    await ctx.reply('Preciso primeiramente confirmar no servidor da Monetizze se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...');
+    await ctx.reply('Preciso primeiramente confirmar no servidor da Hotmart se o seu pagamento já foi aprovado.\n\nPor isso, gostaria de saber algumas informações de você...');
   }
   ctx.wizard.state.novoUsuario = {};
 

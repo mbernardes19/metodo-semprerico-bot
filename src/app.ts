@@ -125,7 +125,7 @@ bot.getBot().command('canais', async (ctx) => {
         await ctx.reply('Ocorreu um erro ao gerar os links dos canais para você. Tente digitar o comando /canais novamente, por favor.');
       }
     } else {
-      await ctx.reply('Sua assinatura Monetizze não está ativa. Ative-a novamente para ter acesso aos canais exclusivos do Método Sempre Rico!');
+      await ctx.reply('Sua assinatura Hotmart não está ativa. Ative-a novamente para ter acesso aos canais exclusivos do Método Sempre Rico!');
     }
   } else {
     await ctx.reply('Você ainda não ativou sua assinatura Monettize comigo. Digite o comando /start para começar!');

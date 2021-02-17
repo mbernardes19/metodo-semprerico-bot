@@ -8,7 +8,7 @@ pedirFormaDePagamento.action('cartao_de_credito', async (ctx) => {
     ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
     log('Forma de pagamento definida')
     await ctx.reply('Certo!')
-    await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Monetizze, tudo bem?')
+    await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Hotmart, tudo bem?')
     await ctx.reply('Qual é o seu nome completo?')
     return ctx.wizard.next()
   })
@@ -17,7 +17,7 @@ pedirFormaDePagamento.action('boleto', async (ctx) => {
     ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
     log('Forma de pagamento definida')
     await ctx.reply('Certo!')
-    await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Monetizze, tudo bem?')
+    await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Hotmart, tudo bem?')
     await ctx.reply('Qual é o seu nome completo?')
     return ctx.wizard.next()
 })
@@ -36,7 +36,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         ctx.wizard.state.novoUsuario.formaDePagamento = 'cartao_de_credito'
         log('Forma de pagamento definida')
         await ctx.reply('Certo!')
-        await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Monetizze, tudo bem?')
+        await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Hotmart, tudo bem?')
         await ctx.reply('Qual é o seu nome completo?')
         return ctx.wizard.next()
     }
@@ -47,7 +47,7 @@ pedirFormaDePagamento.use(async (ctx) => {
         ctx.wizard.state.novoUsuario.formaDePagamento = 'boleto'
         log('Forma de pagamento definida')
         await ctx.reply('Certo!')
-        await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Monetizze, tudo bem?')
+        await ctx.reply('Vou precisar de mais alguns dados pra confirmar o pagamento no servidor da Hotmart, tudo bem?')
         await ctx.reply('Qual é o seu nome completo?')
         return ctx.wizard.next()
     }

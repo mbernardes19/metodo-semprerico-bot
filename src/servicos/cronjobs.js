@@ -1,7 +1,8 @@
 const cron = require('node-cron');
 const dao = require('../dao');
 const { conexaoDb } = require('../db');
-const { atualizarStatusDeAssinaturaDeUsuarios, banirUsuariosSeStatusNaoForAtivo } = require('./monetizze');
+const monetizze = require('./monetizze');
+const hotmart = require('./hotmart');
 const { enviarCSVParaEmail, enviarBackupParaEmail, enviarEmailDeRelatorioDeErro } = require('../email');
 const { log } = require('./logger');
 const { cache } = require('./cache');
@@ -9,25 +10,52 @@ const csv = require('./csv');
 const mysqldump = require('mysqldump').default;
 const { exportarLinksDosChats } = require('./chatLink');
 
-const atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia = () => {
+const atualizarStatusDeAssinaturaDeUsuariosMonetizze = () => {
   cron.schedule('30 9 * * *', async () => {
     const telegramClient = cache.get('bot');
     try {
-      const usuarios = await dao.pegarTodosUsuariosDoBancoDeDados(conexaoDb);
+      const usuarios = await dao.pegarTodosUsuariosDaMonetizze(conexaoDb);
       let comeco = 0;
       let limite = 10;
       const intervalId = setInterval(async () => {
-        await atualizarStatusDeAssinaturaDeUsuarios(usuarios.slice(comeco, limite));
-        await banirUsuariosSeStatusNaoForAtivo(usuarios.slice(comeco, limite), telegramClient);
+        await monetizze.atualizarStatusDeAssinaturaDeUsuarios(usuarios.slice(comeco, limite));
+        await monetizze.banirUsuariosSeStatusNaoForAtivo(usuarios.slice(comeco, limite), telegramClient);
         if (limite >= usuarios.length) {
-          log('Todos usuários atualizados com sucesso');
+          log('Todos usuários Monetizze atualizados com sucesso');
           clearInterval(intervalId);
         } else {
           comeco = limite;
           limite += 10;
         }
       }, 10000);
-      log('Status de assinatura de usuários atualizado com sucesso!');
+      log('Status de assinatura de usuários Monetizze atualizado com sucesso!');
+    } catch (err) {
+      await enviarEmailDeRelatorioDeErro(err);
+      log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${JSON.stringify(err)}`);
+      log(err);
+    }
+  });
+};
+
+const atualizarStatusDeAssinaturaDeUsuariosHotmart = () => {
+  cron.schedule('30 8 * * *', async () => {
+    const telegramClient = cache.get('bot');
+    try {
+      const usuarios = await dao.pegarTodosUsuariosDaHotmart(conexaoDb);
+      let comeco = 0;
+      let limite = 10;
+      const intervalId = setInterval(async () => {
+        await hotmart.updateUsersSubscriptionStatus(usuarios.slice(comeco, limite));
+        await hotmart.banUserIfStatusIsNotActive(usuarios.slice(comeco, limite), telegramClient);
+        if (limite >= usuarios.length) {
+          log('Todos usuários Hotmart atualizados com sucesso');
+          clearInterval(intervalId);
+        } else {
+          comeco = limite;
+          limite += 10;
+        }
+      }, 10000);
+      log('Status de assinatura de usuários Hotmart atualizado com sucesso!');
     } catch (err) {
       await enviarEmailDeRelatorioDeErro(err);
       log(`ERRO AO ATUALIZAR STATUS DE USUÁRIOS: ${JSON.stringify(err)}`);
@@ -138,7 +166,8 @@ const start = () => {
     atualizarPeriodoDeTesteGratuito();
     linkValidation();
   } else {
-    atualizarStatusDeAssinaturaDeUsuariosTodaMeiaNoiteEMeia();
+    atualizarStatusDeAssinaturaDeUsuariosMonetizze();
+    atualizarStatusDeAssinaturaDeUsuariosHotmart();
     enviarRelatoriaDeBancoDeDadosTodosOsDiasAsNoveDaManha();
     criaBackUpDoBancoDeDados();
     recurringMessage();

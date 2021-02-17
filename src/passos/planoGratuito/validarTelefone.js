@@ -70,7 +70,7 @@ const enviarCanaisTelegramGratuito = async (ctx) => {
     }
     log('ERRO: Genérico');
     logError('ERRO AO SALVAR USUÁRIO NO BD', err);
-    await ctx.reply(`Sua compra na Monetizze foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Monetizze. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`);
+    await ctx.reply(`Sua compra na Hotmart foi confirmada, porém ocorreu um erro ao ativar sua assinatura na Hotmart. O número do erro é ${err.errno}. Por favor, envie um email para ${process.env.EMAIL_PARA} com o print desta tela.`);
     return await endConversation({ctx, isFinished: false, reason: Reason.ERROR})
   }
   log('Usuário adicionado ao BD');

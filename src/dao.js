@@ -8,7 +8,7 @@ const adicionarUsuarioAoBancoDeDados = async (usuario, conexao) => {
   } = usuario;
   const query = util.promisify(conexao.query).bind(conexao);
   try {
-    await query(`insert into Usuario (id, nome_completo, telefone, email, forma_de_pagamento, status_assinatura) values ('${idTelegram}', '${nomeCompleto}', '${telefone}', '${email}', '${formaDePagamento}', '${statusAssinatura}')`);
+    await query(`insert into Usuario (id, nome_completo, telefone, email, forma_de_pagamento, status_assinatura, aviso_banimento, plataforma) values ('${idTelegram}', '${nomeCompleto}', '${telefone}', '${email}', '${formaDePagamento}', '${statusAssinatura}', 0, 'hotmart')`);
   } catch (err) {
     throw err;
   }
@@ -73,6 +73,24 @@ const pegarTodosUsuariosDoBancoDeDados = async (conexao) => {
   const query = util.promisify(conexao.query).bind(conexao);
   try {
     return await query('select * from Usuario');
+  } catch (err) {
+    throw err;
+  }
+};
+
+const pegarTodosUsuariosDaMonetizze = async (conexao) => {
+  const query = util.promisify(conexao.query).bind(conexao);
+  try {
+    return await query(`select * from Usuario where plataforma='monetizze'`);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const pegarTodosUsuariosDaHotmart = async (conexao) => {
+  const query = util.promisify(conexao.query).bind(conexao);
+  try {
+    return await query(`select * from Usuario where plataforma='hotmart'`);
   } catch (err) {
     throw err;
   }
@@ -431,6 +449,8 @@ module.exports = {
   pegarTodosNumerosBloqueados,
   pegarDiasDeUsoDeTodosUsuariosGratuitos,
   pegarTodosUsuariosDoBancoDeDados,
+  pegarTodosUsuariosDaMonetizze,
+  pegarTodosUsuariosDaHotmart,
   pegarTodosUsuariosGratuitosDoBancoDeDados,
   atualizarStatusDeAssinaturaDeUsuarios,
   pegarIdDeTodosUsuariosGratuitos,
